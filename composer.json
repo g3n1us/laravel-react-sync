@@ -1,0 +1,32 @@
+{
+    "name": "g3n1us/laravel-react-sync",
+    "description": "Coordinate React frontends with a Laravel controller for updates and maintaining a universal frontend and backend application state",
+    "type": "package",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "Sean Bethel",
+            "email": "sean@americanmadeweb.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+	    "php": ">=5.5.9",
+        "laravel/framework": ">=5.5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "G3n1us\\LaravelReactSync\\": "src/"
+        },	    
+		"files": [
+			"src/helpers.php"
+		] 
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "G3n1us\\LaravelReactSync\\LaravelReactSyncServiceProvider"
+            ]
+        }
+    }
+}
