@@ -1,0 +1,17 @@
+{
+  "name": "laravel-react-sync",
+  "version": "1.0.0",
+  "description": "",
+  "main": "LaravelReactSync.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "g3n1us_helpers": "^1.0.5",
+    "on-change": "^0.1.0",
+    "qs": "^6.5.1"
+  }
+}
