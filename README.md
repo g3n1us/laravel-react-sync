@@ -15,7 +15,7 @@ composer require g3n1us/laravel-react-sync
 
 If using Laravel 5.5 or later and autodiscovery is not disabled, the package will be discovered and ready to use automatically. If NOT, then add the service provider to the list of providers in `config/app.php`.
 
-```
+```php
 'providers' => [
 	/*
 	 * Application Service Providers...
