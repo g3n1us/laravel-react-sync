@@ -6,7 +6,6 @@ use App\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\ReactRequest;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -116,7 +115,10 @@ class ReactUpdateController extends BaseController
 		if(!is_array($value)){
 			throw new \Exception('The value for a "Many to Many" relation must be an array.');
 		}
-
+		// If this is an array of models, pluck the id. Otherwise it should be an array of integers(model ids)
+		if(is_object($value[0])){
+			$value = array_pluck($value, 'id');
+		}
 		$this->model->{$prop}()->sync($value);
 		return $this->model;
 	}
