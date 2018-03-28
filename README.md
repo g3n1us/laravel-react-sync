@@ -1,6 +1,6 @@
 # Laravel React Sync
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/LaravelLogo.png" style="max-width: 160px; height: auto"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" style="max-width: 200px; height: auto">
+<img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Laravel_logo.png"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/320px-React-icon.svg.png">
 
 Make your React components and Laravel models play nicely!
 
