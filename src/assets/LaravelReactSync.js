@@ -3,28 +3,52 @@ import ReactDOM from 'react-dom';
 import qs from 'qs';
 
 
-// This componenet maps specifically to a Laravel model. On componentWillUpdate, the new state is sent to the application via an AJAX request to be updated in the database. //!!! Well, just kidding for now.
+// This componenet maps specifically to a Laravel model. 
 
 export class ModelComponent extends Component{
 	constructor(props){
 		super(props);
-	    
-	    if(!window.ModelComponentHandlersSet){
-		    // prevent handler from getting set multiple times
-		    window.ModelComponentHandlersSet = true;
-		    
-		    $(document).on('change', ':input', (e) => {
-			    console.log(e);
-			    this.handleInputChange(e);
-		    });
-	    }
+		this.buttonData = {};
+	    this.handleInputChange = this.handleInputChange.bind(this);	
 	}
 	
-	componentDidMount(){
+	
+	getComponentFormData(){
 		let $this = $(ReactDOM.findDOMNode(this));
 		if(!$this.is('form'))
 			$this = $this.find('form');
-		this.buttonData = {};
+		let formdata;
+		if(!$this.length){
+			// This means that there isn't a form element in the component. This is OK!, we will find any inputs to determine the components data.
+			// Note!! To call different methods (eg. delete, save, create) within a rendered component, you have to use separate forms.
+			
+			formdata = $(ReactDOM.findDOMNode(this)).find(':input').serialize();
+			formdata = qs.parse(formdata);			
+		}
+		else{
+			formdata = qs.parse($this.serialize());					
+		}
+		formdata = g3n1us_helpers.array_merge(this.props, formdata);
+		formdata = g3n1us_helpers.array_merge(formdata, this.buttonData);
+		if(!formdata.model_classname)
+			formdata.model_classname = this._reactInternalInstance.getName();
+		return formdata;
+	}
+	
+	
+	
+	componentDidMount(){
+		let $this = $(ReactDOM.findDOMNode(this));
+		if(this.props.updateOnChange){
+		    $this.on('change', ':input', (e) => {
+			    console.log(e);
+			    this.handleInputChange(e);
+		    });			
+		}
+		
+		if(!$this.is('form'))
+			$this = $this.find('form');
+
 		// This adds a button's value to the form data
 		$this.find('[type="submit"][name]').on('click', (e) => {
 			let $btn = $(e.target);
@@ -33,55 +57,61 @@ export class ModelComponent extends Component{
 		$this.on('submit', (e) => {
 			e.preventDefault();
 
-			let formdata = qs.parse($this.serialize());
+			let formdata = this.getComponentFormData()
+			this.updateRequest(formdata);
+		});
+	}
+	
+	
+	updateRequest(formdata){
+		let axios_method = window.g3n1us_helpers.array_get(formdata, '_method', 'post').toLowerCase();
 
-			formdata = g3n1us_helpers.array_merge(this.props, formdata);
-			formdata = g3n1us_helpers.array_merge(formdata, this.buttonData);
-			if(!formdata.model_classname)
-				formdata.model_classname = this._reactInternalInstance.getName();
-			let axios_method = window.g3n1us_helpers.array_get(formdata, '_method', 'post').toLowerCase();
-			axios({
-			  method: axios_method,
-			  url: '/update-state',
-			  data: formdata,
-			})
-			.then((response) => {
-				if(response.data){
-					this.setState(response.data);
-				}
-				else{
-					this.setState({});
-				}
-					
-				$.event.trigger({
-					type: "state-has-changed",
-					data: response.data,
-				});
-				
+		axios({
+		  method: axios_method,
+		  url: '/update-state',
+		  data: formdata,
+		})
+		.then((response) => {
+			ReactSyncAppData.update();
+			
+			this.setState(response.data || {});
+			
+			let level = response.status < 400 ? 'success' : 'danger';
 
-				let level = response.status < 400 ? 'success' : 'danger';
-
-				ReactDOM.render(
-					<Alert message="Saved" level={level} />,
-					document.getElementById('notification_outer'),
-				);
-				
-			});
+			ReactDOM.render(
+				<Alert message="Saved" level={level} />,
+				document.getElementById('notification_outer'),
+			);
+			
 		});
 	}
 	
 		
 	handleInputChange(event) {
+
+		event.preventDefault();
+		
 		const target = event.target;
 		
 		const value = target.type === 'checkbox' ? target.checked : target.value;
-		if(target.type) return;
 		
 		const name = target.name;
-		// Maybe use this for validation?
-		this.setState({
-			[name]: value
-		});
+
+		let formd = this.getComponentFormData();
+
+		let thiskey = _.keys(qs.parse(name))[0];
+		
+		let filtered_formdata = g3n1us_helpers.array_only(formd, [thiskey, 'model_classname', '_method', 'id']);
+		let final_filtered = {};
+		for(let i in filtered_formdata){
+			if(_.isArray(filtered_formdata[i]))
+				final_filtered[i] = _.filter(filtered_formdata[i]);
+			else if(typeof filtered_formdata[i] !== "undefined"){
+				final_filtered[i] = filtered_formdata[i];
+			}
+		}
+
+		this.updateRequest(final_filtered);
 	}
 	
 	
@@ -94,25 +124,16 @@ export class MasterComponent extends Component{
 		super(props);
 
 		this.state = ReactSyncAppData.page_data;
+		ReactSyncAppData.components.push(this);
 	}
 
 	
 	
 	componentDidMount(){
-		if(!this.state_has_been_changed_has_been_set){
-			console.log("SETTING('state_has_been_changed_has_been_set)", this);
-			
-			$(document).on('refresh-state state-has-changed', (e) => {
-				console.log('refresh-state or state-has-changed !!!', e);
-
-				axios.get('').then(new_page_data => {
-					console.log(new_page_data.data);
-					this.setState(new_page_data.data);
-				});				
-			});		
-			
-			this.state_has_been_changed_has_been_set = true;
-		}
+		$(this).on('refresh-state', (e) => {
+			console.log('refresh-state !!!', e);
+			this.setState(ReactSyncAppData.page_data);
+		});		
 	}
 	
 	
@@ -134,7 +155,6 @@ export class MasterComponent extends Component{
 	}
 	
 }
-
 
 
 export class Alert extends Component{
@@ -159,7 +179,6 @@ export class Pagination extends Component{
 		if(current_page == this.props.last_page) 
 			return null; // There is only one page, so return nothing
 		
-		
 		while(current_page <= this.props.last_page){
 			if(current_page == this.props.current_page){
 				links.push(
@@ -177,15 +196,15 @@ export class Pagination extends Component{
 		}
 		if(links.length > 10){
 			let tmplinks = links.slice(0, 2);
-			
-			if(this.props.current_page < 3){
+
+			if(this.props.current_page < 4){
 				tmplinks = tmplinks.concat(links.slice(2, (this.props.current_page + 2)));
 			}
 			else{
 				tmplinks.push(<li className="page-item disabled" key={g3n1us_helpers.randid()}><span className="page-link">...</span></li>);
 				tmplinks = tmplinks.concat(links.slice((this.props.current_page - 2), (this.props.current_page + 2)));
 			}
-			
+
 			if((this.props.current_page + 2) >= (this.props.last_page - 2)){
 				tmplinks = tmplinks.concat(links.slice(this.props.current_page + 2));
 			}
@@ -193,8 +212,9 @@ export class Pagination extends Component{
 				tmplinks.push(<li className="page-item disabled" key={g3n1us_helpers.randid()}><span className="page-link">...</span></li>);
 				tmplinks = tmplinks.concat(links.slice((this.props.last_page - 2)));				
 			}
-				
-			links = tmplinks;					
+
+			links = tmplinks;	
+							
 		}
 		
 		return (

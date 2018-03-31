@@ -115,10 +115,12 @@ class ReactUpdateController extends BaseController
 		if(!is_array($value)){
 			throw new \Exception('The value for a "Many to Many" relation must be an array.');
 		}
+
 		// If this is an array of models, pluck the id. Otherwise it should be an array of integers(model ids)
-		if(is_object($value[0])){
+		if(!empty($value) && is_object($value[0])){
 			$value = array_pluck($value, 'id');
 		}
+
 		$this->model->{$prop}()->sync($value);
 		return $this->model;
 	}

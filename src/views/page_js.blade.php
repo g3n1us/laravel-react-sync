@@ -8,6 +8,8 @@
 	
 (function(){
 	
+	//☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️
+	
 	var ReactSyncAppData = function(){
 		var _this = this;
 		_this.user = {!! auth()->user() ?? to_string_boolean(auth()->user()) !!};			
@@ -17,12 +19,26 @@
 		_this.request = {!! collect(request()) !!};
 		_this.route = {!! current_route() !!};
 		
-		_this.__page_data = {!! $page_data !!};
+		_this.page_data = {!! $page_data !!};
+		_this.components = [];
+		_this.update = function(){
+			
+			axios.get('').then(new_page_data => {
+				_this.components.forEach(function(component){
+					component.setState(new_page_data.data);
+				});
+
+				_this.page_data = new_page_data.data;
+
+			});			
+		}
+		
 	}
-	window.ReactSyncAppData = new ReactSyncAppData;
-	window.ReactSyncAppData.page_data = onChange(window.ReactSyncAppData.__page_data, () => save(window.ReactSyncAppData.page_data));
-	console.log(window.ReactSyncAppData);
 	
+	window.ReactSyncAppData = new ReactSyncAppData;
+	
+	//☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️	
+
 })();
 	
 </script>
