@@ -195,12 +195,12 @@ export class Pagination extends Component{
 		while(current_page <= this.props.last_page){
 			if(current_page == this.props.current_page){
 				links.push(
-					<li className="page-item active" key={g3n1us_helpers.randid()}><span className="page-link">{current_page}</span></li>
+					<li className="page-item active" key={g3n1us_helpers.str_rand(20)}><span className="page-link">{current_page}</span></li>
 				);
 			}
 			else{
 				links.push(
-					<li className="page-item" key={g3n1us_helpers.randid()}>
+					<li className="page-item" key={g3n1us_helpers.str_rand(20)}>
 						<a className="page-link" href={`?page=${current_page}`}>{current_page}</a>
 					</li>
 				);					
@@ -214,7 +214,7 @@ export class Pagination extends Component{
 				tmplinks = tmplinks.concat(links.slice(2, (this.props.current_page + 2)));
 			}
 			else{
-				tmplinks.push(<li className="page-item disabled" key={g3n1us_helpers.randid()}><span className="page-link">...</span></li>);
+				tmplinks.push(<li className="page-item disabled" key={g3n1us_helpers.str_rand(20)}><span className="page-link">...</span></li>);
 				tmplinks = tmplinks.concat(links.slice((this.props.current_page - 2), (this.props.current_page + 2)));
 			}
 
@@ -222,7 +222,7 @@ export class Pagination extends Component{
 				tmplinks = tmplinks.concat(links.slice(this.props.current_page + 2));
 			}
 			else{
-				tmplinks.push(<li className="page-item disabled" key={g3n1us_helpers.randid()}><span className="page-link">...</span></li>);
+				tmplinks.push(<li className="page-item disabled" key={g3n1us_helpers.str_rand(20)}><span className="page-link">...</span></li>);
 				tmplinks = tmplinks.concat(links.slice((this.props.last_page - 2)));				
 			}
 
