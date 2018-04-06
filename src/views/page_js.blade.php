@@ -10,15 +10,21 @@
 	
 	//☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️
 	
-	var ReactSyncAppData = function(){
+	var {{config('react_sync.global_variable_name', 'ReactSyncAppData')}} = function(){
 		var _this = this;
 		_this.user = {!! auth()->user() ?? to_string_boolean(auth()->user()) !!};			
 		_this.logged_in = typeof _this.user === "object";
-		_this.user_is_admin = {!! to_string_boolean( auth()->user() ? auth()->user()->can('admin-site') : 0 ) !!};
+		_this.user_can = {!! get_user_abilities() !!};
+		
+		if(_this.logged_in){
+			_this.user.can = function(ability){
+				return _this.user_can[ability] === true;
+			}
+		}
 		_this.csrf_token = '{{ csrf_token() }}';
 		_this.request = {!! collect(request()) !!};
 		_this.route = {!! current_route() !!};
-		
+		_this.base_url = '{{ url('/') }}';
 		_this.page_data = {!! $page_data !!};
 		_this.components = [];
 		_this.update = function(){
@@ -35,7 +41,9 @@
 		
 	}
 	
-	window.ReactSyncAppData = new ReactSyncAppData;
+	window.{{config('react_sync.global_variable_name', 'ReactSyncAppData')}} = new {{config('react_sync.global_variable_name', 'ReactSyncAppData')}};
+	
+	window.ReactSyncGlobal = '{{config('react_sync.global_variable_name', 'ReactSyncAppData')}}';
 	
 	//☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️	
 

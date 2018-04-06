@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import qs from 'qs';
 
-
+const REACT_SYNC_DATA = window[window.ReactSyncGlobal];
 // This componenet maps specifically to a Laravel model. 
 
 export class ModelComponent extends Component{
 	constructor(props){
 		super(props);
 		this.buttonData = {};
-	    this.handleInputChange = this.handleInputChange.bind(this);	
+    this.handleInputChange = this.handleInputChange.bind(this);	
 	}
 	
 	
@@ -72,7 +72,7 @@ export class ModelComponent extends Component{
 		  data: formdata,
 		})
 		.then((response) => {
-			ReactSyncAppData.update();
+			REACT_SYNC_DATA.update();
 			
 			this.setState(response.data || {});
 			
@@ -123,8 +123,8 @@ export class MasterComponent extends Component{
 	constructor(props){
 		super(props);
 
-		this.state = ReactSyncAppData.page_data;
-		ReactSyncAppData.components.push(this);
+		this.state = REACT_SYNC_DATA.page_data;
+		REACT_SYNC_DATA.components.push(this);
 	}
 
 	
@@ -132,7 +132,7 @@ export class MasterComponent extends Component{
 	componentDidMount(){
 		$(this).on('refresh-state', (e) => {
 			console.log('refresh-state !!!', e);
-			this.setState(ReactSyncAppData.page_data);
+			this.setState(REACT_SYNC_DATA.page_data);
 		});		
 	}
 	
