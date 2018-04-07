@@ -12,6 +12,7 @@
 	
 	var {{config('react_sync.global_variable_name', 'ReactSyncAppData')}} = function(){
 		var _this = this;
+		_this.config = {!! collect(config('react_sync')) !!};
 		_this.user = {!! auth()->user() ?? to_string_boolean(auth()->user()) !!};			
 		_this.logged_in = typeof _this.user === "object";
 		_this.user_can = {!! get_user_abilities() !!};
@@ -25,6 +26,10 @@
 		_this.request = {!! collect(request()) !!};
 		_this.route = {!! current_route() !!};
 		_this.base_url = '{{ url('/') }}';
+		_this.url = function(path){
+			return _this.base_url + path;
+		}
+		_this.api_endpoint = _this.url(_this.config.api_path);
 		_this.page_data = {!! $page_data !!};
 		_this.components = [];
 		_this.update = function(){

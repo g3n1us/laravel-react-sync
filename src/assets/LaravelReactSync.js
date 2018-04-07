@@ -68,7 +68,7 @@ export class ModelComponent extends Component{
 
 		axios({
 		  method: axios_method,
-		  url: '/update-state',
+		  url: this.api_endpoint,
 		  data: formdata,
 		})
 		.then((response) => {
@@ -122,8 +122,8 @@ export class ModelComponent extends Component{
 export class MasterComponent extends Component{
 	constructor(props){
 		super(props);
-
-		this.state = REACT_SYNC_DATA.page_data;
+		this.app = { ...REACT_SYNC_DATA };
+		this.state = this.app.page_data;
 		REACT_SYNC_DATA.components.push(this);
 	}
 
@@ -134,24 +134,6 @@ export class MasterComponent extends Component{
 			console.log('refresh-state !!!', e);
 			this.setState(REACT_SYNC_DATA.page_data);
 		});		
-	}
-	
-	
-	
-	// This is possibly a leftover from an experiment
-	fm(dotkey, val, model, id){
-		let key_arr = dotkey.split('.');
-		let current_val = key_arr.reduceRight(function (pastResult, currentKey) {
-		    var obj = {};
-		    obj[currentKey] = pastResult;
-		    return obj;
-		}, val);
-		let resp = {
-			data: current_val,
-			model: model,
-			id: id,			
-		}
-		return JSON.stringify(resp);
 	}
 	
 }

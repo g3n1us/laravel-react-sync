@@ -51,7 +51,7 @@ class ReactUpdateController extends BaseController
 		
 		$this->id = array_get($request, 'id');
 		if($this->id)
-			$this->model = $this->model_ns_string::findOrFail($this->id);
+			$this->model = $this->model_ns_string::findOrFail($this->id); // TODO allow for global constraints! maybe a paramater that ignores the constraints??
 		else
 			$this->model = new $this->model_ns_string;
 	}
@@ -91,7 +91,14 @@ class ReactUpdateController extends BaseController
 			        if(method_exists($this, "resolve$class_basename")){
 				        $this->{"resolve$class_basename"}($prop, $value);
 			        }
+			        else{
+				        throw new \Exception("The property you are setting is a relation that is not currently supported.");
+			        }
 		        }
+		        else{
+			        throw new \Exception("You are attempting to set a property that is callable, but is not a Relation.");
+		        }
+		        
 	        }
 	        else if(array_key_exists($prop, $this->model->getAttributes())){
 		       $this->model->{$prop} = $value;
@@ -127,6 +134,26 @@ class ReactUpdateController extends BaseController
 	
 	
 	
+	
+	private function resolveBelongsTo($prop, $value){
+		if(is_null($value)){
+			$this->model->{$prop}()->dissociate();
+			return $this->model;
+		}
+		if(is_numeric($value)){
+			$value = $this->model->find($value);
+		}
+		if($value instanceOf Model){
+			throw new \Exception("The model that is being associated cannot be found");
+		}
+		
+		$this->model->{$prop}()->associate($value);
+		return $this->model;
+
+	}	
+	
+	
+	
 	private function resolveHasMany($prop, $value){
 		die('sdfsdfsdfsdf');
 		// Since this is a hasMany relationship, use the ...
@@ -145,6 +172,8 @@ class ReactUpdateController extends BaseController
 		dd($this->model);
 		return $this->model;
 	}
+	
+	
 	
 	
 	
