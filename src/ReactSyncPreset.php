@@ -79,8 +79,8 @@ class ReactSyncPreset extends Preset
         
         
         copy(
-            __DIR__.'/assets/package.js',
-            resource_path('assets/js/vendor/laravel-react-sync/package.js')
+            __DIR__.'/assets/package.json',
+            resource_path('assets/js/vendor/laravel-react-sync/package.json')
         );
         
     }
