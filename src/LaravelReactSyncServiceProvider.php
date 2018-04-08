@@ -107,6 +107,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
         
         PresetCommand::macro('react-sync', function ($command_instance) {
 		    
+		    ReactSyncPreset::install();
 		    
 	        $command_instance->info('ReactSync scaffolding installed successfully.');
 	        $command_instance->comment('Please run "npm install && npm run dev" to compile your fresh scaffolding.');
