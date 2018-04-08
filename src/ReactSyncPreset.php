@@ -65,6 +65,13 @@ class ReactSyncPreset extends Preset
             resource_path('assets/js/components/Example.js')
         );
         
+        // make the vendor directory if it doesn't exist
+        if(!is_dir(resource_path('assets/js/vendor')))
+	        mkdir(resource_path('assets/js/vendor'));
+	        
+        if(!is_dir(resource_path('assets/js/vendor/laravel-react-sync')))
+	        mkdir(resource_path('assets/js/vendor/laravel-react-sync'));
+	        
         copy(
             __DIR__.'/assets/LaravelReactSync.js',
             resource_path('assets/js/vendor/laravel-react-sync/LaravelReactSync.js')
