@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Foundation\Console\PresetCommand;
+
 
 class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
@@ -99,6 +101,16 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
             __DIR__.'/config.php' => config_path('react_sync.php'),
             __DIR__.'/assets' => resource_path('assets/js/vendor/laravel-react-sync'),            
         ]);
+        
+        // Load this into the `preset` Artisan command as the type: `react-sync`
+        
+        
+        PresetCommand::macro('react-sync', function ($command_instance) {
+		    
+		    
+	        $command_instance->info('ReactSync scaffolding installed successfully.');
+	        $command_instance->comment('Please run "npm install && npm run dev" to compile your fresh scaffolding.');
+		});
 
     }    
 
