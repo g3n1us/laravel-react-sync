@@ -66,13 +66,13 @@ class ReactSyncPreset extends Preset
         );
         
         copy(
-            __DIR__.'/react-sync-stubs/LaravelReactSync.js',
+            __DIR__.'/assets/LaravelReactSync.js',
             resource_path('assets/js/vendor/laravel-react-sync/LaravelReactSync.js')
         );
         
         
         copy(
-            __DIR__.'/react-sync-stubs/package.js',
+            __DIR__.'/assets/package.js',
             resource_path('assets/js/vendor/laravel-react-sync/package.js')
         );
         
