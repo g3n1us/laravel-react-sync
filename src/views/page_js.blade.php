@@ -34,12 +34,14 @@
 		_this.components = [];
 		_this.update = function(){
 			
-			axios.get('').then(new_page_data => {
+			return axios.get('').then(new_page_data => {
 				_this.components.forEach(function(component){
 					component.setState(new_page_data.data);
 				});
 
 				_this.page_data = new_page_data.data;
+				
+				return _this.page_data;
 
 			});			
 		}
