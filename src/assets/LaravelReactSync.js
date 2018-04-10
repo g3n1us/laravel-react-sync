@@ -10,6 +10,7 @@ export class ModelComponent extends Component{
 		super(props);
 		this.buttonData = {};
     this.handleInputChange = this.handleInputChange.bind(this);	
+    
 	}
 	
 	
@@ -36,18 +37,27 @@ export class ModelComponent extends Component{
 	}
 	
 	
+	getApp(){
+		// return this._reactInternalInstance._currentElement._owner._instance.app;
+		
+		return REACT_SYNC_DATA;
+	}
+	
 	
 	componentDidMount(){
 		let $this = $(ReactDOM.findDOMNode(this));
 		if(this.props.updateOnChange){
 		    $this.on('change', ':input', (e) => {
-			    console.log(e);
 			    this.handleInputChange(e);
 		    });			
 		}
 		
 		if(!$this.is('form'))
 			$this = $this.find('form');
+			
+		// if this isn't a form and no child nodes are forms, then ignore the rest and return
+		if(!$this.length)
+			return;
 
 		// This adds a button's value to the form data
 		$this.find('[type="submit"][name]').on('click', (e) => {
@@ -65,10 +75,9 @@ export class ModelComponent extends Component{
 	
 	updateRequest(formdata){
 		let axios_method = window.g3n1us_helpers.array_get(formdata, '_method', 'post').toLowerCase();
-
 		axios({
 		  method: axios_method,
-		  url: this.api_endpoint,
+		  url: REACT_SYNC_DATA.api_endpoint,
 		  data: formdata,
 		})
 		.then((response) => {
@@ -181,9 +190,11 @@ export class Pagination extends Component{
 				);
 			}
 			else{
+				let req = REACT_SYNC_DATA.request;
+				req.page = current_page;
 				links.push(
 					<li className="page-item" key={g3n1us_helpers.str_rand(20)}>
-						<a className="page-link" href={`?page=${current_page}`}>{current_page}</a>
+						<a className="page-link" href={`?${qs.stringify(req)}`}>{current_page}</a>
 					</li>
 				);					
 			}
