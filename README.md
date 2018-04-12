@@ -26,9 +26,11 @@ If using Laravel 5.5 or later and autodiscovery is not disabled, the package wil
 ]
 ```
 
-## Install `react-sync` Preset
+## Run `react-sync` Preset
 
-Run the `preset` Artisan command to complete installation
+If this you are installing the library on a fresh Laravel installation, run the `preset` Artisan command to complete installation
+
+> Note: If this is NOT a fresh installation, do no run this command. Instead, you can run `php artisan vendor:publish` to copy the necessary files into your resources directory.
 
 ```
 php artisan preset react-sync
