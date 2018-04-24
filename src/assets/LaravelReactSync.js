@@ -165,7 +165,7 @@ export class Alert extends Component{
 	
 	render() {
 		
-		return this.state.show ? <div style={{position: 'fixed', margin: 'auto', left: 0, right: 0, zIndex: '99999'}} className={`alert fade show alert-${this.props.level || 'success'}`}>{this.props.message} <a className="close text-muted" data-dismiss="alert"></a></div> : null;
+		return this.state.show ? <div style={{position: 'fixed', margin: 'auto', left: 0, right: 0, zIndex: '99999'}} className={`alert fade show alert-${this.props.level || 'success'}`}>{this.props.message} <a className="close text-muted" data-dismiss="alert">&times;</a></div> : null;
 
 	}	
 	
@@ -200,6 +200,7 @@ export class Pagination extends Component{
 			}
 			current_page++;
 		}
+
 		if(links.length > 10){
 			let tmplinks = links.slice(0, 2);
 
@@ -223,19 +224,24 @@ export class Pagination extends Component{
 							
 		}
 		
+		let req = REACT_SYNC_DATA.request;
+		req.page = this.props.current_page - 1;
+    let prev_page_url = `?${qs.stringify(req)}`;
+		req.page = this.props.current_page + 1;
+    let next_page_url = `?${qs.stringify(req)}`;
 		return (
 			<div className="d-flex justify-content-center">
 				<ul className="pagination">
 					{this.props.prev_page_url 
 						? 
-					<li className="page-item"><a className="page-link" href={this.props.prev_page_url} rel="previous">«</a></li>
+					<li className="page-item"><a className="page-link" href={prev_page_url} rel="previous">«</a></li>
 						:
 			        <li className="page-item disabled"><span className="page-link">«</span></li>
 					}     
 			        {links}
 					{this.props.next_page_url 
 						? 
-			        <li className="page-item"><a className="page-link" href={this.props.next_page_url} rel="next">»</a></li>
+			        <li className="page-item"><a className="page-link" href={next_page_url} rel="next">»</a></li>
 						:
 					<li className="page-item disabled"><span className="page-link">»</span></li>
 					}     
