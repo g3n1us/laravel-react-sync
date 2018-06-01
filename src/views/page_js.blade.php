@@ -34,7 +34,7 @@
 		_this.components = [];
 		_this.update = function(){
 			
-			return axios.get('').then(new_page_data => {
+			return axios.get('').then(function(new_page_data){
 				_this.components.forEach(function(component){
 					component.setState(new_page_data.data);
 				});
