@@ -10,6 +10,7 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Gate;
 
 
 class ReactUpdateController extends BaseController
@@ -33,7 +34,12 @@ class ReactUpdateController extends BaseController
      */
 	public function __construct(ReactRequest $request){
 		// TODO set up middleware that adapts to non-admin updates
-		$this->middleware('can:admin-site');
+		$gate_handle = config('react_sync.gate_handle');
+		if(!Gate::has($gate_handle)){
+  		throw new \Exception("You must define a authorization rule named '$gate_handle' to protect access to the ReactUpdateController methods.");
+  		exit();
+		}
+		$this->middleware("can:$gate_handle");
 
 	}
 
@@ -155,21 +161,19 @@ class ReactUpdateController extends BaseController
 	
 	
 	private function resolveHasMany($prop, $value){
-		die('sdfsdfsdfsdf');
+  	throw new \Exception("Relationship 'resolveHasMany' is not yet enabled");
+		die('Relationship not yet enabled');
 		// Since this is a hasMany relationship, use the ...
 		// 
 		// See documentation for mass assignment!! This has to be enabled on the model to which you are saving data. 
 		if(is_array($value)){ // always gonna be an array isn't it :(
 			// Save all new relations
-			dd($value);
 			$this->model->{$prop}()->createMany($value);		
 		}
 		else{
 			$this->model->{$prop}()->create($value);		
 		}
-		dd($this->model->{$prop});
 		$this->model->{$prop}()->sync($value);
-		dd($this->model);
 		return $this->model;
 	}
 	
