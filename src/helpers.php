@@ -32,3 +32,12 @@
 			return $abilities;
 		}
 	}
+
+	if(!function_exists('to_string_boolean')){
+		function to_string_boolean($val){
+			return !!$val === true ? 'true' : 'false';
+		}
+	}
+
+
+
