@@ -7,9 +7,7 @@
 // This way you can always get the current state of the page easily via JS and creates a defacto API that can be used to access any application state.
 	
 (function(){
-	
-	//☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️
-	
+		
 	var {{config('react_sync.global_variable_name', 'ReactSyncAppData')}} = function(){
 		var _this = this;
 		_this.config = {!! collect(config('react_sync')) !!};
@@ -52,8 +50,6 @@
 	
 	window.ReactSyncGlobal = '{{config('react_sync.global_variable_name', 'ReactSyncAppData')}}';
 	
-	//☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️☠︎☣︎☠︎☣︎☠︎☠️	
-
 })();
 	
 </script>
