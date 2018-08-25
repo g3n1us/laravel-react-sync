@@ -50,3 +50,5 @@ Installation is complete!
 This data can be used in components extending this class. Changes set via a traditional web form (or form fields) will mutate your `state` and trigger a render as you would expect in React.
 
 Alternately, the `ReactSyncAppData.page_data` object can be mutated manually to trigger a refresh, as this object is set as the components initial `state`.  
+
+GH Pages URL https://g3n1us.github.io/laravel-react-sync/
