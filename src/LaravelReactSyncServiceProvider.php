@@ -1,5 +1,5 @@
 <?php
-namespace G3n1us\LaravelReactSync;	
+namespace G3n1us\LaravelReactSync;
 
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\View;
@@ -11,6 +11,11 @@ use Illuminate\Foundation\Console\PresetCommand;
 
 class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
+
+    private function getJsPath(){
+      return is_dir(resource_path('js')) ? resource_path('js') : resource_path('assets/js');
+    }
+
     /**
      * Register bindings in the container.
      *
@@ -21,8 +26,8 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
         $this->mergeConfigFrom(
             __DIR__.'/config.php', 'react_sync'
         );
-        
-        
+
+
         View::creator('*', function ($view) {
 	        $alldata = collect($view->getFactory()->getShared())
 		        ->merge($view->getData())
@@ -40,11 +45,11 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 			        }
 		        }
 	        }
-	        
+
 	        // $model_arr now exists and can be used somewhere. Hmmm ... where?
-	        
+
 	        View::share('page_data', $alldata);
-		        
+
 	        // auto_jsonable route stuff below ... TODO apply middleware from the original route to secure the ajax requested version. Is this needed??
 	        $route = \Route::current();
 			if($route){
@@ -67,24 +72,24 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 	        }
 	        Blade::directive('page_state_embed', function ($expression) use($alldata){
 		        $return = $alldata->toJson();
-			        
+
 		        $page_state_embed = "<script>window.page_state_data=$return</script>";
-		        
+
 	            return "<?php echo '$page_state_embed'; ?>";
 	        });
-        });    
-        
+        });
+
         // Allow Laravel 5.5.* by checking version and polyfilling where needed
 		if(version_compare((app())::VERSION, "5.6.0", "<")){
 	        Blade::directive('csrf', function ($expression) {
 		        return "<?php echo csrf_field(); ?>";
 	        });
 		}
-        
-        
-    }    
-    
-    
+
+
+    }
+
+
     /**
      * Perform post-registration booting of services.
      *
@@ -92,28 +97,28 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
      */
     public function boot()
     {
-        
+
         $this->loadRoutesFrom(__DIR__.'/routes.php');
-        
-	    $this->loadViewsFrom(__DIR__.'/views', 'react_sync');        
+
+	    $this->loadViewsFrom(__DIR__.'/views', 'react_sync');
 
         $this->publishes([
             __DIR__.'/config.php' => config_path('react_sync.php'),
-            __DIR__.'/assets' => resource_path('assets/js/vendor/laravel-react-sync'),            
+            __DIR__.'/assets' => $this->getJsPath() . '/vendor/laravel-react-sync',
         ]);
-        
+
         // Load this into the `preset` Artisan command as the type: `react-sync`
-        
-        
+
+
         PresetCommand::macro('react-sync', function ($command_instance) {
-		    
+
 		    ReactSyncPreset::install();
-		    
+
 	        $command_instance->info('ReactSync scaffolding installed successfully.');
 	        $command_instance->comment('Please run "npm install && npm run dev" to compile your fresh scaffolding.');
 		});
 
-    }    
+    }
 
-	
+
 }
