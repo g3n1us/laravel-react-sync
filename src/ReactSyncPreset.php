@@ -8,6 +8,11 @@ use Illuminate\Foundation\Console\Presets\Preset;
 
 class ReactSyncPreset extends Preset
 {
+
+    private function getJsPath(){
+      return is_dir(resource_path('js')) ? resource_path('js') : resource_path('assets/js');
+    }
+
     /**
      * Install the preset.
      *
@@ -31,11 +36,13 @@ class ReactSyncPreset extends Preset
      */
     protected static function updatePackageArray(array $packages)
     {
+
+        $js_path = is_dir(resource_path('js')) ? 'resources/js' : 'resources/assets/js';
         return [
             'babel-preset-react' => '^6.23.0',
             'react' => '^15.4.2',
             'react-dom' => '^15.4.2',
-            'laravel-react-sync' => 'file:resources/assets/js/vendor/laravel-react-sync',
+            'laravel-react-sync' => "file:$js_path/vendor/laravel-react-sync",
         ] + Arr::except($packages, ['vue']);
     }
 
@@ -46,7 +53,11 @@ class ReactSyncPreset extends Preset
      */
     protected static function updateWebpackConfiguration()
     {
-        copy(__DIR__.'/react-sync-stubs/webpack.mix.js', base_path('webpack.mix.js'));
+        $js_path = is_dir(resource_path('js')) ? 'js' : 'assets/js';
+        if(is_dir(resource_path('assets/js')))
+          copy(__DIR__.'/react-sync-stubs/webpack56.mix.js', base_path('webpack.mix.js'));
+        else
+          copy(__DIR__.'/react-sync-stubs/webpack.mix.js', base_path('webpack.mix.js'));
     }
 
     /**
@@ -56,33 +67,35 @@ class ReactSyncPreset extends Preset
      */
     protected static function updateComponent()
     {
+        $js_path = is_dir(resource_path('js')) ? 'js' : 'assets/js';
+
         (new Filesystem)->delete(
-            resource_path('assets/js/components/ExampleComponent.vue')
+            resource_path("$js_path/components/ExampleComponent.vue")
         );
 
         copy(
             __DIR__.'/react-sync-stubs/Example.js',
-            resource_path('assets/js/components/Example.js')
+            resource_path("$js_path/components/Example.js")
         );
-        
+
         // make the vendor directory if it doesn't exist
-        if(!is_dir(resource_path('assets/js/vendor')))
-	        mkdir(resource_path('assets/js/vendor'));
-	        
-        if(!is_dir(resource_path('assets/js/vendor/laravel-react-sync')))
-	        mkdir(resource_path('assets/js/vendor/laravel-react-sync'));
-	        
+        if(!is_dir(resource_path("$js_path/vendor")))
+	        mkdir(resource_path("$js_path/vendor"));
+
+        if(!is_dir(resource_path("$js_path/vendor/laravel-react-sync")))
+	        mkdir(resource_path("$js_path/vendor/laravel-react-sync"));
+
         copy(
             __DIR__.'/assets/LaravelReactSync.js',
-            resource_path('assets/js/vendor/laravel-react-sync/LaravelReactSync.js')
+            resource_path("$js_path/vendor/laravel-react-sync/LaravelReactSync.js")
         );
-        
-        
+
+
         copy(
             __DIR__.'/assets/package.json',
-            resource_path('assets/js/vendor/laravel-react-sync/package.json')
+            resource_path("$js_path/vendor/laravel-react-sync/package.json")
         );
-        
+
     }
 
     /**
@@ -92,6 +105,7 @@ class ReactSyncPreset extends Preset
      */
     protected static function updateBootstrapping()
     {
-        copy(__DIR__.'/react-sync-stubs/app.js', resource_path('assets/js/app.js'));
+        $js_path = is_dir(resource_path('js')) ? 'js' : 'assets/js';
+        copy(__DIR__.'/react-sync-stubs/app.js', resource_path("$js_path/app.js"));
     }
 }
