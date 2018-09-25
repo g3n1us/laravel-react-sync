@@ -7,12 +7,12 @@ export default class Example extends Component {
         return (
             <div className="container">
                 <div className="row">
-                    <div className="col-md-8 col-md-offset-2">
-                        <div className="panel panel-default">
-                            <div className="panel-heading">Example Component</div>
+                    <div className="col-md-12">
+                        <div className="card">
+                            <div className="card-header">Example Component</div>
 
-                            <div className="panel-body">
-                                I'm an example component!
+                            <div className="card-body">
+                                I am an example component!
                             </div>
                         </div>
                     </div>
