@@ -12,6 +12,12 @@
   "dependencies": {
     "g3n1us_helpers": "^1.0.5",
     "on-change": "^0.1.0",
-    "qs": "^6.5.1"
+    "qs": "^6.5.1",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "react-promise": "^2.0.3",
+    "lodash": "^4.17.5",
+    "jquery": "^3.2",
+    "axios": "^0.18"
   }
 }
