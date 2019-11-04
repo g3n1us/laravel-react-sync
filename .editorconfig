@@ -1,0 +1,17 @@
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+
+## Why tabs?
+## For people with visual impairments, tabs are easily set to be more easily distinguishable.
+## Spaces are not.
+## The best argument for using spaces is that they are more cross-platform compatible.
+## This is something that can be remedied and worked around.
+## Blindness cannot.
+## Be a Good Samaritan and look out for the next developer who will be working on your code,
+## and let their challenges be related only to coding itself. 😇
+indent_style = tab
+indent_size = 4

@@ -14,37 +14,35 @@ export class ModelComponent extends Component{
 	constructor(props){
 		super(props);
 		this.buttonData = {};
-    this.handleInputChange = this.handleInputChange.bind(this);
-
+        this.handleInputChange = this.handleInputChange.bind(this);
 	}
 
 	static find(id){
-  	let prom = axios.get(`/api/${this.name.toLowerCase()}/${id}`);
-    return <Async promise={prom} then={d => {
-        return React.createElement(this, {...d.data});
-      }} />
+		let prom = axios.get(`/api/${this.name.toLowerCase()}/${id}`);
+		return <Async promise={prom} then={d => {
+		    return React.createElement(this, {...d.data});
+		}} />
 	}
 
-  static where(a,b,c){
-    let query = [].slice.call(arguments);
-    let prom = axios.get('/api/countries', {params: {where: query}});
-    return <Async promise={prom} then={d => {
-        let els = d.data.map((e) => {
-          return React.createElement(this, {...e});
-        });
-        return <div>{els}</div>
-      }} />
-
-  }
+	static where(a,b,c){
+		let query = [].slice.call(arguments);
+		let prom = axios.get(`/api/${this.name.toLowerCase()}`, {params: {where: query}});
+		return <Async promise={prom} then={d => {
+			let els = d.data.map((e) => {
+				return React.createElement(this, {...e});
+			});
+			return <>{els}</>
+		}} />
+	}
 
 	static all(){
-  	let prom = axios.get(`/api/countries`);
-    return <Async promise={prom} then={d => {
-        let els = d.data.data.map((e) => {
-          return React.createElement(this, {...e});
-        });
-        return <div>{els}</div>
-      }} />
+		let prom = axios.get(`/api/${this.name.toLowerCase()}`);
+		return <Async promise={prom} then={d => {
+			let els = d.data.data.map((e) => {
+				return React.createElement(this, {...e});
+			});
+			return <>{els}</>
+		}} />
 	}
 
 
@@ -158,6 +156,12 @@ export class ModelComponent extends Component{
 
 }
 
+ModelComponent.addModel = function(M){
+	ModelComponent.models = ModelComponent.models || {};
+	if(!(M.name in ModelComponent.models))
+		ModelComponent.models[M.name] = M;
+
+}
 
 
 export class MasterComponent extends Component{
@@ -171,6 +175,10 @@ export class MasterComponent extends Component{
 
 
 	componentDidMount(){
+		Model.extractInstancesFromUrl().then(x => {
+			// console.log('x', x);
+		});
+
 		$(this).on('refresh-state', (e) => {
 			console.log('refresh-state !!!', e);
 			this.setState(REACT_SYNC_DATA.page_data);
@@ -196,11 +204,8 @@ export class Alert extends Component{
 	}
 
 	render() {
-
 		return this.state.show ? <div style={{position: 'fixed', margin: 'auto', left: 0, right: 0, zIndex: '99999'}} className={`alert fade show alert-${this.props.level || 'success'}`}>{this.props.message} <a className="close text-muted" data-dismiss="alert">&times;</a></div> : null;
-
 	}
-
 }
 
 
@@ -212,8 +217,9 @@ export class Pagination extends Component{
 	render(){
 		let links = [];
 		let current_page = 1
-		if(current_page == this.props.last_page)
+		if(current_page == this.props.last_page){
 			return null; // There is only one page, so return nothing
+		}
 
 		while(current_page <= this.props.last_page){
 			if(current_page == this.props.current_page){

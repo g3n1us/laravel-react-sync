@@ -1,0 +1,235 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import Async from 'react-promise';
+import Trait from './Trait';
+// import Model from '../Model';
+// import Notification from '../components/Notification';
+// import RefreshableAsync from '../RefreshableAsync';
+import { get, camelCase, snakeCase } from 'lodash';
+import { app_get, snake_case } from '../helpers';
+
+window.Find = (dotstring) => get(ReactSyncAppData.page_data.state, dotstring);
+/**
+@kind mixin
+@extends Trait
+*/
+class Queryable extends Trait{
+
+	constructor(targetClass){
+		super(targetClass);
+	}
+
+/**
+ * (STATIC) - Query the data store and return the model with the supplied id
+ * @static
+ */
+	static find(id){
+		return Find(`${this.plural}.${id}`);
+	}
+
+
+/**
+ * (STATIC) - TODO -- Work in Progress -- DO NOT USE
+ * @static
+ */
+	static where(a,b,c){
+		// WIP!!!
+		let query = [].slice.call(arguments);
+
+		this.refresher = React.createRef();
+		/*
+		return <RefreshableAsync ref={this.refresher} refresh_path={`/api/${this.plural}/`} then={d => {
+		let els = d.data.map((e) => {
+		let ThisModel = this;
+		return <ThisModel {...e} key={`_${this.plural}_${e.id}`} />
+		});
+		return <div>{els}</div>
+		}} />
+		*/
+	}
+
+
+/**
+ * (STATIC) - Return all models from the data store
+ * @static
+ */
+
+
+
+/*
+ 	static all(additional_props = {}){
+
+	    this.refresher = React.createRef();
+	    this.refreshers = this.refreshers || [];
+	    this.refreshers.push(this.refresher);
+	    const callback = (d) => {
+	        let els = d.data.map(e => {
+	          let props = {...e, ...additional_props};
+	          let ThisModel = this;
+	          return <ThisModel refresher={this.refresher} key={`${this.plural}${e.id}`} {...props} />
+	        });
+
+	        return <div>{els}</div>
+	    }
+
+	    return  <RefreshableAsync ref={this.refresher} refresh_path={`/api/${this.plural}/`} catch={(e) => console.error} then={callback} />
+	}
+*/
+
+	static all(additional_props = {}){
+		this.refresher = React.createRef();
+		const plural = this.plural;
+		let items = app_get('state.'+plural) || app_get('state.'+ snakeCase(plural)) || app_get(plural) || app_get(snakeCase(plural));
+		console.log(snakeCase(plural), app_get());
+		if(!items) return null;
+		if(!('map' in items)) items = items.data;
+        let els = items.map(e => {
+			let props = {...e, ...additional_props};
+			let ThisModel = this;
+			return <ThisModel refresher={this.refresher} key={`${plural}${e.id}`} {...props} />;
+        });
+
+		return <>{els}</>
+	}
+
+	static firstWhere(additional_props = {}){
+		let ThisModel = this;
+		let props = {...this.props, ...additional_props};
+		return <ThisModel refresher={this.refresher} key={`${this.plural}${this.props.id}`} {...props} />;
+	}
+
+	static first(additional_props = {}){
+		this.refresher = React.createRef();
+		let e = app_get(this.plural)[0];
+		let props = {...e, ...additional_props};
+		let ThisModel = this;
+		return <ThisModel refresher={this.refresher} key={`${this.plural}${e.id}`} {...props} />;
+	}
+
+/*
+	static all(additional_props = {}){
+
+	    this.refresher = React.createRef();
+	    this.refreshers = this.refreshers || [];
+	    this.refreshers.push(this.refresher);
+
+	    const callback = (d) => {
+	        let els = d.data.map(e => {
+	          let props = {...e, ...additional_props};
+	          let ThisModel = this;
+	          return <ThisModel refresher={this.refresher} key={`${this.plural}${e.id}`} {...props} />
+	        });
+
+	        return <div>{els}</div>
+	    }
+
+	    return  <RefreshableAsync ref={this.refresher} refresh_path={`/api/${this.plural}/`} then={callback} />
+	}
+*/
+
+/**
+ */
+
+/**
+ * Store the model's state back to the database
+ */
+	save(callback = false){
+		axios.put(this.calculatedProperties.api_url, this.filterMutable(this.state))
+			.then(response => {
+				this.refresh();
+				react_sync_notification('Saved');
+				if(callback) callback();
+			})
+			.catch(err => {
+				console.error(err);
+				react_sync_notification({text: 'An error occurred', level: 'danger'});
+			});
+	}
+
+/**
+ * Store the model's state back to the database
+ */
+	static create(initialProps = {}){
+		axios.post(`/${this.plural}`, initialProps)
+			.then(response => {
+				this.refresh_static();
+				react_sync_notification('Saved');
+			})
+			.catch(err => {
+				console.error(err);
+				react_sync_notification({text: 'An error occurred', level: 'danger'});
+			});
+	}
+
+/**
+ * Create a new model instance and store it to the database
+ * @todo complete this method
+ */
+	static create_static(initialProps = {}){
+		return axios.post(`/${this.plural}`, initialProps)
+			.then(data => {
+				this.refresh_static();
+				react_sync_notification('Created');
+			})
+			.catch(err => {
+				react_sync_notification({text: 'An error occurred', level: 'danger'});
+			});
+	}
+
+
+/**
+ * Delete a model
+ */
+	delete(){
+		axios.delete(this.calculatedProperties.api_url)
+			.then(data => {
+				window.location.reload();
+				react_sync_notification('Deleted');
+			})
+			.catch(err => {
+				react_sync_notification({text: 'An error occurred', level: 'danger'});
+			});
+	}
+
+
+  static refresh_static(){
+// 	  window.ReactSyncAppData.app.refreshPage();
+window.location.reload();
+/*
+    let refresher = _.get(this.refresher, 'current.refresh');
+
+    if(refresher) refresher();
+*/
+  }
+
+
+  refresh(redirectEndpoint){
+	window.ReactSyncAppData.update();
+// 	window.location.reload();
+/*
+    let refresher = _.get(this.props, 'refresher.current.refresh');
+    if(refresher) {
+	    console.log(this.props.refresher);
+	    refresher();
+    }
+    else if(typeof this.props.refresh === 'function'){
+	    this.props.refresh();
+    }
+    else if(redirectEndpoint) window.location.assign(redirectEndpoint);
+    else if(this instanceof Model){
+      // Otherwise, make a call to the endpoint and set state from there to confirm the saved data is equal to what we already have set.
+      axios.get(this.calculatedProperties.api_url).then(d => {
+        this.setState(this.filterMutable(d.data));
+      }).catch(e => {
+        console.error(e);
+      });
+    }
+*/
+  }
+
+
+
+
+}
+
+export default Queryable;

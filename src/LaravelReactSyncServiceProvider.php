@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Foundation\Console\PresetCommand;
+use Arr;
 
 
 class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
@@ -29,26 +30,8 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
 
         View::creator('*', function ($view) {
-	        $alldata = collect($view->getFactory()->getShared())
-		        ->merge($view->getData())
-		        ->except('__env', 'app');
-	        // Now find objects and arrays containing Models
-	        $model_arr = [];
-	        foreach($alldata as $k => $d){
-		        if(!is_iterable($d)){
-			        $d = [$d];
-		        }
-		        foreach($d as $m){
-			        if($m instanceOf Model){
-				        $classname = class_basename( get_class($m) );
-				        $model_arr["$classname.{$m->id}"] = $m;
-			        }
-		        }
-	        }
 
-	        // $model_arr now exists and can be used somewhere. Hmmm ... where?
-
-	        View::share('page_data', $alldata);
+			View::share('randomized_var', 'react_sync_random_' . rand() . rand() . '_var');
 
 	        // auto_jsonable route stuff below ... TODO apply middleware from the original route to secure the ajax requested version. Is this needed??
 	        $route = \Route::current();
@@ -62,32 +45,69 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
 		        $route_is_ok = $uses_trait || in_array($route_controller, config('react_sync.jsonable_controllers')) || in_array($route_name, config('react_sync.jsonable_routes'));
 				if(request()->input('asajax')){
-			        response($alldata)->header('Content-Type', 'application/json')->send();
+					$view->setPath(__DIR__ . '/views/as_json.blade.php');
+			        response($view)->header('Content-Type', 'application/json')->send();
 			        exit();
 				}
 		        if(request()->ajax() && request()->getMethod() === 'GET' && $route_is_ok ){
-			        response($alldata)->header('Content-Type', 'application/json')->send();
+					$view->setPath(__DIR__ . '/views/as_json.blade.php');
+			        response($view)->header('Content-Type', 'application/json')->send();
 			        exit();
 		        }
 	        }
-	        Blade::directive('page_state_embed', function ($expression) use($alldata){
-		        $return = $alldata->toJson();
 
-		        $page_state_embed = "<script>window.page_state_data=$return</script>";
+			Blade::directive('output_alldata', function(){
+				return '<?php echo $$randomized_var->toJson(); if(json_last_error() > 0) throw new \Exception("Data passed to the view cannot be serialized. This may be due to a circular structure being included. Data includes: " . $$randomized_var->keys()->implode(", \n")); ?>';
+			});
 
-	            return "<?php echo '$page_state_embed'; ?>";
+
+	        Blade::directive('page_context', function ($id = null) {
+	            if(!$id) $id = "page_context";
+	            return '<script type="text/json" id="'.$id.'"><?php echo $$randomized_var->toJson(); if(json_last_error() > 0) throw new \Exception("Data passed to the view cannot be serialized. This may be due to a circular structure being included. Data includes: " . $$randomized_var->keys()->implode(", \n")); ?></script>';
 	        });
-        });
 
-        // Allow Laravel 5.5.* by checking version and polyfilling where needed
-		if(version_compare((app())::VERSION, "5.6.0", "<")){
-	        Blade::directive('csrf', function ($expression) {
-		        return "<?php echo csrf_field(); ?>";
+	        Blade::directive('json_script', function($expression){
+		        preg_match('/^(?<data>.*?),.?[\'"](?<id>[a-z_]*?)[\'"]$/i', $expression, $matches);
+
+		        $data = trim(Arr::get($matches, 'data', $expression));
+
+		        $id = trim(Arr::get($matches, 'id', 'json_script'));
+
+		        $return = "collect($data)->toJson()";
+
+		        return "<script type=\"text/json\" id=\"$id\"><?php echo {$return}; ?></script>";
 	        });
-		}
 
 
-    }
+			Blade::directive('all_data', function(){
+				return '<?php
+			        $$randomized_var = collect(\Illuminate\Support\Arr::except(get_defined_vars(), [\'__data\', \'__path\', \'__env\']));
+			        // Now find objects and arrays containing Models
+			        $model_arr = [];
+			        foreach($$randomized_var as $k => $d){
+				        if(!is_iterable($d)){
+					        $d = [$d];
+				        }
+				        foreach($d as $m){
+					        if($m instanceOf Model){
+						        $classname = class_basename( get_class($m) );
+						        \Illuminate\Support\Arr::set($model_arr, "$classname.{$m->id}", $m);
+					        }
+					        if(is_iterable($m)){
+						        foreach($m as $mm){
+							        if($mm instanceOf Model){
+								        $classname = class_basename( get_class($mm) );
+								        \Illuminate\Support\Arr::set($model_arr, "$classname.{$mm->id}", $mm);
+							        }
+						        }
+					        }
+				        }
+			        }
+					$$randomized_var->put(\'models\', $model_arr); ?>';
+		    });
+	    });
+	}
+
 
 
     /**
@@ -102,10 +122,15 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
 	    $this->loadViewsFrom(__DIR__.'/views', 'react_sync');
 
-        $this->publishes([
-            __DIR__.'/config.php' => config_path('react_sync.php'),
-            __DIR__.'/assets' => $this->getJsPath() . '/vendor/laravel-react-sync',
-        ]);
+
+		$publishes = [];
+		if(!file_exists(config_path('react_sync.php'))){
+			$publishes[] = config_path('react_sync.php');
+		}
+		if(!is_dir($this->getJsPath() . '/vendor/laravel-react-sync')){
+			$publishes[] = $this->getJsPath() . '/vendor/laravel-react-sync';
+		}
+        $this->publishes($publishes);
 
         // Load this into the `preset` Artisan command as the type: `react-sync`
 
