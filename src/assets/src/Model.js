@@ -348,6 +348,9 @@ new Queryable(Model);
 			matches = collect(matches).filter().all();
 			const model_name = pluralToClassName(matches[1]);
 			const M = Model.getModel(model_name);
+			if(!M){
+				return resolve(return_val);
+			}
 			const plural = M.plural;
 			return_val.models.push(M);
 			return_val.instances[plural] = return_val.instances[plural] || [];

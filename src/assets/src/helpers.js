@@ -1,4 +1,4 @@
-import { clone, get, isArray, find, set, snakeCase } from 'lodash';
+import { clone, get, isArray, find, set, snakeCase, camelCase } from 'lodash';
 const pluralize = require('pluralize');
 
 export function ReactSyncData(){
@@ -19,8 +19,9 @@ export function snake_case(t){
 
 export function studly_case(t){
 	var t = clone(t) || '';
-	(t.match(/_./g) || []).forEach((l) => { t = t.replace(l, `${l.slice(1).toUpperCase()}`) });
-	return t.slice(0,1).toUpperCase() + t.slice(1);
+	const camelized = camelCase(t);
+
+	return camelized.slice(0,1).toUpperCase() + camelized.slice(1);
 }
 
 export function app_get(dotvalue, query){
@@ -57,8 +58,6 @@ export function brackets_to_dots(value){
 }
 
 export function pluralToClassName(plural){
-	// one off here. MOVE!!!
-	if(plural == 'data') return 'DataPoint';
 	return studly_case(pluralize.singular(plural));
 };
 
