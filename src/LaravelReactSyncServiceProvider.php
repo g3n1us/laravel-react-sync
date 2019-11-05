@@ -33,28 +33,6 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
 			View::share('randomized_var', 'react_sync_random_' . rand() . rand() . '_var');
 
-	        // auto_jsonable route stuff below ... TODO apply middleware from the original route to secure the ajax requested version. Is this needed??
-	        $route = \Route::current();
-			if($route){
-				// Find out if the route can be output automatically as JSON. This can be done via config, or by applying a trait to the controller.
-		        $route_controller = is_object($route->controller) ? class_basename(get_class($route->controller)) : false;
-
-		        $uses_trait = is_object($route->controller) && method_exists(get_class($route->controller), 'isJsonable');
-
-		        $route_name = $route->getName();
-
-		        $route_is_ok = $uses_trait || in_array($route_controller, config('react_sync.jsonable_controllers')) || in_array($route_name, config('react_sync.jsonable_routes'));
-				if(request()->input('asajax')){
-					$view->setPath(__DIR__ . '/views/as_json.blade.php');
-			        response($view)->header('Content-Type', 'application/json')->send();
-			        exit();
-				}
-		        if(request()->ajax() && request()->getMethod() === 'GET' && $route_is_ok ){
-					$view->setPath(__DIR__ . '/views/as_json.blade.php');
-			        response($view)->header('Content-Type', 'application/json')->send();
-			        exit();
-		        }
-	        }
 
 			Blade::directive('output_alldata', function(){
 				return '<?php echo $$randomized_var->toJson(); if(json_last_error() > 0) throw new \Exception("Data passed to the view cannot be serialized. This may be due to a circular structure being included. Data includes: " . $$randomized_var->keys()->implode(", \n")); ?>';
@@ -105,6 +83,29 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 			        }
 					$$randomized_var->put(\'models\', $model_arr); ?>';
 		    });
+
+	        // auto_jsonable route stuff below ... TODO apply middleware from the original route to secure the ajax requested version. Is this needed??
+	        $route = \Route::current();
+			if($route){
+				// Find out if the route can be output automatically as JSON. This can be done via config, or by applying a trait to the controller.
+		        $route_controller = is_object($route->controller) ? class_basename(get_class($route->controller)) : false;
+
+		        $uses_trait = is_object($route->controller) && method_exists(get_class($route->controller), 'isJsonable');
+
+		        $route_name = $route->getName();
+
+		        $route_is_ok = $uses_trait || in_array($route_controller, config('react_sync.jsonable_controllers')) || in_array($route_name, config('react_sync.jsonable_routes'));
+				if(request()->input('asajax')){
+					$view->setPath(__DIR__ . '/views/as_json.blade.php');
+			        response($view)->header('Content-Type', 'application/json')->send();
+			        exit();
+				}
+		        if(request()->ajax() && request()->getMethod() === 'GET' && $route_is_ok ){
+					$view->setPath(__DIR__ . '/views/as_json.blade.php');
+			        response($view)->header('Content-Type', 'application/json')->send();
+			        exit();
+		        }
+	        }
 	    });
 	}
 
