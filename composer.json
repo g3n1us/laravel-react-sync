@@ -28,5 +28,10 @@
                 "G3n1us\\LaravelReactSync\\LaravelReactSyncServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@php artisan optimize:clear"
+        ]
     }
 }
