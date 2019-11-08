@@ -22,6 +22,7 @@ class RenderableDefault extends Trait{
 	  });
 
 	  const public_props = collect(this.props).filter((v,k) => {
+		  if(typeof v === 'function') return false;
 		  return k.slice(-3) !== '_id' && k !== 'refresher';
 	  }).map((v, k) => {
 		  if(k in this.relations){

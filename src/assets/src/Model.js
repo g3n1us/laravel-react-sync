@@ -41,8 +41,8 @@ class Model extends Component{
   @constructor
   @argument {Object} props An object representing a single model
 */
-  constructor(props){
-    super(props);
+  constructor(props, context, updater){
+    super(props, context, updater);
 
     Model.addModel(this.constructor);
 
@@ -66,6 +66,7 @@ class Model extends Component{
 
 	let relations = filter(toPairs(this.schema), (v) => v[1].type == "relation");
 	this.relations = {};
+
 	relations.forEach((v_array) => {
 		let [ relationName, relationDefinition ] = v_array;
 		const { relation_type, definition } = relationDefinition;
@@ -115,7 +116,6 @@ class Model extends Component{
 	hydrate(){
 		return new Promise((resolve, reject) => {
 			if(this.props.id && Object.keys(this.props).length === 1){
-				console.log('this.api_url', this.api_url);
 				axios.get(this.api_url).then(response => {
 					return resolve(new this.constructor(response.data));
 				});
@@ -124,6 +124,11 @@ class Model extends Component{
 				return resolve(this);
 			}
 		});
+	}
+
+	set_render(render_name){
+		const fn = this.props.set_render;
+
 	}
 
 	get id(){
@@ -218,7 +223,7 @@ class Model extends Component{
 
 /** */
   render(){
-    let renderAs = this.props.renderAs || 'Default';
+    let renderAs = this.props.renderAs || this.state.renderAs || 'Default';
     let renderName = `render${studly_case(renderAs)}`;
     if(typeof this[renderName] === 'function'){
       return this[renderName]();
@@ -363,18 +368,23 @@ new Queryable(Model);
 				const M = Model.getModel(pluralToClassName(k));
 				const coll = collect(v);
 				coll.model = M;
+
 				return coll.hydrate();
 			});
-			return_val.instances.promise().then(() => {
-				return resolve(collect(return_val));
+			return_val.instances.promise().then((r) => {
+				return_val.instances = return_val.instances.keyBy('model.plural').all();
+				return resolve(return_val);
 			});
 		});
 	}
 
+	Model.modifyInstance = function(instance, newProps){
+		const M = instance.type;
+		const resolved_props = {...instance.props, ...newProps};
+		return <M {...resolved_props} />;
+	}
+
 })();
-
-window.Model = Model;
-
 
 export default Model;
 

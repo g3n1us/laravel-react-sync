@@ -1,6 +1,4 @@
 {
-    "/LaravelReactSync.min.js": "/LaravelReactSync.min.js",
-    "/LaravelReactSync.min.js.map": "/LaravelReactSync.min.js.map",
-    "/SyncLaravelReactSync.min.js": "/SyncLaravelReactSync.min.js",
-    "/SyncLaravelReactSync.min.js.map": "/SyncLaravelReactSync.min.js.map"
+    "/LaravelReactSync.js": "/LaravelReactSync.js",
+    "/SyncLaravelReactSync.js": "/SyncLaravelReactSync.js"
 }
