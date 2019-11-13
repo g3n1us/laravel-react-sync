@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import collect from 'collect.js';
 import Field from './Field';
+import PrimordialModel from './PrimordialModel';
 
 // Import traits
 import Queryable from './traits/Queryable';
@@ -41,20 +42,25 @@ class Model extends Component{
   @constructor
   @argument {Object} props An object representing a single model
 */
-  constructor(props, context, updater){
-    super(props, context, updater);
+  constructor(props){
+/*
+	if(props instanceof PrimordialModel){
+		return props.evolve();
+	}
+*/
+
+    super(props);
 
     Model.addModel(this.constructor);
 
-	this.constructor.instances = this.constructor.instances || {};
 
-	if(this.constructor.instances[this.props.id]){
-		return this.constructor.instances[this.props.id];
-	}
+
 	if(!app_get(this.plural)){
 		app_put(this.plural, {});
 	}
+
 	const res = app_put(`${this.plural}.${this.id}`, this);
+
 
     this._calculatedProperties = {
 		endpoint: `${window.location.protocol}//${window.location.hostname}/${this.constructor.plural}/`,
@@ -105,12 +111,11 @@ class Model extends Component{
 				this[relationName] = resolved;
 				this.relations[relationName] = resolved;
 			}
-		}
-	});
-    this.constructor.instances[this.props.id] = this;
+			}
+		});
 
-	this.constructor.boot(this);
-  }
+		this.constructor.boot(this);
+	}
 
 	/** */
 	hydrate(){
@@ -126,11 +131,13 @@ class Model extends Component{
 		});
 	}
 
+	/** */
 	set_render(render_name){
 		const fn = this.props.set_render;
 
 	}
 
+	/** */
 	get id(){
 		return this.props.id.toString();
 	}
@@ -145,20 +152,21 @@ class Model extends Component{
 		return this._calculatedProperties;
 	}
 
-
+	/** */
 	static getSchema(){
 		let schema = window.app.schemas[this.name];
 		return schema;
 	}
 
+	/** */
 	get schema(){
 		return this.constructor.getSchema();
 	}
 
-/** */
-  get url(){
-    return this._calculatedProperties.url;
-  }
+	/** */
+	get url(){
+		return this._calculatedProperties.url;
+	}
 
 	/** */
 	get api_url(){
@@ -166,73 +174,74 @@ class Model extends Component{
 		return this._calculatedProperties.api_url;
 	}
 
-  get breadcrumb(){
-    let a = document.createElement('a');
-    a.href = this._calculatedProperties.url;
-    let segments = filter(a.pathname.split('/'));
-    let joined = [];
-    const reducer = (accumulator, currentValue) => {
-      accumulator.push(flatten([...accumulator, currentValue]));
-      return accumulator;
-    }
-    return segments.reduce(reducer, [[]])
-                   .map(s => `${window.location.protocol}//${window.location.hostname}/${s.join('/')}`);
-  }
+	/** */
+	get breadcrumb(){
+		let a = document.createElement('a');
+		a.href = this._calculatedProperties.url;
+		let segments = filter(a.pathname.split('/'));
+		let joined = [];
+		const reducer = (accumulator, currentValue) => {
+			accumulator.push(flatten([...accumulator, currentValue]));
+			return accumulator;
+		}
+		return segments.reduce(reducer, [[]])
+			.map(s => `${window.location.protocol}//${window.location.hostname}/${s.join('/')}`);
+	}
 
-/**
-  @todo Implement this as a way to add instantiation items
-*/
-  static boot(instance){
-	  //
-  }
+	/**
+	  @todo Implement this as a way to add instantiation items
+	*/
+	static boot(instance){
+		//
+	}
 
-/** */
-  filterMutable(objectToFilter){
-      if(!this.constructor.editable_props.length) return objectToFilter;
-    return pick(objectToFilter, this.constructor.editable_props);
-  }
-
-/** */
-  get mutableState(){
-    return this.filterMutable(this.props);
-  }
+	/** */
+	filterMutable(objectToFilter){
+		if(!this.constructor.editable_props.length) return objectToFilter;
+		return pick(objectToFilter, this.constructor.editable_props);
+	}
 
 
-/** */
-  get plural(){
-    return this.constructor.plural;
-  }
+	/** */
+	get mutableState(){
+		return this.filterMutable(this.props);
+	}
 
 
-/** */
-  static get plural(){
-    return pluralize(kebabCase(this.name));
-  }
+	/** */
+	get plural(){
+		return this.constructor.plural;
+	}
 
-/** */
+
+	/** */
+	static get plural(){
+		return pluralize(kebabCase(this.name));
+	}
+
+	/** */
 	get singular(){
 		return this.constructor.singular;
 	}
 
 
-/** */
-  static get singular(){
-    return pluralize.singular(this.plural);
-  }
+	/** */
+	static get singular(){
+		return pluralize.singular(this.plural);
+	}
 
 
-/** */
-  render(){
-    let renderAs = this.props.renderAs || this.state.renderAs || 'Default';
-    let renderName = `render${studly_case(renderAs)}`;
-    if(typeof this[renderName] === 'function'){
-      return this[renderName]();
-    }
+	/** */
+	render(){
+		let renderAs = this.props.renderAs || 'Default';
+		let renderName = `render${studly_case(renderAs)}`;
+		if(typeof this[renderName] === 'function'){
+			return this[renderName]();
+		}
 
-    // return the default render method.
-    return this.renderDefault();
-  }
-
+		// return the default render method.
+		return this.renderDefault();
+	}
 }
 
 new RenderableAsBasicForm(Model);
@@ -340,37 +349,51 @@ new Queryable(Model);
 		});
 	});
 
+
 	Model.extractInstancesFromUrl = function(){
 		let matches = Model.matchUrlPath();
 		const return_val = {
 			models: [],
 			instances: {},
 		}
-		return new Promise((resolve, reject) => {
-			if(!matches){
-				return resolve(return_val);
-			}
-			matches = collect(matches).filter().all();
-			const model_name = pluralToClassName(matches[1]);
-			const M = Model.getModel(model_name);
-			if(!M){
-				return resolve(return_val);
-			}
-			const plural = M.plural;
-			return_val.models.push(M);
-			return_val.instances[plural] = return_val.instances[plural] || [];
-			if(matches.length === 3){
-				return_val.instances[plural].push(matches[2]);
-			}
 
+
+		if(!matches){
 			return_val.models = collect(return_val.models);
-			return_val.instances = collect(return_val.instances).map((v, k) => {
-				const M = Model.getModel(pluralToClassName(k));
-				const coll = collect(v);
-				coll.model = M;
+			return_val.instances = collect(return_val.instances);
+			return return_val;
+		}
+		matches = collect(matches).filter().all();
+		const model_name = pluralToClassName(matches[1]);
+		const M = Model.getModel(model_name);
+		if(!M){
+			return resolve(return_val);
+		}
+		const plural = M.plural;
+		return_val.models.push(M);
+		return_val.instances[plural] = return_val.instances[plural] || [];
+		if(matches.length === 3){
+			return_val.instances[plural].push(matches[2]);
+		}
+		return_val.models = collect(return_val.models);
+		return_val.instances = collect(return_val.instances);
+		return_val.instances = return_val.instances.map((v, k) => {
+			const M = Model.getModel(pluralToClassName(k));
+			const coll = collect(v);
+			coll.model = M;
 
-				return coll.hydrate();
-			});
+			return coll.hydrate();
+		});
+
+		return return_val;
+	}
+
+
+
+	Model.resolveInstancesFromUrl = function(return_val){
+		return new Promise((resolve, reject) => {
+
+
 			return_val.instances.promise().then((r) => {
 				return_val.instances = return_val.instances.keyBy('model.plural').all();
 				return resolve(return_val);
@@ -378,11 +401,13 @@ new Queryable(Model);
 		});
 	}
 
+/*
 	Model.modifyInstance = function(instance, newProps){
 		const M = instance.type;
 		const resolved_props = {...instance.props, ...newProps};
 		return <M {...resolved_props} />;
 	}
+*/
 
 })();
 

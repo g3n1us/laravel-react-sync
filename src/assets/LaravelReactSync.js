@@ -170,13 +170,16 @@ export class MasterComponent extends Component{
 		super(props);
 		this.app = { ...REACT_SYNC_DATA };
 		this.state = this.app.page_data;
+		this.route_model_data = Model.extractInstancesFromUrl();
 		REACT_SYNC_DATA.components.push(this);
 	}
 
 
 
 	componentDidMount(){
-		Model.extractInstancesFromUrl().then(x => {
+		const from_url = Model.extractInstancesFromUrl();
+		console.log('from_url', from_url, this.route_model_data);
+		Model.resolveInstancesFromUrl(from_url).then(x => {
 			console.log('x', x);
 		});
 
