@@ -20,13 +20,13 @@ class ReactSyncPreset extends Preset
      */
     public static function install()
     {
+        static::ensurePagesModelsDirectoriesExist();
         static::ensureComponentDirectoryExists();
         static::updatePackages();
         static::updateWebpackConfiguration();
         static::updateBootstrapping();
         static::updateComponent();
         static::removeNodeModules();
-        static::ensurePagesModelsDirectoriesExist();
         Artisan::call('write_index_files');
     }
 
@@ -45,6 +45,10 @@ class ReactSyncPreset extends Preset
 
 		if(!is_file(app_path("Models/.index"))){
 			file_put_contents(app_path("Models/.index"), '');
+		}
+
+		if(!is_dir(resource_path("components"))){
+			mkdir(resource_path("components"));
 		}
 
 		if(!is_file(resource_path("components/.index"))){
