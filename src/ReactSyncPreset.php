@@ -27,7 +27,8 @@ class ReactSyncPreset extends Preset
         static::updateBootstrapping();
         static::updateComponent();
         static::removeNodeModules();
-        Artisan::call('write_index_files');
+        \Artisan::call('make:react_model Example');
+        \Artisan::call('make:react_page Example');
     }
 
     protected static function ensurePagesModelsDirectoriesExist(){
@@ -47,12 +48,12 @@ class ReactSyncPreset extends Preset
 			file_put_contents(app_path("Models/.index"), '');
 		}
 
-		if(!is_dir(resource_path("components"))){
-			mkdir(resource_path("components"));
+		if(!is_dir(resource_path("js/components"))){
+			mkdir(resource_path("js/components"));
 		}
 
-		if(!is_file(resource_path("components/.index"))){
-			file_put_contents(resource_path("components/.index"), '');
+		if(!is_file(resource_path("js/components/.index"))){
+			file_put_contents(resource_path("js/components/.index"), '');
 		}
 
 		if(!is_file(app_path("Models/models.json"))){
