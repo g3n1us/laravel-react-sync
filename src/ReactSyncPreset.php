@@ -40,6 +40,7 @@ class ReactSyncPreset extends Preset
         $js_path = is_dir(resource_path('js')) ? 'resources/js' : 'resources/assets/js';
         return [
             '@babel/preset-react' => '^7.7.0',
+            '@babel/plugin-proposal-class-properties' => '^7.7.0',
             'react' => '^16.9.0',
             'react-dom' => '^16.9.0',
         ] + Arr::except($packages, ['vue']);
