@@ -1,2 +1,5 @@
 .DS_Store
+__TRASH
+_TRASH
 node_modules
+/vendor

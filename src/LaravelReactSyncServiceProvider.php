@@ -121,15 +121,17 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
         $this->loadRoutesFrom(__DIR__.'/routes.php');
 
+        $this->loadRoutesFrom(__DIR__.'/console.php');
+
 	    $this->loadViewsFrom(__DIR__.'/views', 'react_sync');
 
 
 		$publishes = [];
 		if(!file_exists(config_path('react_sync.php'))){
-			$publishes[] = config_path('react_sync.php');
+			$publishes[__DIR__.'/config.php'] = config_path('react_sync.php');
 		}
 		if(!is_dir($this->getJsPath() . '/vendor/laravel-react-sync')){
-			$publishes[] = $this->getJsPath() . '/vendor/laravel-react-sync';
+			$publishes[__DIR__.'/assets/dist'] = $this->getJsPath() . '/vendor/laravel-react-sync';
 		}
         $this->publishes($publishes);
 

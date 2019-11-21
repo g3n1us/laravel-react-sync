@@ -17,6 +17,14 @@ mix.webpackConfig({
 	}
 });
 
+mix.options({
+    terser: {
+        terserOptions: {
+	        mangle: false,
+        }
+    },
+});
+
 mix.react('src/main.js', `dist/${filename}`)
 mix.react('src/main_sync.js', `dist/Sync${filename}`)
 	.setPublicPath('dist')

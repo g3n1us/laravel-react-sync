@@ -39,10 +39,9 @@ class ReactSyncPreset extends Preset
 
         $js_path = is_dir(resource_path('js')) ? 'resources/js' : 'resources/assets/js';
         return [
-            'babel-preset-react' => '^6.23.0',
-            'react' => '^15.4.2',
-            'react-dom' => '^15.4.2',
-            'laravel-react-sync' => "file:$js_path/vendor/laravel-react-sync",
+            '@babel/preset-react' => '^7.7.0',
+            'react' => '^16.9.0',
+            'react-dom' => '^16.9.0',
         ] + Arr::except($packages, ['vue']);
     }
 
@@ -54,10 +53,7 @@ class ReactSyncPreset extends Preset
     protected static function updateWebpackConfiguration()
     {
         $js_path = is_dir(resource_path('js')) ? 'js' : 'assets/js';
-        if(is_dir(resource_path('assets/js')))
-          copy(__DIR__.'/react-sync-stubs/webpack56.mix.js', base_path('webpack.mix.js'));
-        else
-          copy(__DIR__.'/react-sync-stubs/webpack.mix.js', base_path('webpack.mix.js'));
+        copy(__DIR__.'/react-sync-stubs/webpack.mix.js', base_path('webpack.mix.js'));
     }
 
     /**
