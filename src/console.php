@@ -1,8 +1,10 @@
 <?php
 
 use Illuminate\Filesystem\Filesystem;
+use G3n1us\LaravelReactSync\ReactSyncPreset;
 
 Artisan::command('make:react_model {name?}', function($name = null){
+	ReactSyncPreset::ensurePagesModelsDirectoriesExist();
 	if($name === null){
 		$name = $this->ask('What is your name of the model?');
 	}
@@ -10,15 +12,7 @@ Artisan::command('make:react_model {name?}', function($name = null){
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/model.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
 	file_put_contents(app_path("Models/$name.js"), $rendered);
-	if(!is_file(app_path("Models/.index"))){
-		file_put_contents(app_path("Models/.index"), '');
-	}
-	if(!is_file(app_path("Models/models.json"))){
-		$current_models = [];
-	}
-	else{
-		$current_models = json_decode(file_get_contents(app_path("Models/models.json")), true);
-	}
+	$current_models = json_decode(file_get_contents(app_path("Models/models.json")), true);
 	$current_models[] = $name;
 	file_put_contents(app_path("Models/models.json"), json_encode($current_models));
 	Artisan::call('write_index_files');
@@ -29,16 +23,13 @@ Artisan::command('make:react_model {name?}', function($name = null){
 
 
 Artisan::command('make:react_page {name?}', function($name = null){
+	ReactSyncPreset::ensurePagesModelsDirectoriesExist();
 	if($name === null){
 		$name = $this->ask('What is your name of the page?');
 	}
 	$name = preg_replace('/^(.*?)_page$/', '$1', snake_case($name));
 	$pathname = str_slug($name);
 	$name = studly_case($name) . 'Page';
-	if(!is_dir(app_path("Pages"))){
-		mkdir(app_path("Pages"));
-	}
-
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
 	file_put_contents(app_path("Pages/$name.js"), $rendered);
@@ -46,12 +37,6 @@ Artisan::command('make:react_page {name?}', function($name = null){
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page_php.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
 	file_put_contents(app_path("Pages/$name.php"), $rendered);
-
-
-
-	if(!is_file(app_path("Pages/.index"))){
-		file_put_contents(app_path("Pages/.index"), '');
-	}
 
 	Artisan::call('write_index_files');
 	$this->comment("Page: $name created");
@@ -70,7 +55,6 @@ Artisan::command('write_schemas', function () {
     foreach($models as $model){
         $class = "\App\\Models\\$model";
         $schemas[$model] = get_schema(new $class);
-//         $schemas[$model] = get_schema($class::first());
     }
     $file_contents = collect($schemas)->toJSON();
     $file_contents = "export default $file_contents;\n";
@@ -92,9 +76,7 @@ function write_index_files($_this){
     // put a file called .index in a directory you want to index
     // this runs recursively
 
-//     if($dir_start === false){
-        $dir_start = app_path();
-//     }
+    $dir_start = app_path();
     $fs = new Filesystem;
     $dirs = collect($fs->allFiles($dir_start))
         ->map(function($f){ return $f->getPath(); })

@@ -1,4 +1,6 @@
-
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+import App from './components/App';
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes React, LaravelReactSync and other helpers. It's a great starting point while
@@ -13,4 +15,4 @@ require('./bootstrap');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-require('./components/Example');
+ReactDOM.render(<App />, document.createElement('div'));

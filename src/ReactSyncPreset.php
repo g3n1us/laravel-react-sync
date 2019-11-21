@@ -26,6 +26,35 @@ class ReactSyncPreset extends Preset
         static::updateBootstrapping();
         static::updateComponent();
         static::removeNodeModules();
+        static::ensurePagesModelsDirectoriesExist();
+        Artisan::call('write_index_files');
+    }
+
+    protected static function ensurePagesModelsDirectoriesExist(){
+		if(!is_dir(app_path("Pages"))){
+			mkdir(app_path("Pages"));
+		}
+
+		if(!is_file(app_path("Pages/.index"))){
+			file_put_contents(app_path("Pages/.index"), '');
+		}
+
+		if(!is_dir(app_path("Models"))){
+			mkdir(app_path("Models"));
+		}
+
+		if(!is_file(app_path("Models/.index"))){
+			file_put_contents(app_path("Models/.index"), '');
+		}
+
+		if(!is_file(resource_path("components/.index"))){
+			file_put_contents(resource_path("components/.index"), '');
+		}
+
+		if(!is_file(app_path("Models/models.json"))){
+			file_put_contents(app_path("Models/models.json"), json_encode([]));
+		}
+
     }
 
     /**
@@ -71,26 +100,8 @@ class ReactSyncPreset extends Preset
         );
 
         copy(
-            __DIR__.'/react-sync-stubs/Example.js',
-            resource_path("$js_path/components/Example.js")
-        );
-
-        // make the vendor directory if it doesn't exist
-        if(!is_dir(resource_path("$js_path/vendor")))
-	        mkdir(resource_path("$js_path/vendor"));
-
-        if(!is_dir(resource_path("$js_path/vendor/laravel-react-sync")))
-	        mkdir(resource_path("$js_path/vendor/laravel-react-sync"));
-
-        copy(
-            __DIR__.'/assets/LaravelReactSync.js',
-            resource_path("$js_path/vendor/laravel-react-sync/LaravelReactSync.js")
-        );
-
-
-        copy(
-            __DIR__.'/assets/package.json',
-            resource_path("$js_path/vendor/laravel-react-sync/package.json")
+            __DIR__.'/react-sync-stubs/components/App.js',
+            resource_path("$js_path/components/App.js")
         );
 
     }

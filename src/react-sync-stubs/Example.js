@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { ModelComponent, MasterComponent, Alert, Pagination } from 'laravel-react-sync';
+import { ModelComponent, MasterComponent, Alert, Pagination } from 'laravel_react_sync';
 
 export default class Example extends Component {
     render() {
