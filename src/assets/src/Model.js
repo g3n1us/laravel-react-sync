@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import collect from 'collect.js';
 import Field from './Field';
-import PrimordialModel from './PrimordialModel';
+// import PrimordialModel from './PrimordialModel';
 
 // Import traits
 import Queryable from './traits/Queryable';
@@ -43,17 +43,10 @@ class Model extends Component{
   @argument {Object} props An object representing a single model
 */
   constructor(props){
-/*
-	if(props instanceof PrimordialModel){
-		return props.evolve();
-	}
-*/
 
     super(props);
 
     Model.addModel(this.constructor);
-
-
 
 	if(!app_get(this.plural)){
 		app_put(this.plural, {});
@@ -154,8 +147,7 @@ class Model extends Component{
 
 	/** */
 	static getSchema(){
-		let schema = window.app.schemas[this.name];
-		return schema;
+		return window[window.ReactSyncGlobal].schemas[this.name];
 	}
 
 	/** */
@@ -170,7 +162,6 @@ class Model extends Component{
 
 	/** */
 	get api_url(){
-		console.log(this.singular, this.props.id);
 		return this._calculatedProperties.api_url;
 	}
 

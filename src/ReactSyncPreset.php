@@ -31,7 +31,7 @@ class ReactSyncPreset extends Preset
         \Artisan::call('make:react_page Example');
     }
 
-    protected static function ensurePagesModelsDirectoriesExist(){
+    public static function ensurePagesModelsDirectoriesExist(){
 		if(!is_dir(app_path("Pages"))){
 			mkdir(app_path("Pages"));
 		}
@@ -77,6 +77,7 @@ class ReactSyncPreset extends Preset
             '@babel/plugin-proposal-class-properties' => '^7.7.0',
             'react' => '^16.9.0',
             'react-dom' => '^16.9.0',
+            'jquery' => '^3.4.1',
         ] + Arr::except($packages, ['vue']);
     }
 

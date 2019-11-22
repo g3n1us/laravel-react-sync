@@ -7,6 +7,7 @@ $randomid = "page_context_" . rand();
 @page_context({{$randomid}})
 @json_script(collect(config("react_sync")), "react_sync_config")
 @json_script(get_user_abilities(), "react_sync_user_abilities")
+@json_script(get_schemas(), "react_sync_schemas")
 
 
 <script>
@@ -41,6 +42,7 @@ $randomid = "page_context_" . rand();
 		}
 		_this.api_endpoint = _this.url(_this.config.api_path);
 		_this.page_data = JSON.parse(document.getElementById('{{$randomid}}').innerHTML);
+		_this.schemas = JSON.parse(document.getElementById('react_sync_schemas').innerHTML);
 		_this.components = [];
 		_this.update = function(){
 

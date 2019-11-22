@@ -44,19 +44,23 @@ Artisan::command('make:react_page {name?}', function($name = null){
 });
 
 
-
+if(!function_exists('get_schemas')){
+	function get_schemas(){
+	    $models = json_decode(file_get_contents(app_path("Models/models.json")), true);
+	    $path = resource_path('js/schema.js');
+	    $schemas = [];
+	    foreach($models as $model){
+	        $class = "\App\\Models\\$model";
+	        $schemas[$model] = get_schema(new $class);
+	    }
+	    return collect($schemas)->toJSON();
+	}
+}
 
 
 
 Artisan::command('write_schemas', function () {
-    $models = json_decode(file_get_contents(app_path("Models/models.json")), true);
-    $path = resource_path('js/schema.js');
-    $schemas = [];
-    foreach($models as $model){
-        $class = "\App\\Models\\$model";
-        $schemas[$model] = get_schema(new $class);
-    }
-    $file_contents = collect($schemas)->toJSON();
+    $file_contents = get_schemas();
     $file_contents = "export default $file_contents;\n";
     $filecomments = "/****************************************************
  *
@@ -76,7 +80,7 @@ function write_index_files($_this){
     // put a file called .index in a directory you want to index
     // this runs recursively
 
-    $dir_start = app_path();
+    $dir_start = base_path();
     $fs = new Filesystem;
     $dirs = collect($fs->allFiles($dir_start))
         ->map(function($f){ return $f->getPath(); })

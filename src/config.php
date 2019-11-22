@@ -24,7 +24,7 @@ return [
 	],
 
 	'jsonable_routes' => [
-
+        'page_route',
 	],
 
 	'models' => [],
