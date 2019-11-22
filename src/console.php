@@ -47,7 +47,6 @@ Artisan::command('make:react_page {name?}', function($name = null){
 if(!function_exists('get_schemas')){
 	function get_schemas(){
 	    $models = json_decode(file_get_contents(app_path("Models/models.json")), true);
-	    $path = resource_path('js/schema.js');
 	    $schemas = [];
 	    foreach($models as $model){
 	        $class = "\App\\Models\\$model";
@@ -60,6 +59,7 @@ if(!function_exists('get_schemas')){
 
 
 Artisan::command('write_schemas', function () {
+    $path = resource_path('js/schema.js');
     $file_contents = get_schemas();
     $file_contents = "export default $file_contents;\n";
     $filecomments = "/****************************************************
