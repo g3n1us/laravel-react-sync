@@ -13,10 +13,13 @@ import RenderableAsDiagram from './traits/RenderableAsDiagram';
 import RenderableDefault from './traits/RenderableDefault';
 import HasKeyProp from './traits/HasKeyProp';
 
+import Shell from './Shell';
+
 import { pluralToClassName, classNameToPlural, isModel, studly_case, app_put, app_get } from './helpers';
 const pluralize = require('pluralize');
 
-import { filter, flatten, isEmpty, toPairs, pick, kebabCase, snakeCase } from 'lodash';
+import { filter, flatten, isEmpty, toPairs, pick, kebabCase, snakeCase, difference, intersection } from 'lodash';
+
 /**
   @extends Component
   @mixes Queryable
@@ -38,6 +41,8 @@ class Model extends Component{
 	}
 
 
+
+
 /**
   @constructor
   @argument {Object} props An object representing a single model
@@ -56,9 +61,9 @@ class Model extends Component{
 
 
     this._calculatedProperties = {
-		endpoint: `${window.location.protocol}//${window.location.hostname}/${this.constructor.plural}/`,
-		api_url: `${window.location.protocol}//${window.location.hostname}/api/${this.singular}/${this.props.id}/`,
-		url: `${window.location.protocol}//${window.location.hostname}/${this.constructor.singular}/${this.props.id}/`,
+		endpoint: `${window.location.protocol}//${window.location.hostname}/${this.constructor.plural}`,
+		api_url: `${window.location.protocol}//${window.location.hostname}/api/${this.singular}/${this.props.id}`,
+		url: `${window.location.protocol}//${window.location.hostname}/${this.constructor.singular}/${this.props.id}`,
     };
 
     this.state = this.mutableState;
@@ -97,7 +102,7 @@ class Model extends Component{
 		else {
 
 			if(typeof this[relation_type] !== 'function'){
-				console.log(relation_type, 'this[relation_type]');
+				console.error(relation_type, 'this[relation_type]');
 			}
 			else{
 				const resolved = this[relation_type](definition);
@@ -132,7 +137,7 @@ class Model extends Component{
 
 	/** */
 	get id(){
-		return this.props.id.toString();
+		return '' + this.props.id;
 	}
 
 	/** */
@@ -221,17 +226,93 @@ class Model extends Component{
 		return pluralize.singular(this.plural);
 	}
 
+	static query_props = ['find', 'where', 'all', 'first'];
+
+	static pagination_props = ['per_page'];
+
+	static get reserved_props(){
+		return [...this.query_props, ...this.pagination_props];
+	}
+
+	static get_non_reserved_props(props){
+		const ret = difference(Object.keys(props), this.reserved_props);
+// 		debugger
+		const val = {};
+		for(const i in ret){
+			val[ret[i]] = props[ret[i]];
+		}
+		return val;
+	}
+
+	get_non_reserved_props(){
+		return this.constructor.get_non_reserved_props(this.props);
+	}
+
+	get non_reserved_props(){
+		return this.get_non_reserved_props();
+	}
+
+	get_query_prop(){
+		const i = intersection(this.constructor.query_props, Object.keys(this.props));
+		return i.length ? i[0] : null;
+	}
+
+	get query_prop(){
+		return this.get_query_prop();
+	}
+
+
+	get is_query(){
+		return !!this.get_query_prop();
+	}
+
+	get_query_endpoint(){
+		const q = this.get_query_prop();
+		let where_prop;
+		if(q == 'where'){
+			if(Array.isArray(this.props.where)){
+				where_prop = this.props.where.join('|');
+			}
+			else where_prop = this.props.where;
+		}
+		const map = {
+			find: `/api/${this.singular}/${this.props.find}`,
+			where: `/api/${this.plural}/where/${where_prop}`,
+			all: `/api/${this.plural}`,
+			first: `/api/${this.singular}`,
+		}
+		const per_page = this.props.per_page || null;
+		return per_page ? map[q] + `?per_page=${per_page}` : map[q];
+	}
+
+	queryRender(){
+		const q = this.get_query_endpoint();
+		return <Shell url={q} Model={this.constructor} {...this.non_reserved_props} />
+// 		return <div>loading...</div>;
+	}
 
 	/** */
 	render(){
-		let renderAs = this.props.renderAs || 'Default';
+		if(this.is_query){
+			return this.queryRender();
+		}
+
+		let renderAs = this.props.renderAs || this.props.render || 'Default';
 		let renderName = `render${studly_case(renderAs)}`;
+		if(typeof renderAs === 'function'){
+			return renderAs(this.props);
+		}
+
 		if(typeof this[renderName] === 'function'){
 			return this[renderName]();
 		}
 
 		// return the default render method.
 		return this.renderDefault();
+	}
+
+	renderDebug(){
+		return (<div><code>{this.constructor.name} | {this.props.id}</code></div>);
 	}
 }
 
@@ -383,8 +464,6 @@ new Queryable(Model);
 
 	Model.resolveInstancesFromUrl = function(return_val){
 		return new Promise((resolve, reject) => {
-
-
 			return_val.instances.promise().then((r) => {
 				return_val.instances = return_val.instances.keyBy('model.plural').all();
 				return resolve(return_val);

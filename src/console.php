@@ -52,7 +52,7 @@ if(!function_exists('get_schemas')){
 	        $class = "\App\\Models\\$model";
 	        $schemas[$model] = get_schema(new $class);
 	    }
-	    return collect($schemas)->toJSON();
+	    return collect($schemas);
 	}
 }
 

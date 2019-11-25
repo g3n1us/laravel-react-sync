@@ -177,11 +177,12 @@ export class MasterComponent extends Component{
 
 
 	componentDidMount(){
+/*
 		const from_url = Model.extractInstancesFromUrl();
-		console.log('from_url', from_url, this.route_model_data);
 		Model.resolveInstancesFromUrl(from_url).then(x => {
 			console.log('x', x);
 		});
+*/
 
 		$(this).on('refresh-state', (e) => {
 			console.log('refresh-state !!!', e);

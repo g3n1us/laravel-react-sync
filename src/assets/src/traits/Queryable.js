@@ -1,12 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-// import Async from 'react-promise';
 import Trait from './Trait';
-// import Model from '../Model';
-// import Notification from '../components/Notification';
-// import RefreshableAsync from '../RefreshableAsync';
 import { get, camelCase, snakeCase } from 'lodash';
 import { app_get, snake_case } from '../helpers';
+import Shell from '../Shell';
 
 window.Find = (dotstring) => get(ReactSyncAppData.page_data.state, dotstring);
 /**
@@ -49,38 +46,22 @@ class Queryable extends Trait{
 	}
 
 
-/**
- * (STATIC) - Return all models from the data store
- * @static
- */
+	/**
+	 * (STATIC) - Return all models from the data store
+	 * @static
+	 */
 
 
-
-/*
- 	static all(additional_props = {}){
-
-	    this.refresher = React.createRef();
-	    this.refreshers = this.refreshers || [];
-	    this.refreshers.push(this.refresher);
-	    const callback = (d) => {
-	        let els = d.data.map(e => {
-	          let props = {...e, ...additional_props};
-	          let ThisModel = this;
-	          return <ThisModel refresher={this.refresher} key={`${this.plural}${e.id}`} {...props} />
-	        });
-
-	        return <div>{els}</div>
-	    }
-
-	    return  <RefreshableAsync ref={this.refresher} refresh_path={`/api/${this.plural}/`} catch={(e) => console.error} then={callback} />
+	static list(additional_props = {}){
+		return <Shell url={`/api/${this.plural}`} Model={this} {...additional_props} />
 	}
-*/
+
 
 	static all(additional_props = {}){
 		this.refresher = React.createRef();
 		const plural = this.plural;
 		let items = app_get('state.'+plural) || app_get('state.'+ snakeCase(plural)) || app_get(plural) || app_get(snakeCase(plural));
-		console.log(snakeCase(plural), app_get());
+//debugger
 		if(!items) return null;
 		if(!('map' in items)) items = items.data;
         let els = items.map(e => {
@@ -106,35 +87,17 @@ class Queryable extends Trait{
 		return <ThisModel refresher={this.refresher} key={`${this.plural}${e.id}`} {...props} />;
 	}
 
-/*
-	static all(additional_props = {}){
 
-	    this.refresher = React.createRef();
-	    this.refreshers = this.refreshers || [];
-	    this.refreshers.push(this.refresher);
+	/**
+	 */
 
-	    const callback = (d) => {
-	        let els = d.data.map(e => {
-	          let props = {...e, ...additional_props};
-	          let ThisModel = this;
-	          return <ThisModel refresher={this.refresher} key={`${this.plural}${e.id}`} {...props} />
-	        });
 
-	        return <div>{els}</div>
-	    }
-
-	    return  <RefreshableAsync ref={this.refresher} refresh_path={`/api/${this.plural}/`} then={callback} />
-	}
-*/
-
-/**
- */
-
-/**
- * Store the model's state back to the database
- */
+	/**
+	 * Store the model's state back to the database
+	 */
 	save(callback = false){
-		axios.put(this.calculatedProperties.api_url, this.filterMutable(this.state))
+		const save_path = 	this.save_path || this.calculatedProperties.api_url;
+		axios.put(save_path, this.filterMutable(this.state))
 			.then(response => {
 				this.refresh();
 				react_sync_notification('Saved');
@@ -146,13 +109,30 @@ class Queryable extends Trait{
 			});
 	}
 
-/**
- * Store the model's state back to the database
- */
+
+	static create_path = `/${this.plural}`;
+
+
+	/**
+	 * Store the model's state back to the database
+	 */
 	static create(initialProps = {}){
-		axios.post(`/${this.plural}`, initialProps)
+		const react_sync_instance = window[window.ReactSyncGlobal];
+		axios.post(this.create_path, initialProps)
 			.then(response => {
-				this.refresh_static();
+				if(window.location.href != response.request.responseURL){
+					react_sync_instance.components.forEach(function(component){
+						history.pushState(response.data, "", response.request.responseURL);
+						component.setState(response.data);
+					});
+
+					react_sync_instance.page_data = response.data;
+
+				}
+				else{
+					this.refresh_static();
+				}
+
 				react_sync_notification('Saved');
 			})
 			.catch(err => {
@@ -193,8 +173,9 @@ class Queryable extends Trait{
 
 
   static refresh_static(){
+	  window.ReactSyncAppData.update();
 // 	  window.ReactSyncAppData.app.refreshPage();
-window.location.reload();
+// window.location.reload();
 /*
     let refresher = _.get(this.refresher, 'current.refresh');
 

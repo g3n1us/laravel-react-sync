@@ -45,7 +45,6 @@ $randomid = "page_context_" . rand();
 		_this.schemas = JSON.parse(document.getElementById('react_sync_schemas').innerHTML);
 		_this.components = [];
 		_this.update = function(){
-
 			return axios.get('').then(function(new_page_data){
 				_this.components.forEach(function(component){
 					component.setState(new_page_data.data);
