@@ -79,6 +79,12 @@ Object.defineProperty(window, 'react_sync_notification', {
 
 const container = document.createElement('div');
 container.className = 'fixed-top';
+container.style.top = 0;
+container.style.left = 0;
+container.style.right = 0;
+container.style.position = 'fixed';
+container.style.zIndex = 999999;
+
 document.body.appendChild(container);
 ReactDOM.render(<Notification ref={NotificationRef} />, container);
 

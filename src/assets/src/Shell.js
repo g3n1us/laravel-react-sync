@@ -11,21 +11,49 @@ class Shell extends Component{
 
 	constructor(props){
 		super(props);
-		this.state = {children: null}
+		this.state = {
+			children: null,
+		}
+	}
+
+	static cached = {}
+
+	refresh(){
+		const { Model } = this.props;
+		const { url } = this.props;
+		let fromcache;
+		this.setState({children: null});
+		if(!this.constructor.cached[url]){
+			this.constructor.cached[url] = axios.get(url);
+		}
+		else{
+			//
+		}
+		this.constructor.cached[url].then(response => {
+			this.setState({children: response.data});
+		}).catch((err) => {
+			console.log(err, err.response);
+			this.setState({children: null});
+		});
 	}
 
 	componentDidMount(){
-		const { Model, url } = this.props;
-		axios.get(url)
-			.then(response => this.setState({children: response.data}));
+		this.refresh();
+	}
+
+	componentDidUpdate(prevProps, prevState, snapshot){
+		if(prevProps.url != this.props.url){
+			this.refresh();
+		}
+		else if(!this.constructor.cached[this.props.url]){
+			this.refresh();
+		}
 	}
 
 	render(){
-// 		if(!this.state.children) return <div>loading...</div>;
 		if(!this.state.children) return null;
-		const { Model, url, ...remainder } = this.props;
+		const { Model, url, then, ...remainder } = this.props;
 		const { children } = this.state;
-
 
 		// determine if we have received a paginator, collection, or single model
 		let items;
@@ -42,6 +70,11 @@ class Shell extends Component{
 		else{
 			items = children;
 		}
+
+		if(then){
+			return then(collect(items));
+		}
+
 		return (
 			<>{items.map((props, i) => {
 				const normal_props = Model.get_non_reserved_props(remainder);

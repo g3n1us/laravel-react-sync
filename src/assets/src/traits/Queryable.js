@@ -141,10 +141,11 @@ class Queryable extends Trait{
 			});
 	}
 
-/**
- * Create a new model instance and store it to the database
- * @todo complete this method
- */
+	/**
+	 * Create a new model instance and store it to the database
+	 * @todo complete this method
+	 */
+/*
 	static create_static(initialProps = {}){
 		return axios.post(`/${this.plural}`, initialProps)
 			.then(data => {
@@ -155,61 +156,51 @@ class Queryable extends Trait{
 				react_sync_notification({text: 'An error occurred', level: 'danger'});
 			});
 	}
+*/
 
+	get delete_path(){
+		return `/api/${this.singular}/${this.id}`;
+	}
 
-/**
- * Delete a model
- */
+	/**
+	 * Delete a model
+	 */
 	delete(){
-		axios.delete(this.calculatedProperties.api_url)
-			.then(data => {
-				window.location.reload();
+		const react_sync_instance = window[window.ReactSyncGlobal];
+		axios.delete(this.delete_path)
+			.then(response => {
+				if(window.location.href != response.request.responseURL){
+					react_sync_instance.components.forEach(function(component){
+						history.pushState(response.data, "", response.request.responseURL);
+						component.setState(response.data);
+					});
+
+					react_sync_instance.page_data = response.data;
+				}
+				else{
+					this.refresh();
+				}
+
 				react_sync_notification('Deleted');
 			})
 			.catch(err => {
+				console.log(err);
 				react_sync_notification({text: 'An error occurred', level: 'danger'});
 			});
 	}
 
 
-  static refresh_static(){
-	  window.ReactSyncAppData.update();
-// 	  window.ReactSyncAppData.app.refreshPage();
-// window.location.reload();
-/*
-    let refresher = _.get(this.refresher, 'current.refresh');
 
-    if(refresher) refresher();
-*/
-  }
-
-
-  refresh(redirectEndpoint){
-	window.ReactSyncAppData.update();
-// 	window.location.reload();
-/*
-    let refresher = _.get(this.props, 'refresher.current.refresh');
-    if(refresher) {
-	    console.log(this.props.refresher);
-	    refresher();
-    }
-    else if(typeof this.props.refresh === 'function'){
-	    this.props.refresh();
-    }
-    else if(redirectEndpoint) window.location.assign(redirectEndpoint);
-    else if(this instanceof Model){
-      // Otherwise, make a call to the endpoint and set state from there to confirm the saved data is equal to what we already have set.
-      axios.get(this.calculatedProperties.api_url).then(d => {
-        this.setState(this.filterMutable(d.data));
-      }).catch(e => {
-        console.error(e);
-      });
-    }
-*/
-  }
+	static refresh_static(){
+		window.ReactSyncAppData.update();
+	}
 
 
 
+	refresh(redirectEndpoint){
+		Shell.cache = {};
+		window.ReactSyncAppData.update();
+	}
 
 }
 

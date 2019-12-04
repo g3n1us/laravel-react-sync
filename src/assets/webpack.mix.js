@@ -14,7 +14,7 @@ mix.webpackConfig({
 		library: "LaravelReactSync",
 		libraryExport: "default",
 		globalObject: 'this'
-	}
+	},
 });
 
 mix.options({

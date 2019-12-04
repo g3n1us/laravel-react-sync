@@ -168,9 +168,9 @@ ModelComponent.addModel = function(M){
 export class MasterComponent extends Component{
 	constructor(props){
 		super(props);
-		this.app = { ...REACT_SYNC_DATA };
+		this.app = REACT_SYNC_DATA;
 		this.state = this.app.page_data;
-		this.route_model_data = Model.extractInstancesFromUrl();
+		// this.route_model_data = Model.extractInstancesFromUrl();
 		REACT_SYNC_DATA.components.push(this);
 	}
 

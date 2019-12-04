@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { get, find } from 'lodash';
 
 /** */
 class Field extends Component{
@@ -9,6 +10,8 @@ class Field extends Component{
     this.onChangeHandler = this.onChangeHandler.bind(this.props.model);
 
     this.field_type = Field.field_type.bind(this.props.model);
+
+    this.label = this.props.label || this.props.property;
   }
 
   onChangeHandler(e){
@@ -18,8 +21,7 @@ class Field extends Component{
 
 
   static field_type(key, model_instance = this){
-    let n = _.get(model_instance.schema, key, {});
-    console.log(n, key);
+    let n = get(model_instance.schema, key, {});
 // 	  console.log(n.type == 'text'&& typeof model_instance.state[key] === 'object');
 
     const type_tests = [
@@ -35,7 +37,7 @@ class Field extends Component{
       {field: 'file', test: n => n.type == ''},
       {field: 'relation', test: n => typeof n.type === 'object'},
     ];
-    let type = _.find(type_tests, t => {
+    let type = find(type_tests, t => {
       return t.test(n)
     });
     return {type: type, schema: n};
@@ -46,6 +48,8 @@ class Field extends Component{
   field(key){
     let {type, schema} = this.field_type(key);
 
+    const rand = 'rand_' + Math.floor((Math.random()*10000000)+1);
+
 	const val = this.props.model.state[key] || '';
 
     if(!type) return <label>{key}<input type="text" readOnly={true} value={val} /></label>;
@@ -53,21 +57,21 @@ class Field extends Component{
 	if(typeof type.field === 'json') console.log(key, val, type);
 
     const field_renders = {
-      string: <input className="form-control" type="text" name={key} value={val} onChange={this.onChangeHandler} />,
+      string: <input className="form-control" id={rand} type="text" name={key} value={val} onChange={this.onChangeHandler} />,
 
-      checkbox: <input type="checkbox" name={key} value={val} onChange={this.onChangeHandler} />,
+      checkbox: <input type="checkbox" id={rand} name={key} value={val} onChange={this.onChangeHandler} />,
 
-      integer: <input className="form-control" type="tel" pattern="[0-9]{1,100}" name={key} value={val} onChange={this.onChangeHandler} />,
+      integer: <input className="form-control" id={rand} type="tel" pattern="[0-9]{1,100}" name={key} value={val} onChange={this.onChangeHandler} />,
 
-      email: <input className="form-control"  type="email" name={key} value={val} onChange={this.onChangeHandler} />,
+      email: <input className="form-control" id={rand} type="email" name={key} value={val} onChange={this.onChangeHandler} />,
 
-      datetime: <input className="form-control"  type="text" name={key} value={val} onChange={this.onChangeHandler} />,
+      datetime: <input className="form-control" id={rand} type="text" name={key} value={val} onChange={this.onChangeHandler} />,
 
-      file: <div><label>{val}</label><input className="form-control-file" type="file" name={key} /></div>,
+      file: <div><label htmlFor={rand}>{val}</label><input id={rand} className="form-control-file" type="file" name={key} /></div>,
 
-      text: <textarea className="form-control" name={key} value={val} onChange={this.onChangeHandler} />,
+      text: <textarea className="form-control" id={rand} name={key} value={val} onChange={this.onChangeHandler} />,
 
-      json: <textarea className="form-control" name={key} value={JSON.stringify(val)} onChange={this.onChangeHandler} />
+      json: <textarea className="form-control" id={rand} name={key} value={JSON.stringify(val)} onChange={this.onChangeHandler} />
 
 /*
       text: <CkOne
@@ -84,11 +88,12 @@ class Field extends Component{
 
     }
     if(!field_renders[type.field]) return null;
-    return <fieldset className="form-group"><label>{key}</label> {field_renders[type.field]}</fieldset>;
+    const classes = (this.props.className || '') + ' form-group';
+    return <fieldset className={classes}><label htmlFor={rand}>{this.label}</label> {field_renders[type.field]}</fieldset>;
   }
 
   render(){
-    return this.field(this.props.property) || <div>{this.props.property}</div>;
+    return this.field(this.props.property) || <div>{this.label}</div>;
   }
 
 

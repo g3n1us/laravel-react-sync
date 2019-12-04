@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import collect from 'collect.js';
 import Field from './Field';
+import qs from 'qs';
 // import PrimordialModel from './PrimordialModel';
 
 // Import traits
@@ -78,7 +79,7 @@ class Model extends Component{
 			const relationValue = this.props[relationName];
 			const ThisModel = Model.getModel(pluralToClassName(relationName));
 			let relationValueModels = null;
-			if('map' in relationValue) {
+			if(relationValue && ('map' in relationValue)) {
 				if(definition.withDefault && isEmpty(relationValue)){
 					relationValue.push({});
 				}
@@ -231,7 +232,7 @@ class Model extends Component{
 	static pagination_props = ['per_page'];
 
 	static get reserved_props(){
-		return [...this.query_props, ...this.pagination_props];
+		return [...this.query_props, ...this.pagination_props, 'order_by', 'sort_by'];
 	}
 
 	static get_non_reserved_props(props){
@@ -281,14 +282,15 @@ class Model extends Component{
 			all: `/api/${this.plural}`,
 			first: `/api/${this.singular}`,
 		}
-		const per_page = this.props.per_page || null;
-		return per_page ? map[q] + `?per_page=${per_page}` : map[q];
+		const qs_object = {};
+		if(this.props.per_page) qs_object.per_page = this.props.per_page;
+		const qs_string = qs.stringify(qs_object);
+		return map[q] + `?${qs_string}`;
 	}
 
 	queryRender(){
 		const q = this.get_query_endpoint();
 		return <Shell url={q} Model={this.constructor} {...this.non_reserved_props} />
-// 		return <div>loading...</div>;
 	}
 
 	/** */

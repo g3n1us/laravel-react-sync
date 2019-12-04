@@ -3,7 +3,7 @@ import Trait from './Trait';
 import Model from '../Model';
 import * as models from '../models/models';
 const pluralize = require('pluralize');
-import { app_get } from '../helpers';
+import { app_get, pluralToClassName } from '../helpers';
 
 
 /**
