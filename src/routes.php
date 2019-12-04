@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Http\Request;
 
-Route::middleware(['web'])->group(function () {
+Route::middleware(['web', 'auth', 'verified', 'enforce_email_domain'])->group(function () {
 
 	Route::get(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@test');
 	Route::post(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@save');
