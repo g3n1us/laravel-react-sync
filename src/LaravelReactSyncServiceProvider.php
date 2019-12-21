@@ -53,7 +53,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
 		        $return = "collect($data)->toJson()";
 
-		        return "<script type=\"text/json\" id=\"$id\"><?php echo {$return}; ?></script>";
+		        return "<script type=\"text/json\" data-react_sync_data=\"true\" id=\"$id\"><?php echo {$return}; ?></script>";
 	        });
 
 

@@ -9,6 +9,8 @@ $randomid = "page_context_" . rand();
 @json_script(get_user_abilities(), "react_sync_user_abilities")
 @json_script(get_schemas(), "react_sync_schemas")
 
+@json_script(auth()->user() ?? to_string_boolean(auth()->user()), "react_sync_user")
+
 
 <script>
 
