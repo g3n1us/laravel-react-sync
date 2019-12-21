@@ -16,7 +16,7 @@ const path = require('path');
 mix.webpackConfig({
     resolve: {
         alias: {
-            laravel_react_sync: path.resolve('./vendor/g3n1us/laravel-react-sync/src/assets/dist/SyncLaravelReactSync.js'),
+            laravel_react_sync: path.resolve('./vendor/g3n1us/laravel-react-sync/src/assets/dist/LaravelReactSync.js'),
             pages: path.resolve('./app/Pages'),
             models: path.resolve('./app/Models'),
             js: path.resolve('./resources/js'),
