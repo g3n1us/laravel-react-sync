@@ -16,16 +16,16 @@ use Illuminate\Support\Facades\Gate;
 class ReactUpdateController extends BaseController
 {
 	use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-	
+
 	protected $model;
-	
+
 	protected $model_ns_string;
-	
+
 	protected $model_classname;
-	
+
 	protected $id;
-	
-	
+
+
     /**
      * Show the profile for the given user.
      *
@@ -43,9 +43,6 @@ class ReactUpdateController extends BaseController
 
 	}
 
-	public function test(ReactRequest $request){
-		dd('sdfsdf');
-	}
 
 	private function boot(ReactRequest $request){
 		$this->model_classname = $model_classname = $request->input('model_classname');
@@ -53,31 +50,31 @@ class ReactUpdateController extends BaseController
 			throw new \Exception("Your request must include the parameter: 'model_classname' which is the string representation of the model name");
 		}
 		$this->model_ns_string = "\\App\\$model_classname";
-		
-		
+
+
 		$this->id = array_get($request, 'id');
 		if($this->id)
 			$this->model = $this->model_ns_string::findOrFail($this->id); // TODO allow for global constraints! maybe a paramater that ignores the constraints??
 		else
 			$this->model = new $this->model_ns_string;
 	}
-	
-	// Delete a model, this is called for a DELETE request	
+
+	// Delete a model, this is called for a DELETE request
 	public function delete(ReactRequest $request){
 		$this->boot($request);
 
 		$this->model->delete();
-		return $this->model_ns_string::find($this->id);		
+		return $this->model_ns_string::find($this->id);
 	}
-	
+
 	// Create a new model, this is called for a PUT request
 	public function create(ReactRequest $request){
 		$this->boot($request);
-		
-		$input_arr = $this->normalizeRequest($request);	
+
+		$input_arr = $this->normalizeRequest($request);
 		return $this->model_ns_string::create($input_arr);
 	}
-	
+
 	public function save(ReactRequest $request){
 		$this->boot($request);
 		$input_arr = $this->normalizeRequest($request);
@@ -87,7 +84,7 @@ class ReactUpdateController extends BaseController
 	        // So find out if it is a relation or a property
 	        // This is a method, so it could be a relation. Handle this scenario...
 	        if(method_exists($this->model, $prop)){
-		        
+
 		        $model_method = $this->model->{$prop}();
 
 		        if( $model_method instanceOf Relation ){
@@ -104,7 +101,7 @@ class ReactUpdateController extends BaseController
 		        else{
 			        throw new \Exception("You are attempting to set a property that is callable, but is not a Relation.");
 		        }
-		        
+
 	        }
 	        else if(array_key_exists($prop, $this->model->getAttributes())){
 		       $this->model->{$prop} = $value;
@@ -115,16 +112,16 @@ class ReactUpdateController extends BaseController
 
 		}
         $this->model->save();
-        		
+
 		return $this->model_ns_string::withoutGlobalScopes()->findOrFail($this->id);
 	}
-    
-	
-	
+
+
+
 	private function resolveBelongsToMany($prop, $value){
 		// Since this is a BelongsToMany relationship, use the sync method to set the exact value to the model.
 		// This will remove any existing related models and set only those with the ids set here.
-		// Let's check first that we have an array of integers 
+		// Let's check first that we have an array of integers
 		if(!is_array($value)){
 			throw new \Exception('The value for a "Many to Many" relation must be an array.');
 		}
@@ -137,10 +134,10 @@ class ReactUpdateController extends BaseController
 		$this->model->{$prop}()->sync($value);
 		return $this->model;
 	}
-	
-	
-	
-	
+
+
+
+
 	private function resolveBelongsTo($prop, $value){
 		if(is_null($value)){
 			$this->model->{$prop}()->dissociate();
@@ -152,42 +149,42 @@ class ReactUpdateController extends BaseController
 		if($value instanceOf Model){
 			throw new \Exception("The model that is being associated cannot be found");
 		}
-		
+
 		$this->model->{$prop}()->associate($value);
 		return $this->model;
 
-	}	
-	
-	
-	
+	}
+
+
+
 	private function resolveHasMany($prop, $value){
   	throw new \Exception("Relationship 'resolveHasMany' is not yet enabled");
 		die('Relationship not yet enabled');
 		// Since this is a hasMany relationship, use the ...
-		// 
-		// See documentation for mass assignment!! This has to be enabled on the model to which you are saving data. 
+		//
+		// See documentation for mass assignment!! This has to be enabled on the model to which you are saving data.
 		if(is_array($value)){ // always gonna be an array isn't it :(
 			// Save all new relations
-			$this->model->{$prop}()->createMany($value);		
+			$this->model->{$prop}()->createMany($value);
 		}
 		else{
-			$this->model->{$prop}()->create($value);		
+			$this->model->{$prop}()->create($value);
 		}
 		$this->model->{$prop}()->sync($value);
 		return $this->model;
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	private function normalizeRequest(ReactRequest $request){
 		// remove fields that should never be editable
 		$input_arr = array_except($request->all(), ['id', 'modelname', 'model_classname', 'created_at', 'updated_at', '_method']);
 
 		// find JSON setters, (key includes ->), this means that it is intended to set a nested value inside a JSON database field.
 		// Then convert it to a standard value to accomodate the weird thing that is happening in React -- see SB!
-		
+
 		$json_setters = array_where($input_arr, function($v, $k){
 			return str_contains($k, '->');
 		});
@@ -198,8 +195,8 @@ class ReactUpdateController extends BaseController
 				$v = $v === "true";
 			return $v;
 		}, $json_setters);
-		
-		
+
+
 		// remove these from $input_arr
 		$input_arr = array_except($input_arr, array_keys($json_setters));
 		// Now, we need to remove the JSON fields that will be set via the setters above.
@@ -208,17 +205,17 @@ class ReactUpdateController extends BaseController
 				return head(explode('->', $k));
 			}, array_keys($json_setters))
 		);
-		
+
 		// Remove the JSON items and put the setters back in
 		$input_arr = array_except($input_arr, $json_setter_keys) + $json_setters;
-		
+
 		// Lastly, return only fillable items
 		$input_arr = array_where($input_arr, function($v, $k){
 			return $this->model->isFillable($k) || $this->model->isFillable(head(explode('->', $k)));
 		});
 
 		return $input_arr;
-	}	
+	}
 }
 
 

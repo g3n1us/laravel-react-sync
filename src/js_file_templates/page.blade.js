@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { MasterComponent } from 'laravel_react_sync';
+import { Page } from 'laravel_react_sync';
 
-class {{$name}} extends MasterComponent {
+class {{$name}} extends Page {
 
     render() {
 		return (<h2>{this.constructor.name}</h2>);

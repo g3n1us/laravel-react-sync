@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Http\Request;
 
-Route::middleware(['web', 'auth', 'verified', 'enforce_email_domain'])->group(function () {
+Route::middleware(config('react_sync.middleware'))->group(function () {
 
 	Route::get(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@test');
 	Route::post(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@save');
@@ -9,6 +9,7 @@ Route::middleware(['web', 'auth', 'verified', 'enforce_email_domain'])->group(fu
 	Route::delete(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@delete');
 
 	$page_prefix = config('react_sync.pages_prefix', '/pages');
+/*
     Route::get("$page_prefix/{page_name}/{prop_one?}/{prop_two?}/{prop_three?}/", function(Request $request, $page_name, $prop_one = null, $pro_two = null, $prop_three = null){
         $page_slug = studly_case($page_name) . 'Page';
         $page_slug = "\\App\\Pages\\$page_slug";
@@ -16,11 +17,29 @@ Route::middleware(['web', 'auth', 'verified', 'enforce_email_domain'])->group(fu
         return $page_class->getResponse();
     })->name('page_route');
 
-    Route::post("$page_prefix/{page_name}/{prop_one?}/{prop_two?}/{prop_three?}/", function(Request $request, $page_name, $prop_one = null, $pro_two = null, $prop_three = null){
+    Route::match(['post', 'patch', 'put', 'delete'], "$page_prefix/{page_name}/{prop_one?}/{prop_two?}/{prop_three?}/", function(Request $request, $page_name, $prop_one = null, $pro_two = null, $prop_three = null){
         $page_slug = studly_case($page_name) . 'Page';
         $page_slug = "\\App\\Pages\\$page_slug";
         $page_class = new $page_slug($request, $page_name, $prop_one, $pro_two, $prop_three);
         return $page_class->form_request($request);
-    })->middleware('auth');
+    });
+*/
+
+    Route::prefix($page_prefix)->group(function() {
+	    Route::any("/{page_name}/{prop_one?}/{prop_two?}/{prop_three?}/", function(Request $request, $page_name, $prop_one = null, $pro_two = null, $prop_three = null){
+	        $page_slug = studly_case($page_name) . 'Page';
+	        $page_slug = "\\App\\Pages\\$page_slug";
+	        $page_class = new $page_slug($request, $page_name, $prop_one, $pro_two, $prop_three);
+	        if(strtolower($request->getMethod()) == 'get'){
+		        return $page_class->getResponse();
+	        }
+	        else{
+		        return $page_class->form_request($request);
+	        }
+
+	    })->name('page_route');
+    });
+
+
 
 });

@@ -30,6 +30,11 @@ mix.babelConfig({
 });
 
 mix.react('src/main.js', `dist/${filename}`)
+	.setPublicPath('dist')
+	.sourceMaps();
+/*
+mix.react('src/main.js', `dist/${filename}`)
 mix.react('src/main_sync.js', `dist/Sync${filename}`)
 	.setPublicPath('dist')
 	.sourceMaps();
+*/

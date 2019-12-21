@@ -29,4 +29,6 @@ return [
 
 	'models' => [],
 
+	'middleware' => ['web'],
+
 ];
