@@ -5,13 +5,13 @@ import Notification, { NotificationRef } from 'laravel_react_sync';
 
 import * as _models from 'models';
 
-import LaravelReactSync, { Model, Pagination, MasterComponent, helpers as react_sync_helpers } from 'laravel_react_sync';
+import LaravelReactSync, { Model, Pagination, Page, helpers as react_sync_helpers } from 'laravel_react_sync';
 
 for(const M in _models) Model.addModel(_models[M]);
 
 const { models } = Model;
 
-class App extends MasterComponent {
+class App extends Page {
 	constructor(props){
 		super(props);
 		const ReactSyncApp = react_sync_helpers.ReactSyncData();

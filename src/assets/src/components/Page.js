@@ -21,11 +21,12 @@ export default class Page extends Component{
 			console.log('x', x);
 		});
 */
-
-		$(this).on('refresh-state', (e) => {
-			console.log('refresh-state !!!', e);
-			this.setState(REACT_SYNC_DATA.page_data);
-		});
+		if($){
+			$(this).on('refresh-state', (e) => {
+				console.log('refresh-state !!!', e);
+				this.setState(REACT_SYNC_DATA.page_data);
+			});
+		}
 	}
 
 }
