@@ -31,4 +31,6 @@ return [
 
 	'middleware' => ['web'],
 
+	'blade_template' => 'react_sync::layout',
+
 ];

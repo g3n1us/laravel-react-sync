@@ -144,6 +144,10 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
 	        $command_instance->info('ReactSync scaffolding installed successfully.');
 	        $command_instance->comment('Please run "npm install && npm run dev" to compile your fresh scaffolding.');
+	        $command_instance->comment('For convenience, you  may add the follow to the scripts section of package.json:');
+	        $command_instance->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
+	        $command_instance->comment('"start": "php artisan write_index_files && php artisan write_schemas && npm run watch"');
+	        $command_instance->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
 		});
 
     }

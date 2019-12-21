@@ -23,7 +23,7 @@ abstract class Page{
         if(is_array($potential_response)){
             $potential_response = collect($potential_response);
         }
-        $template = 'layouts.app';
+        $template = config('react_sync.blade_template', 'react_sync::layout');
         $view_data = collect($this)->all();
         if(is_string($potential_response)){
             $template = $potential_response;
