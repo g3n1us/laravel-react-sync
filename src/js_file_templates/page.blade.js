@@ -3,7 +3,7 @@ import { Page } from 'laravel_react_sync';
 
 class {{$name}} extends Page {
 
-    render() {
+    renderDefault() {
 		return (<h2>{this.constructor.name}</h2>);
     }
 

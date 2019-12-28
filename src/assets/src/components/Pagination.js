@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import qs from 'qs';
 
-const REACT_SYNC_DATA = require('../App').default;
+const REACT_SYNC_DATA = require('../ReactSync').default;
 const str_rand = function(length = 5){
 	var text = "";
 	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

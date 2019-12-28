@@ -7,8 +7,6 @@ export class Event{
 		countries_loading: () => this.current_state,
 	}
 
-
-
 	static on(event_handle, callback){
 		Event.registeredEventHandlers[event_handle] = Event.registeredEventHandlers[event_handle] || [];
 		Event.registeredEventHandlers[event_handle].push(callback);

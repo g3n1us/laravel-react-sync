@@ -5,6 +5,9 @@ use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Ui\UiCommand;
+
+
 
 use Illuminate\Foundation\Console\PresetCommand;
 use Arr;
@@ -29,6 +32,9 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
         );
 
 
+
+
+
         View::creator('*', function ($view) {
 
 			View::share('randomized_var', 'react_sync_random_' . rand() . rand() . '_var');
@@ -41,7 +47,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
 	        Blade::directive('page_context', function ($id = null) {
 	            if(!$id) $id = "page_context";
-	            return '<script type="text/json" id="'.$id.'"><?php echo $$randomized_var->toJson(); if(json_last_error() > 0) throw new \Exception("Data passed to the view cannot be serialized. This may be due to a circular structure being included. Data includes: " . $$randomized_var->keys()->implode(", \n")); ?></script>';
+	            return '<script type="text/json" data-react_sync_data="true" id="'.$id.'"><?php echo $$randomized_var->toJson(); if(json_last_error() > 0) throw new \Exception("Data passed to the view cannot be serialized. This may be due to a circular structure being included. Data includes: " . $$randomized_var->keys()->implode(", \n")); ?></script>';
 	        });
 
 	        Blade::directive('json_script', function($expression){
@@ -100,6 +106,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 			        response($view)->header('Content-Type', 'application/json')->send();
 			        exit();
 				}
+// dd(request()->headers);
 		        if(request()->ajax() && request()->getMethod() === 'GET' && $route_is_ok ){
 					$view->setPath(__DIR__ . '/views/as_json.blade.php');
 			        response($view)->header('Content-Type', 'application/json')->send();
@@ -138,7 +145,13 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
         // Load this into the `preset` Artisan command as the type: `react-sync`
 
 
-        PresetCommand::macro('react-sync', function ($command_instance) {
+		UiCommand::macro('react-sync', function (UiCommand $command) {
+
+			ReactSyncPreset::install($command);
+		});
+
+
+        PresetCommand::macro('XXXreact-sync', function ($command_instance) {
 
 		    ReactSyncPreset::install();
 

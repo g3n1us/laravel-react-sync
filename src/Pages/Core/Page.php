@@ -15,7 +15,7 @@ abstract class Page{
         $this->prop_three = $prop_three;
         $this->page_name_class = snake_case(class_basename($this));
         $this->page_class = class_basename($this);
-        $this->request = $request;
+        $this->request = collect($request);
     }
 
     public function getResponse(){

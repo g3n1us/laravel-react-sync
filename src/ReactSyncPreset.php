@@ -9,6 +9,12 @@ use Illuminate\Foundation\Console\Presets\Preset;
 class ReactSyncPreset extends Preset
 {
 
+	static $include_bootstrap = false;
+
+	static $include_example = false;
+
+	static $start_added = true;
+
     private function getJsPath(){
       return is_dir(resource_path('js')) ? resource_path('js') : resource_path('assets/js');
     }
@@ -18,8 +24,11 @@ class ReactSyncPreset extends Preset
      *
      * @return void
      */
-    public static function install()
+    public static function install($command)
     {
+        static::preflight($command);
+
+
         static::ensurePagesModelsDirectoriesExist();
         static::ensureComponentDirectoryExists();
         static::updatePackages();
@@ -27,9 +36,86 @@ class ReactSyncPreset extends Preset
         static::updateBootstrapping();
         static::updateComponent();
         static::removeNodeModules();
-        \Artisan::call('make:react_model Example');
-        \Artisan::call('make:react_page Example');
+        if(self::$include_example){
+	        \Artisan::call('make:react_model Example');
+	        \Artisan::call('make:react_page Example');
+        }
+
+        static::addStartCommand();
+
+        $command->info('ReactSync scaffolding installed successfully.');
+        $command->comment('Please run "npm install && npm run dev" to compile your fresh scaffolding.');
+        if(self::$start_added){
+	        $command->comment('We\'ve added a "start" command to the scripts section of package.json:');
+	        $command->comment('');
+	        $command->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
+	        $command->comment('');
+	        $command->comment('"start": "php artisan write_index_files && php artisan write_schemas && npm run watch"');
+	        $command->comment('');
+	        $command->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
+	        $command->comment('');
+	        $command->comment('The extra artisan commands will create your index.js files as well as write the JSON model schemas that are used by the application.');
+
+        }
+        else{
+	        $command->comment('For convenience, you may add the follow to the scripts section of package.json:');
+	        $command->comment('');
+	        $command->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
+	        $command->comment('');
+	        $command->comment('"start": "php artisan write_index_files && php artisan write_schemas && npm run watch"');
+	        $command->comment('');
+	        $command->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
+	        $command->comment('');
+	        $command->comment('This will create your index.js files as well as write the JSON model schemas that are used by the application.');
+
+        }
+        $command->comment('');
+        $command->comment('Enjoy!');
+        $command->comment('');
+
     }
+
+
+    public static function preflight($command){
+	    $command->info("You are about to install the Laravel ReactSync preset");
+		if (!$command->confirm('Would you like to continue?', 'yes')) {
+		    exit('Cancelled' . PHP_EOL);
+		}
+
+	    $command->info("The following questions will help get the preset configured for your specific requirements.");
+
+		if ($command->confirm('Would you like to include the Bootstrap framework?', 'yes')) {
+		    self::$include_bootstrap = true;
+		}
+
+		if ($command->confirm('Would you like to include an example Page and Model component to get started?', 'yes')) {
+		    self::$include_example = true;
+		}
+
+
+    }
+
+
+	public static function addStartCommand(){
+        if (! file_exists(base_path('package.json'))) {
+            return;
+        }
+
+        $package_json = json_decode(file_get_contents(base_path('package.json')), true);
+
+		if(!isset($package_json['scripts']['start'])){
+			$package_json['scripts']['start'] = "php artisan write_index_files && php artisan write_schemas && npm run watch";
+		}
+		else{
+			self::$start_added = false;
+		}
+
+        file_put_contents(
+            base_path('package.json'),
+            json_encode($package_json, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT).PHP_EOL
+        );
+	}
+
 
     public static function ensurePagesModelsDirectoriesExist(){
 		if(!is_dir(app_path("Pages"))){
@@ -70,15 +156,22 @@ class ReactSyncPreset extends Preset
      */
     protected static function updatePackageArray(array $packages)
     {
-
-        $js_path = is_dir(resource_path('js')) ? 'resources/js' : 'resources/assets/js';
-        return [
-            '@babel/preset-react' => '^7.7.0',
-            '@babel/plugin-proposal-class-properties' => '^7.7.0',
-            'react' => '^16.9.0',
-            'react-dom' => '^16.9.0',
+		$packages = [
+            '@babel/preset-react' => '^7.7.4',
+            '@babel/plugin-proposal-class-properties' => '^7.7.4',
+            'react' => '^16.12.0',
+            'react-dom' => '^16.12.0',
             'jquery' => '^3.4.1',
         ] + Arr::except($packages, ['vue']);
+
+		if(self::$include_bootstrap){
+			$packages = [
+	            'bootstrap' => '^4.0.0',
+	            'popper.js' => '^1.12'
+			] + $packages;
+		}
+
+		return $packages;
     }
 
     /**
@@ -121,5 +214,9 @@ class ReactSyncPreset extends Preset
     {
         $js_path = is_dir(resource_path('js')) ? 'js' : 'assets/js';
         copy(__DIR__.'/react-sync-stubs/app.js', resource_path("$js_path/app.js"));
+		if(self::$include_bootstrap){
+			copy(__DIR__.'/react-sync-stubs/app.scss', resource_path("sass/app.scss"));
+			copy(__DIR__.'/react-sync-stubs/_variables.scss', resource_path("sass/_variables.scss"));
+		}
     }
 }
