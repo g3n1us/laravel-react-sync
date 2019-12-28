@@ -1,0 +1,67 @@
+<h1>Laravel React Sync</h1>
+<h2>Models/Eloquent.js</h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+</ul>
+<p><a name="introduction"></a>
+Models in LRS function similar to what you are familiar with. 
+Here is an example to better explain:</p>
+<p>You can and should create models using the built in LRS artisan command:</p>
+<pre><code>php artisan make:react_model</code></pre>
+<p>You will be interactively asked for a model name and both a JavaScript and PHP model will be created in <code>app/Models</code></p>
+<p>Using the model name <code>Cheetah</code> you would, have:
+<code>app/Models/Cheetah.js</code> </p>
+<pre><code>import React, { Component } from 'react';
+import { Model } from 'laravel_react_sync';
+/**
+@extends Model
+*/
+class Cheetah extends Model{
+
+    static get defaultProps(){
+        return {
+            ...Model.defaultProps,
+            // name: 'value',
+        };
+    }
+
+
+    /** */
+    static get editable_props(){
+        return [
+            //
+        ];
+    }
+
+    renderDefault(){
+        return (&lt;h2&gt;{this.constructor.name}&lt;/h2&gt;);
+    }
+
+}
+
+export default Cheetah;</code></pre>
+<p>and
+<code>app/Models/Cheetah.php</code></p>
+<pre><code>&lt;?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Cheetah extends Model
+{
+    //
+}
+</code></pre>
+<p>Your JS component extends the standard React component. It allows you to save back to the database, receive updates when the application state changes and query similar to the way Eloquent works on the Laravel side.</p>
+<p>Here are some examples of querying:</p>
+<pre><code>// Note in all of the following, the `renderDefault` method will be rendered
+// Retrieves a cheetah model with the id of 4
+&lt;Cheetah find={4} /&gt;
+
+// Returns a paginated array of cheetahs:
+&lt;Pagination /&gt;
+&lt;Cheetah all /&gt;
+
+// Cheetahs with few spots
+&lt;Cheetah where={['spots', '&lt;', 30]} /&gt;</code></pre>

@@ -31,10 +31,6 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
             __DIR__.'/config.php', 'react_sync'
         );
 
-
-
-
-
         View::creator('*', function ($view) {
 
 			View::share('randomized_var', 'react_sync_random_' . rand() . rand() . '_var');
@@ -106,7 +102,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 			        response($view)->header('Content-Type', 'application/json')->send();
 			        exit();
 				}
-// dd(request()->headers);
+
 		        if(request()->ajax() && request()->getMethod() === 'GET' && $route_is_ok ){
 					$view->setPath(__DIR__ . '/views/as_json.blade.php');
 			        response($view)->header('Content-Type', 'application/json')->send();
@@ -137,37 +133,18 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 		if(!file_exists(config_path('react_sync.php'))){
 			$publishes[__DIR__.'/config.php'] = config_path('react_sync.php');
 		}
+/*
 		if(!is_dir($this->getJsPath() . '/vendor/laravel-react-sync')){
 			$publishes[__DIR__.'/assets/dist'] = $this->getJsPath() . '/vendor/laravel-react-sync';
 		}
-        $this->publishes($publishes);
+*/
+        $this->publishes($publishes, 'laravel-react-sync');
 
         // Load this into the `preset` Artisan command as the type: `react-sync`
 
 
 		UiCommand::macro('react-sync', function (UiCommand $command) {
-
 			ReactSyncPreset::install($command);
-		});
-
-
-        PresetCommand::macro('XXXreact-sync', function ($command_instance) {
-
-		    ReactSyncPreset::install();
-
-	        $command_instance->info('ReactSync scaffolding installed successfully.');
-	        $command_instance->comment('Please run "npm install && npm run dev" to compile your fresh scaffolding.');
-	        $command_instance->comment('For convenience, you  may add the follow to the scripts section of package.json:');
-	        $command_instance->comment('');
-	        $command_instance->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
-	        $command_instance->comment('');
-	        $command_instance->comment('"start": "php artisan write_index_files && php artisan write_schemas && npm run watch"');
-	        $command_instance->comment('');
-	        $command_instance->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
-	        $command_instance->comment('');
-	        $command_instance->comment('This will create your index.js files as well as write the JSON model schemas that are used by the application.');
-	        $command_instance->comment('Enjoy! 🍀');
-	        $command_instance->comment('');
 		});
 
     }

@@ -43,7 +43,6 @@ export default class Page extends Component{
 
 	renderDefault(){
 		const P = this.getPageComponentFromPath();
-		console.log(this);
 		return (
 			<PageShell Page={P} />
 		)
@@ -52,6 +51,14 @@ export default class Page extends Component{
 	get is_query(){
 		return !(Object.keys(this.props).length);
 	}
+
+	queryRender(){
+		const P = this.getPageComponentFromPath();
+		return (
+			<PageShell Page={P} />
+		)
+	}
+
 
 }
 

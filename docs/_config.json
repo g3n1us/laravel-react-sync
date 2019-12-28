@@ -1,0 +1,10 @@
+{
+    "default": "home",
+    "pages": [
+        "home",
+        "configuration",
+        "models",
+        "pages",
+        "authentication"
+    ]
+}
