@@ -64,7 +64,10 @@ class Queryable extends Trait{
 		return <>{els}</>
 	}
 
-	static firstWhere(additional_props = {}){
+	static firstWhere(a, b){
+
+        return null;
+
 		let ThisModel = this;
 		let props = {...this.props, ...additional_props};
 		return <ThisModel refresher={this.refresher} key={`${this.plural}${this.props.id}`} {...props} />;

@@ -21,6 +21,7 @@ export default class Page extends Component{
 
 	componentDidMount(){
 		on('refresh-state', (e) => {
+    		debugger;
 			this.setState(REACT_SYNC_DATA.page_data);
 		});
 	}
@@ -36,7 +37,12 @@ export default class Page extends Component{
 	}
 
 	getPageComponentFromPath(path = window.location.pathname){
-		const possiblePage = path.replace((new ReactSync).config.pages_prefix + '/', '');
+    	if(path.slice(-1) != '/') path = `${path}/`;
+    	const prefix = (new ReactSync).config.pages_prefix;
+    	const r = new RegExp(`\\${prefix}\\/(.*?)\\/.*?$`);
+    	const matches = path.match(r);
+    	const possiblePage = matches && matches.length > 1 && matches[1];
+// 		const possiblePage = path.replace(prefix + '/', '');
 		const possiblePageName = studly_case(possiblePage) + 'Page';
 		return ReactSync.pages[possiblePageName];
 	}
