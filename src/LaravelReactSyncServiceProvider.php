@@ -5,6 +5,9 @@ use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Ui\UiCommand;
+
+
 
 use Illuminate\Foundation\Console\PresetCommand;
 use Arr;
@@ -28,7 +31,6 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
             __DIR__.'/config.php', 'react_sync'
         );
 
-
         View::creator('*', function ($view) {
 
 			View::share('randomized_var', 'react_sync_random_' . rand() . rand() . '_var');
@@ -41,7 +43,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
 	        Blade::directive('page_context', function ($id = null) {
 	            if(!$id) $id = "page_context";
-	            return '<script type="text/json" id="'.$id.'"><?php echo $$randomized_var->toJson(); if(json_last_error() > 0) throw new \Exception("Data passed to the view cannot be serialized. This may be due to a circular structure being included. Data includes: " . $$randomized_var->keys()->implode(", \n")); ?></script>';
+	            return '<script type="text/json" data-react_sync_data="true" id="'.$id.'"><?php echo $$randomized_var->toJson(); if(json_last_error() > 0) throw new \Exception("Data passed to the view cannot be serialized. This may be due to a circular structure being included. Data includes: " . $$randomized_var->keys()->implode(", \n")); ?></script>';
 	        });
 
 	        Blade::directive('json_script', function($expression){
@@ -53,7 +55,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
 		        $return = "collect($data)->toJson()";
 
-		        return "<script type=\"text/json\" id=\"$id\"><?php echo {$return}; ?></script>";
+		        return "<script type=\"text/json\" data-react_sync_data=\"true\" id=\"$id\"><?php echo {$return}; ?></script>";
 	        });
 
 
@@ -100,6 +102,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 			        response($view)->header('Content-Type', 'application/json')->send();
 			        exit();
 				}
+
 		        if(request()->ajax() && request()->getMethod() === 'GET' && $route_is_ok ){
 					$view->setPath(__DIR__ . '/views/as_json.blade.php');
 			        response($view)->header('Content-Type', 'application/json')->send();
@@ -130,20 +133,18 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 		if(!file_exists(config_path('react_sync.php'))){
 			$publishes[__DIR__.'/config.php'] = config_path('react_sync.php');
 		}
+/*
 		if(!is_dir($this->getJsPath() . '/vendor/laravel-react-sync')){
 			$publishes[__DIR__.'/assets/dist'] = $this->getJsPath() . '/vendor/laravel-react-sync';
 		}
-        $this->publishes($publishes);
+*/
+        $this->publishes($publishes, 'laravel-react-sync');
 
         // Load this into the `preset` Artisan command as the type: `react-sync`
 
 
-        PresetCommand::macro('react-sync', function ($command_instance) {
-
-		    ReactSyncPreset::install();
-
-	        $command_instance->info('ReactSync scaffolding installed successfully.');
-	        $command_instance->comment('Please run "npm install && npm run dev" to compile your fresh scaffolding.');
+		UiCommand::macro('react-sync', function (UiCommand $command) {
+			ReactSyncPreset::install($command);
 		});
 
     }

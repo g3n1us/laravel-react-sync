@@ -3,3 +3,4 @@ __TRASH
 _TRASH
 node_modules
 /vendor
+composer.lock

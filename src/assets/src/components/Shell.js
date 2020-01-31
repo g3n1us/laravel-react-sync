@@ -19,8 +19,7 @@ class Shell extends Component{
 	static cached = {}
 
 	refresh(){
-		const { Model } = this.props;
-		const { url } = this.props;
+		let { Model, url } = this.props;
 		let fromcache;
 		this.setState({children: null});
 		if(!this.constructor.cached[url]){
@@ -42,6 +41,8 @@ class Shell extends Component{
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot){
+		if(!!this.props.Page) return;
+
 		if(prevProps.url != this.props.url){
 			this.refresh();
 		}
@@ -50,9 +51,11 @@ class Shell extends Component{
 		}
 	}
 
+
 	render(){
 		if(!this.state.children) return null;
 		const { Model, url, then, ...remainder } = this.props;
+
 		const { children } = this.state;
 
 		// determine if we have received a paginator, collection, or single model

@@ -1,5 +1,20 @@
 <?php
 
+
+	if(!function_exists('client_side_safe_request')){
+		function client_side_safe_request(){
+			$request = request();
+			return collect([
+				'json' => $request->json,
+				'headers' => $request->headers->all(),
+				'pathInfo' => $request->getPathInfo(),
+				'requestUri' => $request->getRequestUri(),
+				'request' => $request->request->all(),
+				'query' => $request->query->all(),
+			]);
+		}
+	}
+
 	if(!function_exists('current_route')){
 		function current_route(){
 			return collect(\Route::current())

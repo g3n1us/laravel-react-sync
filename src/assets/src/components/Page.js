@@ -1,31 +1,67 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import Event from '../Event';
+import axios from 'axios';
+const { on } = Event;
+import PageShell from './PageShell';
 
-const REACT_SYNC_DATA = require('../App').default;
+import ReactSync from '../ReactSync';
+
+import Eloquent from './traits/Eloquent';
+
+import { studly_case } from '../helpers';
+
 
 export default class Page extends Component{
 	constructor(props){
 		super(props);
-		this.app = REACT_SYNC_DATA;
-		this.state = this.app.page_data;
-		// this.route_model_data = Model.extractInstancesFromUrl();
-		REACT_SYNC_DATA.components.push(this);
+		const { components, page_data, pages } = new ReactSync;
+		components.push(this);
+		ReactSync.pages[this.constructor.name] = this.constructor;
 	}
 
-
-
 	componentDidMount(){
-/*
-		const from_url = Model.extractInstancesFromUrl();
-		Model.resolveInstancesFromUrl(from_url).then(x => {
-			console.log('x', x);
-		});
-*/
-
-		$(this).on('refresh-state', (e) => {
-			console.log('refresh-state !!!', e);
+		on('refresh-state', (e) => {
 			this.setState(REACT_SYNC_DATA.page_data);
 		});
 	}
 
+	refresh(callback = () => {}){
+		const request_options = {
+			headers: {'X-IsAjax': 'true', 'X-Requested-With': 'XMLHttpRequest'},
+		}
+		return axios.get(window.location.href, request_options).then((new_page_data) => {
+			const AppRef = ReactSync.appRef.current;
+			(AppRef || this).setState(new_page_data.data, callback);
+		});
+	}
+
+	getPageComponentFromPath(path = window.location.pathname){
+		const possiblePage = path.replace((new ReactSync).config.pages_prefix + '/', '');
+		const possiblePageName = studly_case(possiblePage) + 'Page';
+		return ReactSync.pages[possiblePageName];
+	}
+
+	renderDefault(){
+		const P = this.getPageComponentFromPath();
+		return (
+			<PageShell Page={P} />
+		)
+	}
+
+	get is_query(){
+		return !(Object.keys(this.props).length);
+	}
+
+	queryRender(){
+		const P = this.getPageComponentFromPath();
+		return (
+			<PageShell Page={P} />
+		)
+	}
+
+
 }
+
+window.Page = Page;
+
+Eloquent.applyTo(Page);

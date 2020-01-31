@@ -1,27 +1,32 @@
 
 /**
  Using Traits:
- Traits are a way to apply a similar set of properties to another object. This of it as though, the properties of the trait class are copied and pasted into the class on which they are applied. In order to use this, you must add two things to your parent class.
+ Traits are a way to apply a similar set of properties to another object. This of it as though, the properties of the trait class are copied and pasted into the class on which they are applied.
 
- 1. Add the following to the `constructor` method:
+ Usage:
 
-@example
- this.constructor.instance_methods_from_traits.map(method => {
-   Object.defineProperty(this, method.key, method.descriptor);
- });
+ ```
+//  create a class that extends `Trait`
 
+class ExampleTrait extends Trait{
+	constructor(TargetClass){
+		super(TargetClass);
+	}
 
+	exampleMethod(){
+		// this will be applied to TargetClass
+	}
+}
 
- 2. Add the following method:
+// in TargetClass file
 
-@example
- static applyTrait(trait){
-     this.instance_methods_from_traits = [...(this.instance_methods_from_traits || []), ...(new trait(this))];
- }
+MyMainClass{
+	// ...
+}
 
+ExampleTrait.applyTo(MyMainClass);
 
- Lastly, call `applyTrait` after your class declaration with your trait class as the functions argument
-@interface
+```
 */
 
 
@@ -42,9 +47,12 @@ class Trait{
 			};
 		}
 
-
 		const property_filter = (d) => {
-			return !d.obj.constructor.hasOwnProperty(d.key) && d.key !== 'constructor';
+			if(d.key === 'constructor') return false;
+			if((d.key in TargetClass.prototype)){
+				return false;
+			}
+			return !d.obj.constructor.hasOwnProperty(d.key);
 		}
 
 		const extract_methods = () => {
@@ -62,18 +70,16 @@ class Trait{
 		let {static_methods, instance_methods} = extract_methods();
 
 		static_methods.map(method => {
-
 			Object.defineProperty(TargetClass, method.key, method.descriptor);
-
 		});
 
 		instance_methods.map(method => {
-
 			Object.defineProperty(TargetClass.prototype, method.key, method.descriptor);
-
 		});
+	}
 
-		return instance_methods;
+	static applyTo(Obj){
+		new this(Obj);
 	}
 }
 

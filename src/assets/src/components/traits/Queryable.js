@@ -34,15 +34,6 @@ class Queryable extends Trait{
 		let query = [].slice.call(arguments);
 
 		this.refresher = React.createRef();
-		/*
-		return <RefreshableAsync ref={this.refresher} refresh_path={`/api/${this.plural}/`} then={d => {
-		let els = d.data.map((e) => {
-		let ThisModel = this;
-		return <ThisModel {...e} key={`_${this.plural}_${e.id}`} />
-		});
-		return <div>{els}</div>
-		}} />
-		*/
 	}
 
 
@@ -145,6 +136,7 @@ class Queryable extends Trait{
 	 * Create a new model instance and store it to the database
 	 * @todo complete this method
 	 */
+
 /*
 	static create_static(initialProps = {}){
 		return axios.post(`/${this.plural}`, initialProps)

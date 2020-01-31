@@ -4,6 +4,8 @@ import * as helpers from './helpers';
 
 import * as extras from './extras';
 
+import ReactSync from './ReactSync';
+
 const LaravelReactSync = {
 	...extras,
 	helpers,
@@ -13,6 +15,7 @@ const LaravelReactSync = {
 	Field,
 	Form,
 	Notification,
+	ReactSync
 };
 
 // require('./components/Notification');
