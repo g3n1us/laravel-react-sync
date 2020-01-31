@@ -26,7 +26,7 @@ export default class ReactSync{
 		});
 
 		if(this.user){
-			user.can = (ability) => this.user_can[ability] === true;
+			this.user.can = (ability) => this.user_can[ability] === true;
 		}
 	}
 
