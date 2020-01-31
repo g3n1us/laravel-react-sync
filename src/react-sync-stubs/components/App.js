@@ -11,7 +11,7 @@ for(const M in _models) Model.addModel(_models[M]);
 
 const { models } = Model;
 
-class App extends MasterComponent {
+class App extends Component {
 	constructor(props){
 		super(props);
 		const ReactSyncApp = react_sync_helpers.ReactSyncData();
