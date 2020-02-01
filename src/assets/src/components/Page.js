@@ -16,12 +16,12 @@ export default class Page extends Component{
 		super(props);
 		const { components, page_data, pages } = new ReactSync;
 		components.push(this);
+
 		ReactSync.pages[this.constructor.name] = this.constructor;
 	}
 
 	componentDidMount(){
 		on('refresh-state', (e) => {
-    		debugger;
 			this.setState(REACT_SYNC_DATA.page_data);
 		});
 	}
@@ -48,6 +48,7 @@ export default class Page extends Component{
 	}
 
 	renderDefault(){
+		console.log('Page.js renderDefault is called');
 		const P = this.getPageComponentFromPath();
 		return (
 			<PageShell Page={P} />

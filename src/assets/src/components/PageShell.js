@@ -19,15 +19,13 @@ class PageShell extends Component{
 
 
 	componentDidMount(){
-		const { Page } = this.props;
 		const request_options = {
 			headers: {'X-IsAjax': 'true', 'X-Requested-With': 'XMLHttpRequest'},
 		}
-		axios.get(window.location.href, request_options).then((new_page_data) => {
 
+		axios.get(window.location.href, request_options).then((new_page_data) => {
 			this.setState({children: new_page_data.data});
 		});
-
 	}
 
 

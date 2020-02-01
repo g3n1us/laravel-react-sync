@@ -98,11 +98,6 @@ export default class Eloquent extends Trait{
 		return this.renderDefault();
 	}
 
-/*
-	renderDefault(){
-		return (<div><code>{this.constructor.name} | {this.props.id}</code></div>);
-	}
-*/
 
 	renderDebug(){
 		return (<div><code>{this.constructor.name} | {this.props.id}</code></div>);

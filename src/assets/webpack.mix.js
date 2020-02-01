@@ -4,7 +4,8 @@ const path = require('path');
 const fs = require('fs');
 
 const filename_base = 'LaravelReactSync';
-const extension = process.env.NODE_ENV == 'production' ? '.min.js' : '.js';
+// const extension = process.env.NODE_ENV == 'production' ? '.min.js' : '.js';
+const extension = '.js';
 const filename = filename_base + extension;
 
 
