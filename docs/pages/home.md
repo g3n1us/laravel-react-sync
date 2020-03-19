@@ -1,3 +1,9 @@
+---
+layout: default
+title: Home
+permalink: /
+---
+
 # Laravel React Sync
 
 - [Introduction](#introduction)
@@ -40,8 +46,7 @@ php artisan vendor:publish --tag="laravel-react-sync"
 The library uses g3n1us/model-api as well, so if you would like to further configure this library, you may publish it's configuration as well
 
 ```
-php artisan vendor:publish --provider="G3n1us\ModelApi\ServiceProvider\
-"
+php artisan vendor:publish --provider="G3n1us\ModelApi\ServiceProvider"
 ```
 
 You are now set up and ready to go!

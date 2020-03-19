@@ -1,3 +1,9 @@
+---
+layout: default
+title: Models
+permalink: /models/
+---
+
 # Laravel React Sync
 
 ## Models/Eloquent.js
