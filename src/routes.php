@@ -13,8 +13,10 @@ Route::middleware(config('react_sync.middleware'))->group(function () {
     Route::prefix($page_prefix)->group(function() {
 	    Route::any("/{page_name}/{prop_one?}/{prop_two?}/{prop_three?}/", function(Request $request, $page_name, $prop_one = null, $pro_two = null, $prop_three = null){
 	        $page_slug = studly_case($page_name) . 'Page';
-	        $page_slug = "\\App\\Pages\\$page_slug";
+	        $namespace = str_start(config('react_sync.namespace'), '\\');
+	        $page_slug = "$namespace\\Pages\\$page_slug";
 	        $page_class = new $page_slug($request, $page_name, $prop_one, $pro_two, $prop_three);
+
 	        if(strtolower($request->getMethod()) == 'get'){
 		        return $page_class->getResponse();
 	        }
@@ -24,7 +26,4 @@ Route::middleware(config('react_sync.middleware'))->group(function () {
 
 	    })->name('page_route');
     });
-
-
-
 });

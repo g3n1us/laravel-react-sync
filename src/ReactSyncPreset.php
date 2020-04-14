@@ -16,7 +16,7 @@ class ReactSyncPreset extends Preset
 	static $start_added = true;
 
     private function getJsPath(){
-      return is_dir(resource_path('js')) ? resource_path('js') : resource_path('assets/js');
+      return is_dir(Paths::resource_path('js')) ? Paths::resource_path('js') : Paths::resource_path('assets/js');
     }
 
     /**
@@ -97,11 +97,11 @@ class ReactSyncPreset extends Preset
 
 
 	public static function addStartCommand(){
-        if (! file_exists(base_path('package.json'))) {
+        if (! file_exists(Paths::base_path('package.json'))) {
             return;
         }
 
-        $package_json = json_decode(file_get_contents(base_path('package.json')), true);
+        $package_json = json_decode(file_get_contents(Paths::base_path('package.json')), true);
 
 		if(!isset($package_json['scripts']['start'])){
 			$package_json['scripts']['start'] = "php artisan write_index_files && php artisan write_schemas && npm run watch";
@@ -111,39 +111,39 @@ class ReactSyncPreset extends Preset
 		}
 
         file_put_contents(
-            base_path('package.json'),
+            Paths::base_path('package.json'),
             json_encode($package_json, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT).PHP_EOL
         );
 	}
 
 
     public static function ensurePagesModelsDirectoriesExist(){
-		if(!is_dir(app_path("Pages"))){
-			mkdir(app_path("Pages"));
+		if(!is_dir(Paths::app_path("Pages"))){
+			mkdir(Paths::app_path("Pages"));
 		}
 
-		if(!is_file(app_path("Pages/.index"))){
-			file_put_contents(app_path("Pages/.index"), '');
+		if(!is_file(Paths::app_path("Pages/.index"))){
+			file_put_contents(Paths::app_path("Pages/.index"), '');
 		}
 
-		if(!is_dir(app_path("Models"))){
-			mkdir(app_path("Models"));
+		if(!is_dir(Paths::app_path("Models"))){
+			mkdir(Paths::app_path("Models"));
 		}
 
-		if(!is_file(app_path("Models/.index"))){
-			file_put_contents(app_path("Models/.index"), '');
+		if(!is_file(Paths::app_path("Models/.index"))){
+			file_put_contents(Paths::app_path("Models/.index"), '');
 		}
 
-		if(!is_dir(resource_path("js/components"))){
-			mkdir(resource_path("js/components"));
+		if(!is_dir(Paths::resource_path("js/components"))){
+			mkdir(Paths::resource_path("js/components"));
 		}
 
-		if(!is_file(resource_path("js/components/.index"))){
-			file_put_contents(resource_path("js/components/.index"), '');
+		if(!is_file(Paths::resource_path("js/components/.index"))){
+			file_put_contents(Paths::resource_path("js/components/.index"), '');
 		}
 
-		if(!is_file(app_path("Models/models.json"))){
-			file_put_contents(app_path("Models/models.json"), json_encode([]));
+		if(!is_file(Paths::app_path("Models/models.json"))){
+			file_put_contents(Paths::app_path("Models/models.json"), json_encode([]));
 		}
 
     }
@@ -181,8 +181,8 @@ class ReactSyncPreset extends Preset
      */
     protected static function updateWebpackConfiguration()
     {
-        $js_path = is_dir(resource_path('js')) ? 'js' : 'assets/js';
-        copy(__DIR__.'/react-sync-stubs/webpack.mix.js', base_path('webpack.mix.js'));
+        $js_path = is_dir(Paths::resource_path('js')) ? 'js' : 'assets/js';
+        copy(__DIR__.'/react-sync-stubs/webpack.mix.js', Paths::base_path('webpack.mix.js'));
     }
 
     /**
@@ -192,15 +192,15 @@ class ReactSyncPreset extends Preset
      */
     protected static function updateComponent()
     {
-        $js_path = is_dir(resource_path('js')) ? 'js' : 'assets/js';
+        $js_path = is_dir(Paths::resource_path('js')) ? 'js' : 'assets/js';
 
         (new Filesystem)->delete(
-            resource_path("$js_path/components/ExampleComponent.vue")
+            Paths::resource_path("$js_path/components/ExampleComponent.vue")
         );
 
         copy(
             __DIR__.'/react-sync-stubs/components/App.js',
-            resource_path("$js_path/components/App.js")
+            Paths::resource_path("$js_path/components/App.js")
         );
 
     }
@@ -212,11 +212,11 @@ class ReactSyncPreset extends Preset
      */
     protected static function updateBootstrapping()
     {
-        $js_path = is_dir(resource_path('js')) ? 'js' : 'assets/js';
-        copy(__DIR__.'/react-sync-stubs/app.js', resource_path("$js_path/app.js"));
+        $js_path = is_dir(Paths::resource_path('js')) ? 'js' : 'assets/js';
+        copy(__DIR__.'/react-sync-stubs/app.js', Paths::resource_path("$js_path/app.js"));
 		if(self::$include_bootstrap){
-			copy(__DIR__.'/react-sync-stubs/app.scss', resource_path("sass/app.scss"));
-			copy(__DIR__.'/react-sync-stubs/_variables.scss', resource_path("sass/_variables.scss"));
+			copy(__DIR__.'/react-sync-stubs/app.scss', Paths::resource_path("sass/app.scss"));
+			copy(__DIR__.'/react-sync-stubs/_variables.scss', Paths::resource_path("sass/_variables.scss"));
 		}
     }
 }

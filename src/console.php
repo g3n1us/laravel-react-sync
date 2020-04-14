@@ -2,19 +2,33 @@
 
 use Illuminate\Filesystem\Filesystem;
 use G3n1us\LaravelReactSync\ReactSyncPreset;
+use G3n1us\LaravelReactSync\Paths;
+
 
 Artisan::command('make:react_model {name?}', function($name = null){
 	ReactSyncPreset::ensurePagesModelsDirectoriesExist();
 	if($name === null){
 		$name = $this->ask('What is your name of the model?');
 	}
-	Artisan::call("make:model -m -f Models/$name");
+    $namespace = config('react_sync.namespace');
+    $name_plural = str_plural($name);
+    $tablename = str_plural(snake_case($name));
+	$model_tpl = file_get_contents(__DIR__.'/react-sync-stubs/model.stub');
+	$rendered_model = str_replace('{{ namespace }}', "$namespace\\Models", $model_tpl);
+	$rendered_model = str_replace('{{ class }}', $name, $rendered_model);
+	file_put_contents(Paths::app_path("Models/$name.php"), $rendered_model);
+
+	$migration_tpl = file_get_contents(__DIR__.'/react-sync-stubs/migration.create.stub');
+	
+	$rendered_migration = str_replace('{{ table }}', $tablename, $migration_tpl);
+	$rendered_migration = str_replace('{{ class }}', "Create{$name_plural}Table", $rendered_migration);
+	$migration_filename = implode('_', [\Carbon\Carbon::now()->format('Y_m_d_hms'), 'create', $tablename, 'table']) . '.php';
+	file_put_contents(Paths::database_path("migrations/$migration_filename"), $rendered_migration);
+	
+// 	Artisan::call("make:model -m -f $path");
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/model.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
-	file_put_contents(app_path("Models/$name.js"), $rendered);
-	$current_models = json_decode(file_get_contents(app_path("Models/models.json")), true);
-	$current_models[] = $name;
-	file_put_contents(app_path("Models/models.json"), json_encode($current_models));
+	file_put_contents(Paths::app_path("Models/$name.js"), $rendered);
 	Artisan::call('write_index_files');
 	$this->comment("Model: $name created");
 });
@@ -32,11 +46,11 @@ Artisan::command('make:react_page {name?}', function($name = null){
 	$name = studly_case($name) . 'Page';
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
-	file_put_contents(app_path("Pages/$name.js"), $rendered);
+	file_put_contents(Paths::app_path("Pages/$name.js"), $rendered);
 
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page_php.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
-	file_put_contents(app_path("Pages/$name.php"), $rendered);
+	file_put_contents(Paths::app_path("Pages/$name.php"), $rendered);
 
 	Artisan::call('write_index_files');
 	$this->comment("Page: $name created");
@@ -46,7 +60,7 @@ Artisan::command('make:react_page {name?}', function($name = null){
 
 if(!function_exists('get_schemas')){
 	function get_schemas(){
-	    $models = json_decode(file_get_contents(app_path("Models/models.json")), true);
+	    $models = json_decode(file_get_contents(Paths::app_path("Models/models.json")), true);
 	    $schemas = [];
 	    foreach($models as $model){
 	        $class = "\App\\Models\\$model";
@@ -59,7 +73,7 @@ if(!function_exists('get_schemas')){
 
 
 Artisan::command('write_schemas', function () {
-    $path = resource_path('js/schema.js');
+    $path = Paths::resource_path('js/schema.js');
     $file_contents = get_schemas();
     $file_contents = "export default $file_contents;\n";
     $filecomments = "/****************************************************
@@ -75,53 +89,72 @@ Artisan::command('write_schemas', function () {
 })->describe('Write out schemas to js directory');
 
 
-
-function write_index_files($_this){
-    // put a file called .index in a directory you want to index
-    // this runs recursively
-
-    $dir_start = base_path();
-    $fs = new Filesystem;
-    $dirs = collect($fs->allFiles($dir_start))
-        ->map(function($f){ return $f->getPath(); })
-        ->unique()
-        ->filter(function($dir) use($fs){
-            return $fs->exists("$dir/.index");
-        });
-    $dirs->each(function($dir) use($fs, $_this){
-        $filenames = collect($fs->files($dir));
-        $names = $filenames->map(function($file)use ($fs){
-            $path = $file->getPathName();
-            $name = $fs->name($path);
-            if($name != 'index' && preg_match('/^js.?$/', $fs->extension($path))){
-                return $name;
+if(!function_exists('write_index_files')){
+	function write_index_files($_this){
+	    // put a file called .index in a directory you want to index
+	    // this runs recursively
+	
+	    $dir_start = Paths::base_path();
+	    $fs = new Filesystem;
+	    $dirs = collect($fs->allFiles($dir_start))
+	        ->map(function($f){ return $f->getPath(); })
+	        ->unique()
+	        ->filter(function($dir) use($fs){
+	            return $fs->exists("$dir/.index");
+	        });
+	    $dirs->each(function($dir) use($fs, $_this){
+	        $filenames = collect($fs->files($dir));
+	        $names = $filenames->map(function($file)use ($fs){
+	            $path = $file->getPathName();
+	            $name = $fs->name($path);
+	            if($name != 'index' && preg_match('/^js.?$/', $fs->extension($path))){
+	                return $name;
+	            }
+	            return null;
+	        })->filter();
+	        $imports = $names->map(function($name){
+	            return "import $name from './$name';";
+	        })->implode("\n");
+	        $exports = $names->implode(", ");
+	//
+	$filecomments = "/****************************************************
+	 *
+	 * THIS FILE IS AUTOMATICALLY GENERATED. DO NOT EDIT.
+	 *
+	 ****************************************************
+	 */
+	 ";
+	
+	$contents = "
+	$filecomments
+	$imports
+	
+	export { $exports };
+	";
+	        $fs->put("$dir/index.js", trim($contents) . "\n");
+	        $_this->comment("\n index.js written to $dir \n\n");
+	    });
+	    
+    //update models.json
+    $possible_models = collect($fs->allFiles(Paths::app_path('Models')))
+        ->map(function($f) use($fs){
+	        if($f->getType() != 'file') return null;
+	        if($f->getExtension() != 'js') return null;
+	        $filename = $f->getFileName();
+	        $classname = preg_replace('/^(.*?)\.js$/', '$1', $filename);
+            if($fs->exists(Paths::app_path("Models/$classname.php"))){
+	            return $classname;
             }
             return null;
-        })->filter();
-        $imports = $names->map(function($name){
-            return "import $name from './$name';";
-        })->implode("\n");
-        $exports = $names->implode(", ");
-//
-$filecomments = "/****************************************************
- *
- * THIS FILE IS AUTOMATICALLY GENERATED. DO NOT EDIT.
- *
- ****************************************************
- */
- ";
-
-$contents = "
-$filecomments
-$imports
-
-export { $exports };
-";
-        $fs->put("$dir/index.js", trim($contents) . "\n");
-        $_this->comment("\n index.js written to $dir \n\n");
-    });
-
+        })
+        ->filter()
+        ->unique()
+        ->values();
+    $fs->put(Paths::app_path("Models/models.json"), $possible_models->toJSON());
+	$_this->comment("\n models.json updated in ".Paths::app_path("Models")." \n\n");
+	}
 }
+
 
 Artisan::command('write_index_files', function(){
     // put a file called .index in a directory you want to index

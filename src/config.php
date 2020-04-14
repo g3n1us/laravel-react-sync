@@ -19,6 +19,8 @@ return [
 
 	'pages_prefix' => env('REACT_SYNC_PAGES_PREFIX', '/pages'),
 
+	'namespace' => env('REACT_SYNC_NAMESPACE', 'App'),
+
 	'jsonable_controllers' => [
 
 	],
