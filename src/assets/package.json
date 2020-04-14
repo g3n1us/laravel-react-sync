@@ -1,8 +1,8 @@
 {
-	"name": "laravel-react-sync",
+	"name": "laravel_react_sync",
 	"version": "1.0.0",
 	"description": "A companion to the Laravel React Sync package for Laravel",
-	"main": "LaravelReactSync.js",
+	"main": "dist/LaravelReactSync.js",
 	"scripts": {
 		"dev": "npm run development",
 		"development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",

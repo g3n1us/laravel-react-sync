@@ -16,6 +16,7 @@ export default class Page extends Component{
 		super(props);
 		const { components, page_data, pages } = new ReactSync;
 		components.push(this);
+
 		ReactSync.pages[this.constructor.name] = this.constructor;
 	}
 
@@ -36,12 +37,18 @@ export default class Page extends Component{
 	}
 
 	getPageComponentFromPath(path = window.location.pathname){
-		const possiblePage = path.replace((new ReactSync).config.pages_prefix + '/', '');
+    	if(path.slice(-1) != '/') path = `${path}/`;
+    	const prefix = (new ReactSync).config.pages_prefix;
+    	const r = new RegExp(`\\${prefix}\\/(.*?)\\/.*?$`);
+    	const matches = path.match(r);
+    	const possiblePage = matches && matches.length > 1 && matches[1];
+// 		const possiblePage = path.replace(prefix + '/', '');
 		const possiblePageName = studly_case(possiblePage) + 'Page';
 		return ReactSync.pages[possiblePageName];
 	}
 
 	renderDefault(){
+		console.log('Page.js renderDefault is called');
 		const P = this.getPageComponentFromPath();
 		return (
 			<PageShell Page={P} />
