@@ -14,13 +14,17 @@ Route::middleware(config('react_sync.middleware'))->group(function () {
 	Route::delete(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@delete');
 
 	$page_class = Page::resolve() ?? 'G3n1us\LaravelReactSync\Pages\Core\Page';
-	$page_prefix = Str::start(config('react_sync.pages_prefix', '/pages'), '/');
+// 	dd($page_class);
+// 	$page_prefix = Str::start(config('react_sync.pages_prefix', '/pages'), '/');
+	$page_prefix = config('react_sync.pages_prefix', 'pages');
+	if(class_exists($page_class)){
+		$class_parameter = $page_class::slug();
 
-	$class_parameter = $page_class::slug();
-
-    Route::prefix("$page_prefix/$class_parameter")
-	    ->namespace('G3n1us\\LaravelReactSync\\Pages')
-	    ->group(function($route) use($page_class){
-		    Route::any($page_class::$pattern, 'PageController@run')->name('page_route');
-	    });
+	    Route::prefix("{prefix}/$class_parameter")
+		    ->where(['prefix' => $page_prefix])
+		    ->namespace('G3n1us\\LaravelReactSync\\Pages')
+		    ->group(function($route) use($page_class){
+			    Route::any($page_class::$pattern, 'PageController@run')->name('page_route');
+		    });
+	}
 });

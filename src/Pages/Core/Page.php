@@ -38,18 +38,19 @@ abstract class Page{
 		$current_path = Str::start(request()->path(), '/');
 
 		$current_path = Str::finish($current_path, '/');
-
-		$pattern = "\\$page_prefix\\/(.*?)\/";
+		$pattern = "^\\$page_prefix\\/(.*?)\/";
 
 		preg_match("/$pattern/", $current_path, $matches);
 
 		$page_slug = @$matches[1];
-
 		if(empty($page_slug)) return null;
 
 	    $page_class = studly_case($page_slug) . 'Page';
 
-	    $page_class = "\\App\\Pages\\$page_class";
+		$namespace = config('react_sync.namespace');
+
+	    $page_class = "\\$namespace\\Pages\\$page_class";
+// dd($page_class, $page_slug, $matches);
 
 	    return $page_class;
 	}

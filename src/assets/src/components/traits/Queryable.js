@@ -52,7 +52,7 @@ class Queryable extends Trait{
 		this.refresher = React.createRef();
 		const plural = this.plural;
 		let items = app_get('state.'+plural) || app_get('state.'+ snakeCase(plural)) || app_get(plural) || app_get(snakeCase(plural));
-//debugger
+// debugger
 		if(!items) return null;
 		if(!('map' in items)) items = items.data;
         let els = items.map(e => {
@@ -75,7 +75,10 @@ class Queryable extends Trait{
 
 	static first(additional_props = {}){
 		this.refresher = React.createRef();
-		let e = app_get(this.plural)[0];
+		const plural = this.plural;
+		let items = app_get('state.'+plural) || app_get('state.'+ snakeCase(plural)) || app_get(plural) || app_get(snakeCase(plural));
+		if(!items.length) return null;
+		let e = items[0];
 		let props = {...e, ...additional_props};
 		let ThisModel = this;
 		return <ThisModel refresher={this.refresher} key={`${this.plural}${e.id}`} {...props} />;

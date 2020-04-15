@@ -19,12 +19,12 @@ Artisan::command('make:react_model {name?}', function($name = null){
 	file_put_contents(Paths::app_path("Models/$name.php"), $rendered_model);
 
 	$migration_tpl = file_get_contents(__DIR__.'/react-sync-stubs/migration.create.stub');
-	
+
 	$rendered_migration = str_replace('{{ table }}', $tablename, $migration_tpl);
 	$rendered_migration = str_replace('{{ class }}', "Create{$name_plural}Table", $rendered_migration);
 	$migration_filename = implode('_', [\Carbon\Carbon::now()->format('Y_m_d_hms'), 'create', $tablename, 'table']) . '.php';
 	file_put_contents(Paths::database_path("migrations/$migration_filename"), $rendered_migration);
-	
+
 // 	Artisan::call("make:model -m -f $path");
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/model.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
@@ -46,10 +46,14 @@ Artisan::command('make:react_page {name?}', function($name = null){
 	$name = studly_case($name) . 'Page';
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
+	
 	file_put_contents(Paths::app_path("Pages/$name.js"), $rendered);
 
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page_php.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
+	$namespace = config('react_sync.namespace');
+	$rendered = str_replace('{{ namespace }}', "$namespace\\Pages", $rendered);
+	
 	file_put_contents(Paths::app_path("Pages/$name.php"), $rendered);
 
 	Artisan::call('write_index_files');
@@ -63,7 +67,8 @@ if(!function_exists('get_schemas')){
 	    $models = json_decode(file_get_contents(Paths::app_path("Models/models.json")), true);
 	    $schemas = [];
 	    foreach($models as $model){
-	        $class = "\App\\Models\\$model";
+		    $namespace = config('react_sync.namespace');
+	        $class = "\\$namespace\\Models\\$model";
 	        $schemas[$model] = get_schema(new $class);
 	    }
 	    return collect($schemas);
@@ -93,7 +98,7 @@ if(!function_exists('write_index_files')){
 	function write_index_files($_this){
 	    // put a file called .index in a directory you want to index
 	    // this runs recursively
-	
+
 	    $dir_start = Paths::base_path();
 	    $fs = new Filesystem;
 	    $dirs = collect($fs->allFiles($dir_start))
@@ -124,17 +129,17 @@ if(!function_exists('write_index_files')){
 	 ****************************************************
 	 */
 	 ";
-	
+
 	$contents = "
 	$filecomments
 	$imports
-	
+
 	export { $exports };
 	";
 	        $fs->put("$dir/index.js", trim($contents) . "\n");
 	        $_this->comment("\n index.js written to $dir \n\n");
 	    });
-	    
+
     //update models.json
     $possible_models = collect($fs->allFiles(Paths::app_path('Models')))
         ->map(function($f) use($fs){

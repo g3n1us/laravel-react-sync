@@ -1,5 +1,5 @@
 <?php
-namespace App\Pages;
+namespace {{ namespace }};
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
