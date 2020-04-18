@@ -30,7 +30,7 @@ twitter_username: sean_bethel
 github_username:  g3n1us
 
 # Build settings
-theme: minima
+theme: jekyll-theme-leap-day
 plugins:
   - jekyll-feed
 
