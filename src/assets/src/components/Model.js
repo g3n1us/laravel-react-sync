@@ -136,9 +136,18 @@ class Model extends Component{
 
 	}
 
+
+	static getPrimaryKey(){
+		return collect(this.getSchema()).firstWhere('primaryKey')['name'];
+	}
+
+	get primaryKey(){
+		return this.constructor.getPrimaryKey();
+	}
+
 	/** */
 	get id(){
-		return '' + this.props.id;
+		return '' + this.props[this.primaryKey];
 	}
 
 	/** */
