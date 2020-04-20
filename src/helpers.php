@@ -1,6 +1,5 @@
 <?php
 
-
 	if(!function_exists('client_side_safe_request')){
 		function client_side_safe_request(){
 			$request = request();
@@ -87,8 +86,11 @@
 			if($model === null) die("\npass in a model instance!\n\n");
 
 			$table = $model->getTable();
+
+			$primary_key = $model->getKeyName();
+
 			$attrs = Schema::getColumnListing($model->getTable());
-			$attrs = collect($attrs)->map(function($column) use($table, $connection){
+			$attrs = collect($attrs)->map(function($column) use($table, $connection, $primary_key){
 				$column_definition = $connection->getDoctrineColumn($table, $column)->toArray();
 				$column_definition['type'] = $column_definition['type']->getName();
 				$column_definition['nullable'] = $column_definition['notnull'] === false; // maybe add something else to determine this
@@ -96,6 +98,8 @@
 				!in_array($column, ['created_at', 'updated_at']); // maybe add something else to determine this
 				$column_definition['required'] = $column_definition['fillable'] === true &&
 				empty($column_definition['default']) && $column_definition['nullable'] === false; // maybe add something else to determine this
+
+				$column_definition['primaryKey'] = $primary_key == $column;
 				return [$column => $column_definition];
 			})->values()->collapse();
 

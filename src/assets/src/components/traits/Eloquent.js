@@ -47,7 +47,6 @@ export default class Eloquent extends Trait{
 		return this.get_query_prop();
 	}
 
-
 	get is_query(){
 		return !!this.get_query_prop();
 	}
