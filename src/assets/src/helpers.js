@@ -1,5 +1,7 @@
 import { clone, get, isArray, find, set, snakeCase, camelCase } from 'lodash';
+import ReactSync from './ReactSync';
 const pluralize = require('pluralize');
+import { on } from './Event';
 
 export function ReactSyncData(){
 	window[window.ReactSyncGlobal] = window[window.ReactSyncGlobal] || {};
@@ -44,6 +46,7 @@ export function app_get(dotvalue, query){
 	}
 	else return data;
 }
+
 window.appGet = app_get;
 
 export function app_put(dotkey, value){
@@ -69,3 +72,18 @@ export function isModel(n){
 	return typeof schemas[n] !== "undefined";
 }
 
+
+
+export function app_current(){
+	return new Promise((resolve, reject) => {
+		on('react_sync_booted', resolve);
+	});
+}
+
+
+export function def(obj, prop, callback){
+	Object.defineProperty(obj, prop, {
+		get: callback,
+		set: function(){ return null; }
+	});
+}

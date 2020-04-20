@@ -1,4 +1,5 @@
 import React from 'react';
+import { dispatch } from './Event';
 
 export default class ReactSync{
 	constructor(){
@@ -28,13 +29,22 @@ export default class ReactSync{
 		if(this.user){
 			this.user.can = (ability) => this.user_can[ability] === true;
 		}
+		
+		
 	}
 
 	boot(data){
 		ReactSync.pages = {...ReactSync.pages, ...data.pages};
 	}
 
-	static appRef = React.createRef();
+	static setAppRef = reference => {
+		this.appRef = {current: reference};
+		dispatch('react_sync_booted', this.appRef);
+	}
+
+
+// 	static appRef = React.createRef();
+	static appRef = {current: null};
 
 	get appRef(){
 		return this.constructor.appRef;
