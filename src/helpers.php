@@ -85,7 +85,7 @@
 			$connection = Schema::getConnection();
 
 			if($model === null) die("\npass in a model instance!\n\n");
-
+// dump($model->getKeyName());
 			$table = $model->getTable();
 			$attrs = Schema::getColumnListing($model->getTable());
 			$attrs = collect($attrs)->map(function($column) use($table, $connection){

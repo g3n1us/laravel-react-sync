@@ -20,6 +20,7 @@ abstract class Page{
 
     final public function __construct() {
         preg_match_all('/\{(.*?)\??\}/', static::$pattern, $matches);
+        
         $segments = @$matches[1] ?? [];
         $args = $this->arguments = func_get_args();
         foreach($segments as $i => $key){
@@ -50,7 +51,6 @@ abstract class Page{
 		$namespace = config('react_sync.namespace');
 
 	    $page_class = "\\$namespace\\Pages\\$page_class";
-// dd($page_class, $page_slug, $matches);
 
 	    return $page_class;
 	}

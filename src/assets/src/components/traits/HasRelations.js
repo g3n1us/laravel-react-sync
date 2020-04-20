@@ -84,6 +84,11 @@ withDefault: null
 		let plural = pluralize(relationName);
 		let related_id = this.props[foreignKey];
 		let Class_ = Model.models[pluralToClassName(relationName)];
+		let found_item = app_get(`${plural}.${related_id}`);
+		if(found_item instanceof Model){
+			return found_item;
+		}
+// 		console.log('found_item', found_item, found_item instanceof Model);
 		return <Class_ {...app_get(`${plural}.${related_id}`)}/>
 
 	}
