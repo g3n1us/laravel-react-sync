@@ -12,8 +12,12 @@ class HasKeyProp extends Trait{
   }
 
 
+  unique_key(prefix = ''){
+    return `${prefix}_${this.plural}_${this.id}`;
+  }
+
   get key(){
-    return `_${this.plural}_${this.props.id}`;
+    return this.unique_key();
   }
 
 }

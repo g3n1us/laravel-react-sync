@@ -88,7 +88,7 @@ withDefault: null
 		if(found_item instanceof Model){
 			return found_item;
 		}
-// 		console.log('found_item', found_item, found_item instanceof Model);
+		console.log('found_item', found_item, found_item instanceof Model);
 		return <Class_ {...app_get(`${plural}.${related_id}`)}/>
 
 	}

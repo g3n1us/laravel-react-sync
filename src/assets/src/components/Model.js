@@ -16,7 +16,7 @@ import HasKeyProp from './traits/HasKeyProp';
 
 import Shell from './Shell';
 
-import { pluralToClassName, classNameToPlural, isModel, studly_case, app_put, app_get } from '../helpers';
+import { pluralToClassName, classNameToPlural, isModel, studly_case, app_put, app_get, def } from '../helpers';
 const pluralize = require('pluralize');
 
 import { filter, flatten, isEmpty, toPairs, pick, kebabCase, snakeCase, difference, intersection } from 'lodash';
@@ -95,9 +95,11 @@ class Model extends Component{
 					relationValueModels = (<ThisModel {...relationValue} />);
 				}
 			}
-
-			this[relationName] = relationValueModels;
-			this.relations[relationName] = relationValueModels;
+			if(relationValueModels){
+				this[relationName] = relationValueModels;	
+			}
+			
+// 			this.relations[relationName] = this[relationName];
 
 		}
 		else {
@@ -106,9 +108,13 @@ class Model extends Component{
 				console.error(relation_type, 'this[relation_type]');
 			}
 			else{
+				def(this, relationName, () => this[relation_type](definition));
+				def(this.relations, relationName, () => this[relation_type](definition));
+/*
 				const resolved = this[relation_type](definition);
 				this[relationName] = resolved;
 				this.relations[relationName] = resolved;
+*/
 			}
 			}
 		});
@@ -203,7 +209,7 @@ class Model extends Component{
 
 	/** */
 	filterMutable(objectToFilter){
-		if(!this.constructor.editable_props.length) return objectToFilter;
+		// if(!this.constructor.editable_props.length) return objectToFilter;
 		return pick(objectToFilter, this.constructor.editable_props);
 	}
 
