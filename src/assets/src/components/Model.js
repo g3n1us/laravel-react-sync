@@ -209,7 +209,7 @@ class Model extends Component{
 
 	/** */
 	filterMutable(objectToFilter){
-		if(!this.constructor.editable_props.length) return objectToFilter;
+		// if(!this.constructor.editable_props.length) return objectToFilter;
 		return pick(objectToFilter, this.constructor.editable_props);
 	}
 
