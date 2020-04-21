@@ -52,7 +52,7 @@ withDefault: null
 		let plural = pluralize(relation_name);
 
 		console.log(this, relationship_definition_from_schema);
-		debugger;
+
 		throw new Error(`HasOneThrough not defined!`);
 
 		return <div>Relation: { relationship_definition_from_schema.relationName }</div>
