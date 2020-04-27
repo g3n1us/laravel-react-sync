@@ -5,8 +5,6 @@ use Illuminate\Routing\Router;
 use G3n1us\LaravelReactSync\Pages\Core\Page;
 
 
-
-
 Route::middleware(config('react_sync.middleware'))->group(function () {
 
 	Route::get(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@test');
@@ -14,8 +12,7 @@ Route::middleware(config('react_sync.middleware'))->group(function () {
 	Route::put(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@create');
 	Route::delete(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@delete');
 	
-
-	$page_class = Page::resolve() ?? 'G3n1us\LaravelReactSync\Pages\Core\Page';
+	$page_class = Page::resolve();
 
 	$page_prefix = config('react_sync.pages_prefix', 'pages');
 	if(class_exists($page_class)){
@@ -26,7 +23,6 @@ Route::middleware(config('react_sync.middleware'))->group(function () {
 		    ->namespace('G3n1us\\LaravelReactSync\\Pages')
 		    ->group(function($route) use($page_class, $class_parameter){
 			    Route::any($page_class::$pattern, 'PageController@run')->name('page_class');
-// 			    Route::any($page_class::$pattern, 'PageController@run')->name($class_parameter);
 		    });
 	}
 });

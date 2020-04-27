@@ -15,6 +15,8 @@ abstract class Page{
     public static $middleware = [];
 
     public static $pattern = '{one?}/{two?}/{three?}/{four?}/{five?}';
+    
+    public static $default_page_class = 'DefaultPage';
 
     private $arguments;
 
@@ -43,11 +45,9 @@ abstract class Page{
 
 		preg_match("/$pattern/", $current_path, $matches);
 
-		$page_slug = @$matches[1];
-		if(empty($page_slug)) return null;
+		$page_slug = @$matches[1] ?? static::$default_page_class;
 
-	    $page_class = studly_case($page_slug) . 'Page';
-
+	    $page_class =  Str::finish(studly_case($page_slug), 'Page');
 		$namespace = config('react_sync.namespace');
 
 	    $page_class = "\\$namespace\\Pages\\$page_class";
@@ -57,7 +57,7 @@ abstract class Page{
 
 	public static function slug(){
     	$classpath = self::resolve();
-    	if(!$classpath) return;
+
 		$str = class_basename($classpath);
 
 		return Str::kebab(preg_replace('/^(.*?)Page$/', '$1', $str));
