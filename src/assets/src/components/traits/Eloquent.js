@@ -5,22 +5,25 @@ import { studly_case } from '../../helpers';
 
 import { difference, intersection } from 'lodash';
 
-
-export default class Eloquent extends Trait{
+/** */
+class Eloquent extends Trait{
+	/** */
 	constructor(targetClass){
 		super(targetClass);
 	}
 
-	sean = 'awesome';
-
+	/** */
 	static query_props = ['find', 'where', 'all', 'first'];
 
+	/** */
 	static pagination_props = ['per_page'];
 
+	/** */
 	static get reserved_props(){
 		return [...this.query_props, ...this.pagination_props, 'order_by', 'sort_by'];
 	}
 
+	/** */
 	static get_non_reserved_props(props){
 		const ret = difference(Object.keys(props), this.reserved_props);
 		const val = {};
@@ -30,27 +33,33 @@ export default class Eloquent extends Trait{
 		return val;
 	}
 
+	/** */
 	get_non_reserved_props(){
 		return this.constructor.get_non_reserved_props(this.props);
 	}
 
+	/** */
 	get non_reserved_props(){
 		return this.get_non_reserved_props();
 	}
 
+	/** */
 	get_query_prop(){
 		const i = intersection(this.constructor.query_props, Object.keys(this.props));
 		return i.length ? i[0] : null;
 	}
 
+	/** */
 	get query_prop(){
 		return this.get_query_prop();
 	}
 
+	/** */
 	get is_query(){
 		return !!this.get_query_prop();
 	}
 
+	/** */
 	get_query_endpoint(){
 		const q = this.get_query_prop();
 		let where_prop;
@@ -72,6 +81,7 @@ export default class Eloquent extends Trait{
 		return map[q] + `?${qs_string}`;
 	}
 
+	/** */
 	queryRender(){
 		const q = this.get_query_endpoint();
 		return <Shell url={q} Model={this.constructor} {...this.non_reserved_props} />
@@ -97,7 +107,7 @@ export default class Eloquent extends Trait{
 		return this.renderDefault();
 	}
 
-
+	/** */
 	renderDebug(){
 		return (<div><code>{this.constructor.name} | {this.props.id}</code></div>);
 	}
@@ -105,3 +115,5 @@ export default class Eloquent extends Trait{
 }
 
 window.Eloquent = Eloquent;
+
+export default Eloquent;

@@ -4,6 +4,7 @@ import { get, find } from 'lodash';
 /** */
 class Field extends Component{
 
+	/** */
   constructor(props){
     super(props);
 
@@ -14,12 +15,13 @@ class Field extends Component{
     this.label = this.props.label || this.props.property;
   }
 
+	/** */
   onChangeHandler(e){
     let thisprop = e.currentTarget.getAttribute('name');
     this.setState({[thisprop]: e.currentTarget.value});
   }
 
-
+	/** */
   static field_type(key, model_instance = this){
     let n = get(model_instance.schema, key, {});
 // 	  console.log(n.type == 'text'&& typeof model_instance.state[key] === 'object');
@@ -44,7 +46,7 @@ class Field extends Component{
   }
 
 
-
+	/** */
   field(key){
     let {type, schema} = this.field_type(key);
 
@@ -92,6 +94,7 @@ class Field extends Component{
     return <fieldset className={classes}><label htmlFor={rand}>{this.label}</label> {field_renders[type.field]}</fieldset>;
   }
 
+	/** */
   render(){
     return this.field(this.props.property) || <div>{this.label}</div>;
   }

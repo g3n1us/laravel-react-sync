@@ -2,13 +2,16 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import collect from 'collect.js';
 
+/** */
 class Shell extends Component{
 
+	/** */
 	static defaultProps = {
 		url: null,
 		Model: null,
 	}
 
+	/** */
 	constructor(props){
 		super(props);
 		this.state = {
@@ -16,8 +19,10 @@ class Shell extends Component{
 		}
 	}
 
+	/** */
 	static cached = {}
 
+	/** */
 	refresh(){
 		let { Model, url } = this.props;
 		let fromcache;
@@ -36,10 +41,12 @@ class Shell extends Component{
 		});
 	}
 
+	/** */
 	componentDidMount(){
 		this.refresh();
 	}
 
+	/** */
 	componentDidUpdate(prevProps, prevState, snapshot){
 		if(!!this.props.Page) return;
 
@@ -51,7 +58,7 @@ class Shell extends Component{
 		}
 	}
 
-
+	/** */
 	render(){
 		if(!this.state.children) return null;
 		const { Model, url, then, ...remainder } = this.props;

@@ -13,8 +13,9 @@ const str_rand = function(length = 5){
 }
 
 
-export default class Pagination extends Component{
+class Pagination extends Component{
 
+	/** */
 	render(){
 		let links = [];
 		let current_page = 1
@@ -90,3 +91,5 @@ export default class Pagination extends Component{
 	}
 
 }
+
+export default Pagination;

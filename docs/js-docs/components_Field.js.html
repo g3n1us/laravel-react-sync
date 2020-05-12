@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Field.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Field.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+import { get, find } from 'lodash';
+
+/** */
+class Field extends Component{
+
+	/** */
+  constructor(props){
+    super(props);
+
+    this.onChangeHandler = this.onChangeHandler.bind(this.props.model);
+
+    this.field_type = Field.field_type.bind(this.props.model);
+
+    this.label = this.props.label || this.props.property;
+  }
+
+	/** */
+  onChangeHandler(e){
+    let thisprop = e.currentTarget.getAttribute('name');
+    this.setState({[thisprop]: e.currentTarget.value});
+  }
+
+	/** */
+  static field_type(key, model_instance = this){
+    let n = get(model_instance.schema, key, {});
+// 	  console.log(n.type == 'text'&amp;&amp; typeof model_instance.state[key] === 'object');
+
+    const type_tests = [
+      {field: null, test: (n) => typeof n.type === 'undefined'},
+      {field: 'string', test: (n) => n.type == 'string'},
+      {field: 'text', test: (n) => n.type == 'string' &amp;&amp; n.max_length},
+      {field: 'email', test: (n) => n.type == 'email' &amp;&amp; n.max_length},
+      {field: 'checkbox', test: (n) => n.type == 'boolean'},
+      {field: 'integer', test: (n) => n.type == 'integer'},
+      {field: 'datetime', test: (n) => n.type == 'datetime'},
+      {field: 'json', test: n => n.type == 'text' &amp;&amp; typeof model_instance.state[key] === 'object'},
+      {field: 'text', test: n => n.type == 'text'},
+      {field: 'file', test: n => n.type == ''},
+      {field: 'relation', test: n => typeof n.type === 'object'},
+    ];
+    let type = find(type_tests, t => {
+      return t.test(n)
+    });
+    return {type: type, schema: n};
+  }
+
+
+	/** */
+  field(key){
+    let {type, schema} = this.field_type(key);
+
+    const rand = 'rand_' + Math.floor((Math.random()*10000000)+1);
+
+	const val = this.props.model.state[key] || '';
+
+    if(!type) return &lt;label>{key}&lt;input type="text" readOnly={true} value={val} />&lt;/label>;
+
+	if(typeof type.field === 'json') console.log(key, val, type);
+
+    const field_renders = {
+      string: &lt;input className="form-control" id={rand} type="text" name={key} value={val} onChange={this.onChangeHandler} />,
+
+      checkbox: &lt;input type="checkbox" id={rand} name={key} value={val} onChange={this.onChangeHandler} />,
+
+      integer: &lt;input className="form-control" id={rand} type="tel" pattern="[0-9]{1,100}" name={key} value={val} onChange={this.onChangeHandler} />,
+
+      email: &lt;input className="form-control" id={rand} type="email" name={key} value={val} onChange={this.onChangeHandler} />,
+
+      datetime: &lt;input className="form-control" id={rand} type="text" name={key} value={val} onChange={this.onChangeHandler} />,
+
+      file: &lt;div>&lt;label htmlFor={rand}>{val}&lt;/label>&lt;input id={rand} className="form-control-file" type="file" name={key} />&lt;/div>,
+
+      text: &lt;textarea className="form-control" id={rand} name={key} value={val} onChange={this.onChangeHandler} />,
+
+      json: &lt;textarea className="form-control" id={rand} name={key} value={JSON.stringify(val)} onChange={this.onChangeHandler} />
+
+/*
+      text: &lt;CkOne
+				    className="form-control"
+                    editor={ '' }
+                    data={ this.props.model.state[key] || '' }
+                    onChange={ ( event, editor ) => {
+                        const data = editor.getData();
+                        this.props.model.setState({[key]: data});
+
+                    } }
+                />
+*/
+
+    }
+    if(!field_renders[type.field]) return null;
+    const classes = (this.props.className || '') + ' form-group';
+    return &lt;fieldset className={classes}>&lt;label htmlFor={rand}>{this.label}&lt;/label> {field_renders[type.field]}&lt;/fieldset>;
+  }
+
+	/** */
+  render(){
+    return this.field(this.props.property) || &lt;div>{this.label}&lt;/div>;
+  }
+
+
+}
+
+export default Field;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Alert.html">Alert</a></li><li><a href="Eloquent.html">Eloquent</a></li><li><a href="Event.html">Event</a></li><li><a href="Field.html">Field</a></li><li><a href="Form.html">Form</a></li><li><a href="HasKeyProp.html">HasKeyProp</a></li><li><a href="hasPluralForm.html">hasPluralForm</a></li><li><a href="HasReflection.html">HasReflection</a></li><li><a href="HasRelations.html">HasRelations</a></li><li><a href="LegacyModel.html">LegacyModel</a></li><li><a href="Mockable.html">Mockable</a></li><li><a href="Model.html">Model</a></li><li><a href="Notification.html">Notification</a></li><li><a href="Page.html">Page</a></li><li><a href="PageShell.html">PageShell</a></li><li><a href="PrimordialModel.html">PrimordialModel</a></li><li><a href="Queryable.html">Queryable</a></li><li><a href="ReactSync.html">ReactSync</a></li><li><a href="RenderableAsBasicForm.html">RenderableAsBasicForm</a></li><li><a href="RenderableAsDiagram.html">RenderableAsDiagram</a></li><li><a href="RenderableDefault.html">RenderableDefault</a></li><li><a href="Shell.html">Shell</a></li><li><a href="Trait.html">Trait</a></li></ul><h3>Global</h3><ul><li><a href="global.html#app_current">app_current</a></li><li><a href="global.html#app_get">app_get</a></li><li><a href="global.html#app_put">app_put</a></li><li><a href="global.html#brackets_to_dots">brackets_to_dots</a></li><li><a href="global.html#classNameToPlural">classNameToPlural</a></li><li><a href="global.html#Csrf">Csrf</a></li><li><a href="global.html#def">def</a></li><li><a href="global.html#dispatch">dispatch</a></li><li><a href="global.html#isModel">isModel</a></li><li><a href="global.html#LaravelReactSync">LaravelReactSync</a></li><li><a href="global.html#on">on</a></li><li><a href="global.html#pluralToClassName">pluralToClassName</a></li><li><a href="global.html#ReactSyncData">ReactSyncData</a></li><li><a href="global.html#snake_case">snake_case</a></li><li><a href="global.html#studly_case">studly_case</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Tue May 12 2020 11:11:31 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

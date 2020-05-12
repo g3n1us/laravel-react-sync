@@ -7,6 +7,7 @@ import Trait from './Trait';
 */
 class hasPluralForm extends Trait{
 
+	/** */
   constructor(targetClass){
     super(targetClass);
   }

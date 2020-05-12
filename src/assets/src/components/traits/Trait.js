@@ -78,6 +78,7 @@ class Trait{
 		});
 	}
 
+	/** */
 	static applyTo(Obj){
 		new this(Obj);
 	}

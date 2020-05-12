@@ -10,24 +10,38 @@ abstract class Page{
 
     abstract public function form_request(Request $request);
 
-    abstract public function constructor();
+   abstract public function constructor();
 
     public static $middleware = [];
 
     public static $pattern = '{one?}/{two?}/{three?}/{four?}/{five?}';
-    
+
     public static $default_page_class = 'DefaultPage';
 
     private $arguments;
 
+
+
     final public function __construct() {
         preg_match_all('/\{(.*?)\??\}/', static::$pattern, $matches);
-        
-        $segments = @$matches[1] ?? [];
-        $args = $this->arguments = func_get_args();
-        foreach($segments as $i => $key){
-            $this->{$key} = @$args[$i];
+        $reg_pattern = static::$pattern;
+        foreach(($matches[0] ?? []) as $i => $sub){
+	        $key = $matches[1][$i];
+	        $reg_pattern = str_replace($sub, "(?<$key>.*?)", $reg_pattern);
         }
+        $reg_pattern = str_replace('/', '\\/', $reg_pattern);
+        $reg_pattern = "/^$reg_pattern$/";
+        $request_path = Str::start(request()->path(), '/');
+
+        preg_match($reg_pattern, $request_path, $matches2);
+
+		$this->arguments = array_filter($matches2, function($k) {
+		    return !is_numeric($k);
+		}, ARRAY_FILTER_USE_KEY);
+
+		foreach($this->arguments as $key => $value){
+			$this->{$key} = $value;
+		}
 
         $this->page_name_class = snake_case(class_basename($this));
         $this->page_class = class_basename($this);
@@ -57,14 +71,18 @@ abstract class Page{
 
 	public static function slug(){
     	$classpath = self::resolve();
-
 		$str = class_basename($classpath);
+
+		if($str == static::$default_page_class){
+			return '';
+		}
 
 		return Str::kebab(preg_replace('/^(.*?)Page$/', '$1', $str));
 	}
 
     public function getResponse(){
-        $potential_response = $this->constructor(...$this->arguments);
+	    $arg_values = array_values($this->arguments);
+        $potential_response = $this->constructor(...$arg_values);
         if(is_array($potential_response)){
             $potential_response = collect($potential_response);
         }

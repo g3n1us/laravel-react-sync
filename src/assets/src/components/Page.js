@@ -11,7 +11,9 @@ import Eloquent from './traits/Eloquent';
 import { studly_case } from '../helpers';
 
 
-export default class Page extends Component{
+/** */
+class Page extends Component{
+	/** */
 	constructor(props){
 		super(props);
 		const { components, page_data, pages } = new ReactSync;
@@ -20,12 +22,14 @@ export default class Page extends Component{
 		ReactSync.pages[this.constructor.name] = this.constructor;
 	}
 
+	/** */
 	componentDidMount(){
 		on('refresh-state', (e) => {
 			this.setState(REACT_SYNC_DATA.page_data);
 		});
 	}
 
+	/** */
 	refresh(callback = () => {}){
 		const request_options = {
 			headers: {'X-IsAjax': 'true', 'X-Requested-With': 'XMLHttpRequest'},
@@ -36,6 +40,7 @@ export default class Page extends Component{
 		});
 	}
 
+	/** */
 	getPageComponentFromPath(path = window.location.pathname){
     	if(path.slice(-1) != '/') path = `${path}/`;
     	const prefix = (new ReactSync).config.pages_prefix;
@@ -47,6 +52,7 @@ export default class Page extends Component{
 		return ReactSync.pages[possiblePageName];
 	}
 
+	/** */
 	renderDefault(){
 		console.log('Page.js renderDefault is called');
 		const P = this.getPageComponentFromPath();
@@ -55,10 +61,12 @@ export default class Page extends Component{
 		)
 	}
 
+	/** */
 	get is_query(){
 		return !(Object.keys(this.props).length);
 	}
 
+	/** */
 	queryRender(){
 		const P = this.getPageComponentFromPath();
 		return (
@@ -68,6 +76,9 @@ export default class Page extends Component{
 
 
 }
+
+
+export default Page;
 
 window.Page = Page;
 

@@ -3,11 +3,15 @@ import ReactSync from './ReactSync';
 const pluralize = require('pluralize');
 import { on } from './Event';
 
+
+/** */
 export function ReactSyncData(){
 	window[window.ReactSyncGlobal] = window[window.ReactSyncGlobal] || {};
 	return window[window.ReactSyncGlobal];
 }
 
+
+/** */
 export function snake_case(t){
 	var t = clone(t) || '';
 	return snakeCase(t);
@@ -19,6 +23,7 @@ export function snake_case(t){
 */
 }
 
+/** */
 export function studly_case(t){
 	var t = clone(t) || '';
 	const camelized = camelCase(t);
@@ -26,6 +31,7 @@ export function studly_case(t){
 	return camelized.slice(0,1).toUpperCase() + camelized.slice(1);
 }
 
+/** */
 export function app_get(dotvalue, query){
 	const ReactSyncAppData = ReactSyncData();
 	if(typeof dotvalue === 'undefined' && typeof query === 'undefined'){
@@ -49,38 +55,42 @@ export function app_get(dotvalue, query){
 
 window.appGet = app_get;
 
+/** */
 export function app_put(dotkey, value){
 	const ReactSyncAppData = ReactSyncData();
 	set(ReactSyncAppData.page_data, dotkey, value);
 	return app_get(dotkey);
 }
 
-
+/** */
 export function brackets_to_dots(value){
 	return value.replace(/\[(.*?)\]/g, ".$1");
 }
 
+/** */
 export function pluralToClassName(plural){
 	return studly_case(pluralize.singular(plural));
 };
 
+/** */
 export function classNameToPlural(class_name){
 	return snake_case(pluralize(class_name));
 }
 
+/** */
 export function isModel(n){
 	return typeof schemas[n] !== "undefined";
 }
 
 
-
+/** */
 export function app_current(){
 	return new Promise((resolve, reject) => {
 		on('react_sync_booted', resolve);
 	});
 }
 
-
+/** */
 export function def(obj, prop, callback){
 	Object.defineProperty(obj, prop, {
 		get: callback,

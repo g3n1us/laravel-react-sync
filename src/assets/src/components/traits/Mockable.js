@@ -7,11 +7,12 @@ window.faker = require('faker');
 */
 class Mockable extends Trait{
 
+	/** */
   constructor(targetClass){
     super(targetClass);
   }
 
-
+	/** */
   static mock(){
     let fake_state = this.mergedMockProps();
     console.log(this.refreshers, fake_state, this.refresher);

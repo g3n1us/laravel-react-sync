@@ -7,15 +7,17 @@ import Trait from './Trait';
 */
 class HasKeyProp extends Trait{
 
+	/** */
   constructor(targetClass){
     super(targetClass);
   }
 
-
+	/** */
   unique_key(prefix = ''){
     return `${prefix}_${this.plural}_${this.id}`;
   }
 
+	/** */
   get key(){
     return this.unique_key();
   }

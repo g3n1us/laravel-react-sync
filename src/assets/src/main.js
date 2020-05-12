@@ -8,7 +8,7 @@ import ReactSync from './ReactSync';
 
 import { on, dispatch } from './Event';
 
-
+/** */
 const LaravelReactSync = {
 	...extras,
 	helpers,

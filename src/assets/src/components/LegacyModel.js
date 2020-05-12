@@ -3,13 +3,16 @@ import ReactDOM from 'react-dom';
 import axios from 'axios';
 import Alert from './Alert';
 
-export default class LegacyModel extends Component{
+/** */
+
+class LegacyModel extends Component{
 	constructor(props){
 		super(props);
 		this.buttonData = {};
         this.handleInputChange = this.handleInputChange.bind(this);
 	}
 
+	/** */
 	static find(id){
 		let prom = axios.get(`/api/${this.name.toLowerCase()}/${id}`);
 		return <Async promise={prom} then={d => {
@@ -17,6 +20,7 @@ export default class LegacyModel extends Component{
 		}} />
 	}
 
+	/** */
 	static where(a,b,c){
 		let query = [].slice.call(arguments);
 		let prom = axios.get(`/api/${this.name.toLowerCase()}`, {params: {where: query}});
@@ -28,6 +32,7 @@ export default class LegacyModel extends Component{
 		}} />
 	}
 
+	/** */
 	static all(){
 		let prom = axios.get(`/api/${this.name.toLowerCase()}`);
 		return <Async promise={prom} then={d => {
@@ -38,7 +43,7 @@ export default class LegacyModel extends Component{
 		}} />
 	}
 
-
+	/** */
 	getComponentFormData(){
 		let $this = $(ReactDOM.findDOMNode(this));
 		if(!$this.is('form'))
@@ -61,12 +66,12 @@ export default class LegacyModel extends Component{
 		return formdata;
 	}
 
-
+	/** */
 	getApp(){
 		return REACT_SYNC_DATA;
 	}
 
-
+	/** */
 	componentDidMount(){
 		let $this = $(ReactDOM.findDOMNode(this));
 		if(this.props.updateOnChange){
@@ -95,7 +100,7 @@ export default class LegacyModel extends Component{
 		});
 	}
 
-
+	/** */
 	updateRequest(formdata){
 		let axios_method = window.g3n1us_helpers.array_get(formdata, '_method', 'post').toLowerCase();
 		axios({
@@ -118,7 +123,7 @@ export default class LegacyModel extends Component{
 		});
 	}
 
-
+	/** */
 	handleInputChange(event) {
 
 		event.preventDefault();
@@ -155,3 +160,5 @@ LegacyModel.addModel = function(M){
 		LegacyModel.models[M.name] = M;
 
 }
+
+export default LegacyModel;
