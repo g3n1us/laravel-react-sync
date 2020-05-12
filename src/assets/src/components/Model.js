@@ -142,11 +142,12 @@ class Model extends Component{
 
 	}
 
-
+	/** */
 	static getPrimaryKey(){
 		return collect(this.getSchema()).firstWhere('primaryKey')['name'];
 	}
 
+	/** */
 	get primaryKey(){
 		return this.constructor.getPrimaryKey();
 	}
@@ -242,14 +243,18 @@ class Model extends Component{
 		return pluralize.singular(this.plural);
 	}
 
+	/** */
 	static query_props = ['find', 'where', 'all', 'first'];
 
+	/** */
 	static pagination_props = ['per_page'];
 
+	/** */
 	static get reserved_props(){
 		return [...this.query_props, ...this.pagination_props, 'order_by', 'sort_by'];
 	}
 
+	/** */
 	static get_non_reserved_props(props){
 		const ret = difference(Object.keys(props), this.reserved_props);
 // 		debugger
@@ -260,28 +265,33 @@ class Model extends Component{
 		return val;
 	}
 
+	/** */
 	get_non_reserved_props(){
 		return this.constructor.get_non_reserved_props(this.props);
 	}
 
+	/** */
 	get non_reserved_props(){
 		return this.get_non_reserved_props();
 	}
 
+	/** */
 	get_query_prop(){
 		const i = intersection(this.constructor.query_props, Object.keys(this.props));
 		return i.length ? i[0] : null;
 	}
 
+	/** */
 	get query_prop(){
 		return this.get_query_prop();
 	}
 
-
+	/** */
 	get is_query(){
 		return !!this.get_query_prop();
 	}
 
+	/** */
 	get_query_endpoint(){
 		const q = this.get_query_prop();
 		let where_prop;
@@ -303,6 +313,7 @@ class Model extends Component{
 		return map[q] + `?${qs_string}`;
 	}
 
+	/** */
 	queryRender(){
 		const q = this.get_query_endpoint();
 		return <Shell url={q} Model={this.constructor} {...this.non_reserved_props} />
@@ -328,6 +339,7 @@ class Model extends Component{
 		return this.renderDefault();
 	}
 
+	/** */
 	renderDebug(){
 		return (<div><code>{this.constructor.name} | {this.props.id}</code></div>);
 	}
@@ -348,23 +360,27 @@ new HasKeyProp(Model);
 new Queryable(Model);
 
 (function(){
+	/** */
 	Model.addModel = function(M){
 		Model.models = Model.models || {};
 		if(!(M.name in Model.models))
 			Model.models[M.name] = M;
 	}
 
+	/** */
 	Model.getModel = function(M){
 		Model.models = Model.models || {};
 		const Mname = typeof M === 'string' ? M : M.name;
 		return Model.models[Mname];
 	}
 
+	/** */
 	Model.allModels = function(){
 		Model.models = Model.models || {};
 		return Model.models;
 	}
 
+	/** */
 	Model.getRegex = function(){
 		const models = collect(Model.allModels());
 		if(!models.count()){
@@ -392,6 +408,7 @@ new Queryable(Model);
 
 	Model.getRegex();
 
+	/** */
 	Model.matchUrlPath = function(){
 		const regex = Model.getRegex();
 		if(!regex){
@@ -438,7 +455,7 @@ new Queryable(Model);
 		});
 	});
 
-
+	/** */
 	Model.extractInstancesFromUrl = function(){
 		let matches = Model.matchUrlPath();
 		const return_val = {
@@ -478,7 +495,7 @@ new Queryable(Model);
 	}
 
 
-
+	/** */
 	Model.resolveInstancesFromUrl = function(return_val){
 		return new Promise((resolve, reject) => {
 			return_val.instances.promise().then((r) => {

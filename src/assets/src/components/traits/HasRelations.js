@@ -51,7 +51,6 @@ withDefault: null
 		const RelatedRelatedModel = Model.models[parent].find(RelatedModel.props[secondKey]);
 		let plural = pluralize(relation_name);
 
-		console.log(this, relationship_definition_from_schema);
 
 		throw new Error(`HasOneThrough not defined!`);
 
@@ -88,7 +87,12 @@ withDefault: null
 		if(found_item instanceof Model){
 			return found_item;
 		}
-		console.log('found_item', found_item, found_item instanceof Model);
+/*
+		if(!Class_){
+			return 
+		}
+*/
+		console.log('BelongsTo found_item', Class_, found_item, found_item instanceof Model);
 		return <Class_ {...app_get(`${plural}.${related_id}`)}/>
 
 	}

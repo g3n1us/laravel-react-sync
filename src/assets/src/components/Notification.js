@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
+/** */
 class Notification extends Component{
 
+	/** */
   static get defaultProps(){
     return {
       level: 'success',
@@ -11,6 +13,7 @@ class Notification extends Component{
     }
   }
 
+	/** */
   constructor(props, defaultProps){
     super(props, defaultProps);
     this.state = {
@@ -38,6 +41,7 @@ class Notification extends Component{
   }
 */
 
+	/** */
   hide(){
 	  clearTimeout(this.tm);
     this.tm = setTimeout(() => {
@@ -47,6 +51,7 @@ class Notification extends Component{
     }, 1500);
   }
 
+	/** */
   render(){
     if(!this.state.visible){
 	    return null;

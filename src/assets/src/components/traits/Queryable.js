@@ -2,10 +2,16 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Trait from './Trait';
 import { get, camelCase, snakeCase } from 'lodash';
-import { app_get, snake_case } from '../../helpers';
+import { app_get, snake_case, def } from '../../helpers';
 import Shell from '../Shell';
 
-window.Find = (dotstring) => get(ReactSyncAppData.page_data.state, dotstring);
+window.Find = (dotstring) => {
+	
+	return get(ReactSyncAppData.page_data.state, dotstring);
+};
+
+
+
 /**
 @kind mixin
 @extends Trait
@@ -15,13 +21,25 @@ class Queryable extends Trait{
 	constructor(targetClass){
 		super(targetClass);
 	}
+	
+	static repo = ReactSyncAppData.page_data.state;
+	
+	static hasBeenKeyed = false;
+	
+	static setKeyed(){
+		
+	}
 
 /**
  * (STATIC) - Query the data store and return the model with the supplied id
  * @static
  */
 	static find(id){
-		return Find(`${this.plural}.${id}`);
+		const { plural, repo } = this;
+		const dotstring = `${plural}.${id}`;
+		console.log('plural, repo', plural, repo, dotstring);
+		
+		return app_get(dotstring);
 	}
 
 
@@ -48,6 +66,7 @@ class Queryable extends Trait{
 	}
 
 
+	/** */
 	static all(additional_props = {}){
 		this.refresher = React.createRef();
 		const plural = this.plural;
@@ -64,6 +83,7 @@ class Queryable extends Trait{
 		return <>{els}</>
 	}
 
+	/** */
 	static firstWhere(a, b){
 
         return null;
@@ -73,6 +93,7 @@ class Queryable extends Trait{
 		return <ThisModel refresher={this.refresher} key={`${this.plural}${this.props.id}`} {...props} />;
 	}
 
+	/** */
 	static first(additional_props = {}){
 		this.refresher = React.createRef();
 		const plural = this.plural;
@@ -107,6 +128,7 @@ class Queryable extends Trait{
 	}
 
 
+	/** */
 	static create_path = `/${this.plural}`;
 
 
@@ -156,6 +178,7 @@ class Queryable extends Trait{
 	}
 */
 
+	/** */
 	get delete_path(){
 		return `/api/${this.singular}/${this.id}`;
 	}
@@ -188,13 +211,13 @@ class Queryable extends Trait{
 	}
 
 
-
+	/** */
 	static refresh_static(){
 		window.ReactSyncAppData.update();
 	}
 
 
-
+	/** */
 	refresh(redirectEndpoint){
 		Shell.cache = {};
 		window.ReactSyncAppData.update();

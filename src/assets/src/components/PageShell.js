@@ -2,12 +2,15 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import collect from 'collect.js';
 
+/** */
 class PageShell extends Component{
 
+	/** */
 	static defaultProps = {
 		Model: null,
 	}
 
+	/** */
 	constructor(props){
 		super(props);
 		this.state = {
@@ -15,9 +18,10 @@ class PageShell extends Component{
 		}
 	}
 
+	/** */
 	static cached = {}
 
-
+	/** */
 	componentDidMount(){
 		const request_options = {
 			headers: {'X-IsAjax': 'true', 'X-Requested-With': 'XMLHttpRequest'},
@@ -28,7 +32,7 @@ class PageShell extends Component{
 		});
 	}
 
-
+	/** */
 	render(){
 		if(!this.state.children) return null;
 

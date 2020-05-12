@@ -1,7 +1,9 @@
 import React from 'react';
 import { dispatch } from './Event';
 
-export default class ReactSync{
+/** */
+class ReactSync{
+	/** */
 	constructor(){
 		if(ReactSync.instance) return ReactSync.instance;
 		ReactSync.instance = this;
@@ -33,10 +35,12 @@ export default class ReactSync{
 		
 	}
 
+	/** */
 	boot(data){
 		ReactSync.pages = {...ReactSync.pages, ...data.pages};
 	}
 
+	/** */
 	static setAppRef = reference => {
 		this.appRef = {current: reference};
 		dispatch('react_sync_booted', this.appRef);
@@ -44,22 +48,28 @@ export default class ReactSync{
 
 
 // 	static appRef = React.createRef();
+	/** */
 	static appRef = {current: null};
 
+	/** */
 	get appRef(){
 		return this.constructor.appRef;
 	}
 
 	// instance property
+	/** */
 	components = [];
 
 	// instance property
+	/** */
 	static pages = {};
 
+	/** */
 	get logged_in(){
 		return typeof this.user === "object";
 	}
 
+	/** */
 	update(callback){
 		return axios.get('').then((new_page_data) => {
 			this.components.forEach(function(component){
@@ -79,3 +89,5 @@ export default class ReactSync{
 ReactSync.instance = false;
 
 window[window.ReactSyncGlobal] = new ReactSync;
+
+export default ReactSync;

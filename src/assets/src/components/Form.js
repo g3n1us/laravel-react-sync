@@ -2,12 +2,16 @@ import React, { Component } from 'react';
 import { Csrf } from '../extras';
 import axios from 'axios';
 
-export default class Form extends Component{
+
+/** */
+class Form extends Component{
+	/** */
 	constructor(props){
 		super(props);
 
 	}
 
+	/** */
 	onSubmit = e =>{
 		e.preventDefault();
 		const form = e.currentTarget;
@@ -20,6 +24,7 @@ export default class Form extends Component{
 
 	}
 
+	/** */
 	get form_props(){
 		return {
 			...this.props,
@@ -27,7 +32,9 @@ export default class Form extends Component{
 			method: this.props.method || 'post',
 		}
 	};
-
+	
+	
+	/** */
 	render(){
 		return (
 			<form {...this.form_props} onSubmit={this.onSubmit}>
@@ -38,4 +45,4 @@ export default class Form extends Component{
 	}
 }
 
-
+export default Form;

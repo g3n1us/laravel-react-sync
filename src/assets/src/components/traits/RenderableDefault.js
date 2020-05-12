@@ -57,6 +57,7 @@ class RenderableDefault extends Trait{
 
   }
 
+	/** */
   renderListItem(){
 	  return <div className="list-item">{this.constructor.name} : {this.props.name || this.props.value || this.props.id}</div>
   }
