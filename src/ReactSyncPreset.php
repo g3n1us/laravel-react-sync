@@ -50,7 +50,7 @@ class ReactSyncPreset extends Preset
 	        $command->comment('');
 	        $command->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
 	        $command->comment('');
-	        $command->comment('"start": "php artisan write_index_files && php artisan write_schemas && npm run watch"');
+	        $command->comment('"start": "php artisan react_sync:all && npm run watch"');
 	        $command->comment('');
 	        $command->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
 	        $command->comment('');
@@ -62,7 +62,7 @@ class ReactSyncPreset extends Preset
 	        $command->comment('');
 	        $command->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
 	        $command->comment('');
-	        $command->comment('"start": "php artisan write_index_files && php artisan write_schemas && npm run watch"');
+	        $command->comment('"start": "php artisan react_sync:all && npm run watch"');
 	        $command->comment('');
 	        $command->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
 	        $command->comment('');

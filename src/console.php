@@ -46,17 +46,17 @@ Artisan::command('make:react_page {name?}', function($name = null){
 	$name = studly_case($name) . 'Page';
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
-	
+
 	file_put_contents(Paths::app_path("Pages/$name.js"), $rendered);
 
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page_php.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
 	$namespace = config('react_sync.namespace');
 	$rendered = str_replace('{{ namespace }}', "$namespace\\Pages", $rendered);
-	
+
 	file_put_contents(Paths::app_path("Pages/$name.php"), $rendered);
 
-	Artisan::call('write_index_files');
+	Artisan::call('react_sync:all');
 	$this->comment("Page: $name created");
 	$this->comment("route registered at: " . url("/pages/$pathname"));
 });
