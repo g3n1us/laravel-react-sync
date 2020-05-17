@@ -1,4 +1,5 @@
 let mix = require('laravel-mix');
+const fs = require('fs');
 const path = require('path');
 
 /*
@@ -12,6 +13,10 @@ const path = require('path');
  |
  */
 
+fs.writeFile('public/APP_VERSION', `v${(new Date).getTime()}`, (err) => {
+	if (err) throw err;
+	console.log('The file has been saved!');
+});
 
 mix.webpackConfig({
     resolve: {

@@ -104,7 +104,7 @@ class ReactSyncPreset extends Preset
         $package_json = json_decode(file_get_contents(Paths::base_path('package.json')), true);
 
 		if(!isset($package_json['scripts']['start'])){
-			$package_json['scripts']['start'] = "php artisan write_index_files && php artisan write_schemas && npm run watch";
+			$package_json['scripts']['start'] = "php artisan react_sync:all && npm run watch";
 		}
 		else{
 			self::$start_added = false;
@@ -159,9 +159,9 @@ class ReactSyncPreset extends Preset
 		$packages = [
             '@babel/preset-react' => '^7.7.4',
             '@babel/plugin-proposal-class-properties' => '^7.7.4',
-            'react' => '^16.12.0',
-            'react-dom' => '^16.12.0',
-            'jquery' => '^3.4.1',
+            'react' => '^16.13.0',
+            'react-dom' => '^16.13.0',
+            'jquery' => '^3.5.1',
         ] + Arr::except($packages, ['vue']);
 
 		if(self::$include_bootstrap){
