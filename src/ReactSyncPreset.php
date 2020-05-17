@@ -36,6 +36,7 @@ class ReactSyncPreset extends Preset
         static::updateBootstrapping();
         static::updateComponent();
         static::removeNodeModules();
+        \Artisan::call('ui:auth');
         if(self::$include_example){
 	        \Artisan::call('make:react_model Example');
 	        \Artisan::call('make:react_page Example');
