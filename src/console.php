@@ -29,7 +29,7 @@ Artisan::command('make:react_model {name?}', function($name = null){
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/model.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
 	file_put_contents(Paths::app_path("Models/$name.js"), $rendered);
-	Artisan::call('write_index_files');
+	Artisan::call('react_sync:all');
 	$this->comment("Model: $name created");
 });
 
