@@ -127,15 +127,10 @@ trait ReactSyncable{
 		if(!file_exists(Paths::config_path('react_sync.php'))){
 			$publishes[__DIR__.'/config.php'] = Paths::config_path('react_sync.php');
 		}
-/*
-		if(!is_dir($this->getJsPath() . '/vendor/laravel-react-sync')){
-			$publishes[__DIR__.'/assets/dist'] = $this->getJsPath() . '/vendor/laravel-react-sync';
-		}
-*/
+
         $this->publishes($publishes, 'laravel-react-sync');
 
-        // Load this into the `preset` Artisan command as the type: `react-sync`
-
+        // Load this into the `ui` Artisan command as the type: `react-sync`
 
 		UiCommand::macro('react-sync', function (UiCommand $command) {
 			ReactSyncPreset::install($command);
