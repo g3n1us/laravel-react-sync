@@ -29,6 +29,8 @@ class Queryable extends Trait{
 	static setKeyed(){
 		
 	}
+	
+	
 
 /**
  * (STATIC) - Query the data store and return the model with the supplied id
@@ -36,22 +38,18 @@ class Queryable extends Trait{
  */
 	static find(id){
 		const { plural, repo } = this;
-		const dotstring = `${plural}.${id}`;
-		console.log('plural, repo', plural, repo, dotstring);
-		
+		const dotstring = `${plural}.${id}`;		
 		return app_get(dotstring);
 	}
 
 
 /**
- * (STATIC) - TODO -- Work in Progress -- DO NOT USE
+ * (STATIC) - 
  * @static
  */
-	static where(a,b,c){
-		// WIP!!!
-		let query = [].slice.call(arguments);
-
+	static where(...args){
 		this.refresher = React.createRef();
+		return collect(appGet(this.plural)).where(...args);
 	}
 
 

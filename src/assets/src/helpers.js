@@ -4,6 +4,13 @@ const pluralize = require('pluralize');
 import { on } from './Event';
 
 
+
+/** */
+export function fromRenderedComponent(C){
+	const { type, props } = c;
+	return new type(...props);
+}
+
 /** */
 export function ReactSyncData(){
 	window[window.ReactSyncGlobal] = window[window.ReactSyncGlobal] || {};
@@ -47,7 +54,7 @@ export function app_get(dotvalue, query){
 	data = get(ReactSyncAppData.page_data, dotvalue);
 
 	if(query) {
-		if(!isArray(query)) query = ['id', parseInt(query)];
+		if(!isArray(query)) query = ['id', query];
 		return find(data, query);
 	}
 	else return data;

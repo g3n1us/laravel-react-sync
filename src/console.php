@@ -76,8 +76,14 @@ if(!function_exists('get_schemas')){
 }
 
 
+Artisan::command('react_sync:all', function(){
+	Artisan::call('react_sync:write_schemas');
+	Artisan::call('react_sync:write_index_files');
+})->describe('Write metadata and other data files required for Laravel React Sync');
 
-Artisan::command('write_schemas', function () {
+
+
+Artisan::command('react_sync:write_schemas', function () {
     $path = Paths::resource_path('js/schema.js');
     $file_contents = get_schemas();
     $file_contents = "export default $file_contents;\n";
@@ -161,7 +167,7 @@ if(!function_exists('write_index_files')){
 }
 
 
-Artisan::command('write_index_files', function(){
+Artisan::command('react_sync:write_index_files', function(){
     // put a file called .index in a directory you want to index
     write_index_files($this);
 });

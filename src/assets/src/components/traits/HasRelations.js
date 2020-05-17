@@ -5,6 +5,9 @@ import * as models from '../../models/models';
 const pluralize = require('pluralize');
 import { app_get, pluralToClassName } from '../../helpers';
 
+function dot_basename(str){
+	return str.split(/\./g).pop();
+}
 
 /**
 @kind mixin
@@ -20,7 +23,7 @@ class HasRelations extends Trait{
 	HasMany(relationship_definition_from_schema){
 		const { related, localKey, foreignKey } = relationship_definition_from_schema;
 		const M = Model.getModel(related);
-		return M.where(foreignKey, this.props[localKey]);
+		return M.where('props.'+dot_basename(foreignKey), this.props[localKey]);
 	}
 
 	/** */
