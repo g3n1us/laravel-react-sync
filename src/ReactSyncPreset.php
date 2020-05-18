@@ -163,6 +163,7 @@ class ReactSyncPreset extends Preset
             'react' => '^16.13.0',
             'react-dom' => '^16.13.0',
             'jquery' => '^3.5.1',
+            'pluralize' => '^8.0.0'
         ] + Arr::except($packages, ['vue']);
 
 		if(self::$include_bootstrap){

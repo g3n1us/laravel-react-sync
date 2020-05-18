@@ -21,7 +21,8 @@ fs.writeFile('public/APP_VERSION', `v${(new Date).getTime()}`, (err) => {
 mix.webpackConfig({
     resolve: {
         alias: {
-            laravel_react_sync: path.resolve('./vendor/g3n1us/laravel-react-sync/src/assets/dist/LaravelReactSync.js'),
+//            laravel_react_sync: path.resolve('./vendor/g3n1us/laravel-react-sync/src/assets/dist/LaravelReactSync.js'),
+            laravel_react_sync: path.resolve('./vendor/g3n1us/laravel-react-sync/src/assets/src/main.js'),
             pages: path.resolve('./app/Pages'),
             models: path.resolve('./app/Models'),
             js: path.resolve('./resources/js'),

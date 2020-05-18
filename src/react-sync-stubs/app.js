@@ -4,6 +4,7 @@ import App from './components/App';
 import { ReactSync } from 'laravel_react_sync';
 import * as pages from 'pages';
 import * as models from 'models';
+import { collect } from 'collect.js';
 
 /**
  * First we will load all of this project's JavaScript dependencies which

@@ -21,8 +21,20 @@ const LaravelReactSync = {
 	Form,
 	Notification,
 	ReactSync
+
 };
 
-// require('./components/Notification');
+export {
+	helpers,
+	on,
+	dispatch,
+	Pagination,
+	Page,
+	Model,
+	Field,
+	Form,
+	Notification,
+	ReactSync
+};
 
 export default LaravelReactSync;
