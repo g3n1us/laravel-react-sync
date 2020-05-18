@@ -16,7 +16,7 @@ Route::middleware(config('react_sync.middleware'))->group(function () {
 
 	$page_class = Page::resolve();
 
-	$page_prefix = config('react_sync.pages_prefix', 'pages');
+	$page_prefix = trim(config('react_sync.pages_prefix', 'pages'), '/');
 	if(class_exists($page_class)){
 		$class_parameter = $page_class::slug();
 
