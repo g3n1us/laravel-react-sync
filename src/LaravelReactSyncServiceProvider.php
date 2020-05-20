@@ -3,7 +3,9 @@ namespace G3n1us\LaravelReactSync;
 
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Blade;
 use G3n1us\LaravelReactSync\Pages\Core\Page;
+use G3n1us\LaravelReactSync\Views\Components\RenderableClass;
 
 class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 	use ReactSyncable;
@@ -16,11 +18,11 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
     public function register()
     {
 	    $this->syncable_register();
-	    
+
 		$this->app->bind(Page::class, function ($app) {
 		    return new Page;
 		});
-	    
+
 	}
 
 
@@ -32,6 +34,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
      */
     public function boot()
     {
+	    Blade::component('react-sync-render', RenderableClass::class);
 	    $this->syncable_boot();
 // dd(Route::list());
     }

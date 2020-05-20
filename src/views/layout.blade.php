@@ -31,9 +31,13 @@
     </div>
 @endif
 
-	        @section('content')
-                <div id="content" data-react-render="{{$page_class ?? null}}"></div>
-        @show
+@section('content')
+
+	        <x-react-sync-render :page-class="$page_class" />
+{!! ssr(__DIR__.'/../../../public/js/server-app.js')->render() !!}
+
+<!--             <div id="content" data-react-render="{{$page_class ?? null}}"></div> -->
+@show
             <div id="app"></div>
 
     <div id="notification_outer">

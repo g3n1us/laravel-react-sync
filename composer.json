@@ -16,7 +16,8 @@
         "g3n1us/laravel-model-api": "dev-laravel-7-update",
         "laravel/helpers": "^1.1",
         "laravel/ui": "^2.0",
-        "doctrine/dbal": "^2.9"
+        "doctrine/dbal": "^2.9",
+        "spatie/laravel-server-side-rendering": "^1.4"
     },
     "autoload": {
         "psr-4": {

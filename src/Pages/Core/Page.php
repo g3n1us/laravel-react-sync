@@ -10,7 +10,7 @@ abstract class Page{
 
     abstract public function form_request(Request $request);
 
-   abstract public function constructor();
+    abstract public function constructor();
 
     public static $middleware = [];
 
