@@ -1,5 +1,6 @@
 import React from 'react';
 import Trait from './Trait';
+import Shell from '../Shell';
 
 import { studly_case } from '../../helpers';
 
