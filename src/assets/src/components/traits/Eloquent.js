@@ -41,7 +41,7 @@ class Eloquent extends Trait{
 
 	/** */
 	get non_reserved_props(){
-		return this.get_non_reserved_props();
+		return this.constructor.get_non_reserved_props(this.props);
 	}
 
 	/** */
