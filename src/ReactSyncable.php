@@ -128,6 +128,8 @@ trait ReactSyncable{
 			$publishes[__DIR__.'/config.php'] = Paths::config_path('react_sync.php');
 		}
 
+		$publishes[__DIR__.'/views'] = Paths::resource_path('views/vendor/react_sync');  // resource_path('views/vendor/courier')
+
         $this->publishes($publishes, 'laravel-react-sync');
 
         // Load this into the `ui` Artisan command as the type: `react-sync`

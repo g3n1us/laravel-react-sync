@@ -16,11 +16,11 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
     public function register()
     {
 	    $this->syncable_register();
-	    
+
 		$this->app->bind(Page::class, function ($app) {
 		    return new Page;
 		});
-	    
+
 	}
 
 
@@ -33,7 +33,6 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
     public function boot()
     {
 	    $this->syncable_boot();
-// dd(Route::list());
     }
 }
 
