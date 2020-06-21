@@ -8,7 +8,7 @@ import ReactSync from '../ReactSync';
 
 import Eloquent from './traits/Eloquent';
 
-import { studly_case } from '../helpers';
+import { studly_case, kebab_case } from '../helpers';
 
 
 /** */
@@ -59,6 +59,17 @@ class Page extends Component{
 		return (
 			<PageShell Page={P} />
 		)
+	}
+
+	/** */
+	renderNavLink(){
+		const human_name = this.constructor.name.slice(0, -4);
+		const path = kebab_case(this.constructor.name.slice(0, -4));
+		const prefix = (new ReactSync).config.pages_prefix;
+		const link = `${prefix}/${path}`;
+		return (
+			<a key={`NavLink${link}`} href={link} className="nav-link">{human_name}</a>
+		);
 	}
 
 	/** */

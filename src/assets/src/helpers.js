@@ -1,4 +1,4 @@
-import { clone, get, isArray, find, set, snakeCase, camelCase } from 'lodash';
+import { clone, get, isArray, find, set, snakeCase, camelCase, kebabCase } from 'lodash';
 import ReactSync from './ReactSync';
 const pluralize = require('pluralize');
 import { on } from './Event';
@@ -15,6 +15,19 @@ export function fromRenderedComponent(C){
 export function ReactSyncData(){
 	window[window.ReactSyncGlobal] = window[window.ReactSyncGlobal] || {};
 	return window[window.ReactSyncGlobal];
+}
+
+
+/** */
+export function kebab_case(t){
+	var t = clone(t) || '';
+	return kebabCase(t);
+/*
+
+	(t.match(/[A-Z]/g) || []).forEach((l) => { t = t.replace(l, `_${l}`) })
+
+	return t.replace(/^_/, '').toLowerCase();
+*/
 }
 
 

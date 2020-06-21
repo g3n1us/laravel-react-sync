@@ -31,8 +31,8 @@ class ReactSync{
 		if(this.user){
 			this.user.can = (ability) => this.user_can[ability] === true;
 		}
-		
-		
+
+
 	}
 
 	/** */
@@ -63,6 +63,10 @@ class ReactSync{
 	// instance property
 	/** */
 	static pages = {};
+
+	get pages(){
+		return ReactSync.pages;
+	}
 
 	/** */
 	get logged_in(){
