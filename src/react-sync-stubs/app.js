@@ -27,6 +27,7 @@ const { state = {} } = ReactSyncInstance.page_data;
 
 const model_map = Object.values(models).reduce((accumulator, v) => {
 	accumulator[v.plural] = v;
+	return accumulator;
 }, {});
 
 const models_with_keys = Object.values(models).map(C => [C.plural, C]);

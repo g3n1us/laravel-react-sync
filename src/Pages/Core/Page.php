@@ -53,7 +53,6 @@ abstract class Page{
 		$page_prefix = Str::start(config('react_sync.pages_prefix', '/pages'), '/');
 
 		$current_path = Str::start(request()->path(), '/');
-
 		$current_path = Str::finish($current_path, '/');
 		$pattern = "^\\$page_prefix\\/(.*?)\/";
 
@@ -82,6 +81,7 @@ abstract class Page{
 
     public function getResponse(){
 	    $arg_values = array_values($this->arguments);
+
         $potential_response = $this->constructor(...$arg_values);
         if(is_array($potential_response)){
             $potential_response = collect($potential_response);
