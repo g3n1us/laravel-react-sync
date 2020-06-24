@@ -156,7 +156,6 @@ class Model extends Component{
 
 	/** */
 	static getPrimaryKey(){
-		console.log('this.getSchema()', this.getSchema())
 		return collect(this.getSchema()).firstWhere('primaryKey')['name'];
 	}
 
