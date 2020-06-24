@@ -1,5 +1,6 @@
 import React from 'react';
 import { dispatch } from './Event';
+import schemas from 'js/schema';
 
 /** */
 class ReactSync{
@@ -27,7 +28,7 @@ class ReactSync{
 				}
 			}
 		});
-
+		this.schemas = schemas;
 		if(this.user){
 			this.user.can = (ability) => this.user_can[ability] === true;
 		}

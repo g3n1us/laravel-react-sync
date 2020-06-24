@@ -94,6 +94,7 @@ abstract class Page{
         else if(is_object($potential_response)){
             return $this->returnObjectResponse($potential_response);
         }
+
         return response()->view($template, $view_data);
     }
 

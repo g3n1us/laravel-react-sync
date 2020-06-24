@@ -25,6 +25,7 @@ class PageController extends Controller{
 	protected $page_instance;
 
     public function __construct(Request $request) {
+	    $this->request = $request;
         $this->page_class = Page::resolve();
 
         $this->middleware($this->page_class::$middleware);
@@ -39,7 +40,7 @@ class PageController extends Controller{
 	        return $page_instance->getResponse();
         }
         else{
-	        return $page_instance->form_request($request);
+	        return $page_instance->form_request($this->request);
         }
     }
 
