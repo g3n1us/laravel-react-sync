@@ -1,6 +1,9 @@
 import React from 'react';
 import { dispatch } from './Event';
 import schemas from 'js/schema';
+import qs from 'qs';
+import Reducer from './Reducer';
+import { getAjaxUrl } from './helpers';
 
 /** */
 class ReactSync{
@@ -33,12 +36,16 @@ class ReactSync{
 			this.user.can = (ability) => this.user_can[ability] === true;
 		}
 
-
+console.log('this', this);
 	}
 
 	/** */
 	boot(data){
 		ReactSync.pages = {...ReactSync.pages, ...data.pages};
+	}
+	
+	static getInstance(){
+		return new this;
 	}
 
 	/** */
@@ -74,14 +81,15 @@ class ReactSync{
 		return typeof this.user === "object";
 	}
 
+	getAjaxUrl(){
+		return getAjaxUrl();
+	}
+
 	/** */
 	update(callback){
-		return axios.get('').then((new_page_data) => {
-			this.components.forEach(function(component){
-				component.setState(new_page_data.data);
-			});
-
+		return axios.get(getAjaxUrl()).then((new_page_data) => {
 			this.page_data = new_page_data.data;
+			app().setState(Reducer());
 			if(typeof callback === 'function'){
 				callback(this.page_data);
 			}

@@ -6,6 +6,8 @@ import * as extras from './extras';
 
 import ReactSync from './ReactSync';
 
+import Reducer from './Reducer';
+
 import { on, dispatch } from './Event';
 
 /** */
@@ -20,8 +22,8 @@ const LaravelReactSync = {
 	Field,
 	Form,
 	Notification,
-	ReactSync
-
+	ReactSync,
+	Reducer,
 };
 
 export {
@@ -34,7 +36,8 @@ export {
 	Field,
 	Form,
 	Notification,
-	ReactSync
+	ReactSync,
+	Reducer,
 };
 
 export default LaravelReactSync;

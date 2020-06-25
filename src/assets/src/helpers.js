@@ -2,7 +2,7 @@ import { clone, get, isArray, find, set, snakeCase, camelCase, kebabCase } from 
 import ReactSync from './ReactSync';
 const pluralize = require('pluralize');
 import { on } from './Event';
-
+import qs from 'qs';
 
 
 /** */
@@ -15,6 +15,12 @@ export function fromRenderedComponent(C){
 export function ReactSyncData(){
 	window[window.ReactSyncGlobal] = window[window.ReactSyncGlobal] || {};
 	return window[window.ReactSyncGlobal];
+}
+
+/** */
+export function getAjaxUrl(addl_query = {}){
+	const query = {...qs.parse(window.location.search), ...addl_query, asajax: true};
+	return window.location.href + '?' + qs.stringify(query);
 }
 
 

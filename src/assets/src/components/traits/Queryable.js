@@ -4,6 +4,7 @@ import Trait from './Trait';
 import { get, camelCase, snakeCase } from 'lodash';
 import { app_get, snake_case, def } from '../../helpers';
 import Shell from '../Shell';
+import ReactSync from '../../ReactSync';
 
 window.Find = (dotstring) => {
 	
@@ -127,24 +128,19 @@ class Queryable extends Trait{
 
 
 	/** */
-	static create_path = `/${this.plural}`;
+	static create_path = `/${this.plural}?asajax=true`;
+
 
 
 	/**
 	 * Store the model's state back to the database
 	 */
 	static create(initialProps = {}){
-		const react_sync_instance = window[window.ReactSyncGlobal];
 		axios.post(this.create_path, initialProps)
 			.then(response => {
 				if(window.location.href != response.request.responseURL){
-					react_sync_instance.components.forEach(function(component){
-						history.pushState(response.data, "", response.request.responseURL);
-						component.setState(response.data);
-					});
-
-					react_sync_instance.page_data = response.data;
-
+					history.pushState(response.data, "", response.request.responseURL);
+					this.refresh_static();
 				}
 				else{
 					this.refresh_static();
@@ -185,16 +181,11 @@ class Queryable extends Trait{
 	 * Delete a model
 	 */
 	delete(){
-		const react_sync_instance = window[window.ReactSyncGlobal];
 		axios.delete(this.delete_path)
 			.then(response => {
 				if(window.location.href != response.request.responseURL){
-					react_sync_instance.components.forEach(function(component){
-						history.pushState(response.data, "", response.request.responseURL);
-						component.setState(response.data);
-					});
-
-					react_sync_instance.page_data = response.data;
+					history.pushState(response.data, "", response.request.responseURL);
+					this.refresh();
 				}
 				else{
 					this.refresh();
@@ -211,14 +202,14 @@ class Queryable extends Trait{
 
 	/** */
 	static refresh_static(){
-		window.ReactSyncAppData.update();
+		this.getInstance().update();
 	}
 
 
 	/** */
 	refresh(redirectEndpoint){
 		Shell.cache = {};
-		window.ReactSyncAppData.update();
+		ReactSync.getInstance().update();
 	}
 
 }

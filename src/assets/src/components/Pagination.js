@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import qs from 'qs';
 
-const REACT_SYNC_DATA = require('../ReactSync').default;
+// const REACT_SYNC_DATA = require('../ReactSync').default;
+
+import ReactSync from '../ReactSync';
+
 const str_rand = function(length = 5){
 	var text = "";
 	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -22,7 +25,7 @@ class Pagination extends Component{
 		if(current_page == this.props.last_page){
 			return null; // There is only one page, so return nothing
 		}
-
+		const query = { ...ReactSync.getInstance().request.query };
 		while(current_page <= this.props.last_page){
 			if(current_page == this.props.current_page){
 				links.push(
@@ -30,11 +33,9 @@ class Pagination extends Component{
 				);
 			}
 			else{
-				let req = REACT_SYNC_DATA.request;
-				req.page = current_page;
 				links.push(
 					<li className="page-item" key={str_rand(20)}>
-						<a className="page-link" href={`?${qs.stringify(req)}`}>{current_page}</a>
+						<a className="page-link" href={`?${qs.stringify({...query, page: current_page})}`}>{current_page}</a>
 					</li>
 				);
 			}
@@ -64,11 +65,9 @@ class Pagination extends Component{
 
 		}
 
-		let req = REACT_SYNC_DATA.request;
-		req.page = this.props.current_page - 1;
-    let prev_page_url = `?${qs.stringify(req)}`;
-		req.page = this.props.current_page + 1;
-    let next_page_url = `?${qs.stringify(req)}`;
+	    let prev_page_url = `?${qs.stringify({...query, page: this.props.current_page - 1})}`;
+	    let next_page_url = `?${qs.stringify({...query, page: this.props.current_page + 1})}`;
+
 		return (
 			<div className="d-flex justify-content-center">
 				<ul className="pagination">
