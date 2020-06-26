@@ -36,7 +36,6 @@ class ReactSync{
 			this.user.can = (ability) => this.user_can[ability] === true;
 		}
 
-console.log('this', this);
 	}
 
 	/** */

@@ -159,18 +159,6 @@ class Queryable extends Trait{
 	 * @todo complete this method
 	 */
 
-/*
-	static create_static(initialProps = {}){
-		return axios.post(`/${this.plural}`, initialProps)
-			.then(data => {
-				this.refresh_static();
-				react_sync_notification('Created');
-			})
-			.catch(err => {
-				react_sync_notification({text: 'An error occurred', level: 'danger'});
-			});
-	}
-*/
 
 	/** */
 	get delete_path(){
@@ -202,7 +190,7 @@ class Queryable extends Trait{
 
 	/** */
 	static refresh_static(){
-		this.getInstance().update();
+		ReactSync.getInstance().update();
 	}
 
 
