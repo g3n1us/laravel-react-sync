@@ -18,11 +18,14 @@ class Eloquent extends Trait{
 	static query_props = ['find', 'where', 'all', 'first'];
 
 	/** */
-	static pagination_props = ['per_page'];
+	static pagination_props = ['per_page', 'perPage'];
+
+	/** */
+	static ordering_props = ['order_by', 'sort_by', 'orderBy', 'sortBy'];
 
 	/** */
 	static get reserved_props(){
-		return [...this.query_props, ...this.pagination_props, 'order_by', 'sort_by'];
+		return [ ...this.query_props, ...this.pagination_props, ...this.ordering_props ];
 	}
 
 	/** */
@@ -78,7 +81,24 @@ class Eloquent extends Trait{
 			first: `/api/${this.singular}`,
 		}
 		const qs_object = {};
-		if(this.props.per_page) qs_object.per_page = this.props.per_page;
+		let { per_page, perPage } = this.props;
+		per_page = per_page || perPage;
+		if(per_page) {
+			qs_object.per_page = per_page;
+		}
+		
+		let { order_by, orderBy, sort_by, sortBy, order_direction, orderDirection, sort_direction, sortDirection } = this.props;
+		
+		order_by = order_by || orderBy || sort_by || sortBy;
+		if(order_by){
+			qs_object.order_by = order_by;
+		}
+		
+		order_direction = order_direction || orderDirection || sort_direction || sortDirection;
+		if(order_direction){
+			qs_object.order_direction = order_direction;
+		}
+		
 		const qs_string = qs.stringify(qs_object);
 		return map[q] + `?${qs_string}`;
 	}
