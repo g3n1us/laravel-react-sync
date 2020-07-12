@@ -6,6 +6,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Filesystem\Filesystem;
 use Laravel\Ui\Presets\Preset;
 
+use Laravel\Ui\UiCommand;
+use Laravel\Ui\AuthCommand;
+
+
+use Schema;
+
 class ReactSyncPreset extends Preset
 {
 
@@ -15,19 +21,33 @@ class ReactSyncPreset extends Preset
 
 	static $start_added = true;
 
+	static $command;
+
     private function getJsPath(){
-      return is_dir(Paths::resource_path('js')) ? Paths::resource_path('js') : Paths::resource_path('assets/js');
+		return is_dir(Paths::resource_path('js')) ? Paths::resource_path('js') : Paths::resource_path('assets/js');
     }
+
+
+	public static function install_auth(AuthCommand $command){
+		static::$command = $command;
+		$command->call('ui:auth');
+		if ($command->confirm('Would you like to use the React Sync layout in place of the default layout view template?', 'yes')) {
+			copy(__DIR__.'/views/layout.blade.php', Paths::resource_path("views/layouts/app.blade.php"));
+		}
+
+
+
+	}
 
     /**
      * Install the preset.
      *
      * @return void
      */
-    public static function install($command)
+    public static function install(UiCommand $command)
     {
+        static::$command = $command;
         static::preflight($command);
-
 
         static::ensurePagesModelsDirectoriesExist();
         static::ensureComponentDirectoryExists();
@@ -36,17 +56,20 @@ class ReactSyncPreset extends Preset
         static::updateBootstrapping();
         static::updateComponent();
         static::removeNodeModules();
-        \Artisan::call('ui:auth');
-        if(self::$include_example){
-	        \Artisan::call('make:react_model Example');
-	        \Artisan::call('make:react_page Example');
+
+        $command->call('ui:auth', ['type' => 'react-sync']);
+//         dd('sdf');
+
+        if(static::$include_example){
+	        $command->call('make:react_model', ['name' => 'Example']);
+	        $command->call('make:react_page', ['name' => 'Example']);
         }
 
         static::addStartCommand();
 
         $command->info('ReactSync scaffolding installed successfully.');
         $command->comment('Please run "npm install && npm run dev" to compile your fresh scaffolding.');
-        if(self::$start_added){
+        if(static::$start_added){
 	        $command->comment('We\'ve added a "start" command to the scripts section of package.json:');
 	        $command->comment('');
 	        $command->comment('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ');
@@ -78,19 +101,31 @@ class ReactSyncPreset extends Preset
 
 
     public static function preflight($command){
+		try {
+		    \DB::connection()->getPdo();
+		} catch (\Exception $e) {
+			echo PHP_EOL;
+		    $command->error("Your database configuration does not appear to be configured yet. Afterwards, you will need to run 'php artisan react_sync:all' manually to complete installation.");
+			echo PHP_EOL;
+
+		}
+
+
 	    $command->info("You are about to install the Laravel ReactSync preset");
 		if (!$command->confirm('Would you like to continue?', 'yes')) {
 		    exit('Cancelled' . PHP_EOL);
 		}
 
+
+
 	    $command->info("The following questions will help get the preset configured for your specific requirements.");
 
 		if ($command->confirm('Would you like to include the Bootstrap framework?', 'yes')) {
-		    self::$include_bootstrap = true;
+		    static::$include_bootstrap = true;
 		}
 
 		if ($command->confirm('Would you like to include an example Page and Model component to get started?', 'yes')) {
-		    self::$include_example = true;
+		    static::$include_example = true;
 		}
 
 
@@ -108,7 +143,7 @@ class ReactSyncPreset extends Preset
 			$package_json['scripts']['start'] = "php artisan react_sync:all && npm run watch";
 		}
 		else{
-			self::$start_added = false;
+			static::$start_added = false;
 		}
 
         file_put_contents(
@@ -176,6 +211,16 @@ class ReactSyncPreset extends Preset
 		return $packages;
     }
 
+    protected static function confirm_copy($from, $to){
+        if (file_exists($from)) {
+            if (! static::$command->confirm("The file [{$from}] already exists. Do you want to replace it?")) {
+                return;
+            }
+        }
+
+        copy($from, $to);
+    }
+
     /**
      * Update the Webpack configuration.
      *
@@ -216,7 +261,7 @@ class ReactSyncPreset extends Preset
     {
         $js_path = is_dir(Paths::resource_path('js')) ? 'js' : 'assets/js';
         copy(__DIR__.'/react-sync-stubs/app.js', Paths::resource_path("$js_path/app.js"));
-		if(self::$include_bootstrap){
+		if(static::$include_bootstrap){
 			copy(__DIR__.'/react-sync-stubs/app.scss', Paths::resource_path("sass/app.scss"));
 			copy(__DIR__.'/react-sync-stubs/_variables.scss', Paths::resource_path("sass/_variables.scss"));
 		}

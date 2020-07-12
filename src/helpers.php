@@ -90,6 +90,13 @@
 	if(!function_exists('get_schema')){
 		function get_schema($model = null){
 			$connection = Schema::getConnection();
+			try {
+			    \DB::connection()->getPdo();
+			} catch (\Exception $e) {
+
+				return;
+			}
+
 
 			if($model === null) die("\npass in a model instance!\n\n");
 
@@ -97,7 +104,7 @@
 			$primary_key = $model->getKeyName();
 
 			$attrs = Schema::getColumnListing($model->getTable());
-			
+
 			$attrs = collect($attrs)->map(function($column) use($table, $connection, $primary_key){
 				$column_definition = $connection->getDoctrineColumn($table, $column)->toArray();
 				$column_definition['type'] = $column_definition['type']->getName();
@@ -114,7 +121,7 @@
 			$appended_attrs = coerceAsArray($model)->only(['with', 'appends'])->flatten();
 
 			$reflection = new ReflectionClass($model);
-			
+
 			$reflected_relations = new ReflectionClass(Illuminate\Database\Eloquent\Concerns\HasRelationships::class);
 			$reflected_relations = collect($reflected_relations->getMethods())->map->getName();
 
@@ -126,7 +133,7 @@
 	                $isrel = !!$reflected_relations->first(function($m) use($function_text){
 		                return str_contains($function_text, '->' . $m);
 	                });
-	                
+
 	                return $isrel;
                 }
             });

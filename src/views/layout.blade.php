@@ -19,7 +19,7 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}?v={{env('APP_VERSION', 9999999)}}" rel="stylesheet">
 </head>
-<body class="{{$bg_class ?? ''}} {{$page_name_class}}">
+<body class="{{$bg_class ?? ''}} {{$page_name_class ?? ''}}">
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">

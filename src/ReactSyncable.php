@@ -119,7 +119,9 @@ trait ReactSyncable{
     {
         $this->loadRoutesFrom(__DIR__.'/routes.php');
 
-        $this->loadRoutesFrom(__DIR__.'/console.php');
+        if ($this->app->runningInConsole()) {
+	        $this->loadRoutesFrom(__DIR__.'/console.php');
+        }
 
 	    $this->loadViewsFrom(__DIR__.'/views', 'react_sync');
 
@@ -134,8 +136,14 @@ trait ReactSyncable{
 
         // Load this into the `ui` Artisan command as the type: `react-sync`
 
-		UiCommand::macro('react-sync', function (UiCommand $command) {
-			ReactSyncPreset::install($command);
+		UiCommand::macro('react-sync', function ($command) {
+			if($command instanceof UiCommand){
+				ReactSyncPreset::install($command);
+			}
+			else{
+				ReactSyncPreset::install_auth($command);
+			}
+
 		});
 
     }
