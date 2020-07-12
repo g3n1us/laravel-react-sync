@@ -68,24 +68,6 @@
             input.parentElement.insertBefore(warning_message, input);
         }
 
-        document.addEventListener('submit', function(e){
-            if(e.currentTarget.activeElement.value == 'download'){
-                return;
-            }
-
-            $(e.target).find('[type="submit"]').each(function(){
-                $(this).addClass('disabled')
-                    .attr('readonly', true)
-                    .css('cursor', 'not-allowed');
-                $(this).find('i[class*="fa"]').each(function(){
-                    $(this).attr('class', 'fa fa-cog fa-spin');
-                });
-            });
-            e.target.addEventListener('submit', function(e){
-                e.preventDefault();
-                return false;
-            });
-        });
     })()
 
 	</script>
