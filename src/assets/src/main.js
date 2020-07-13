@@ -1,4 +1,4 @@
-import { Pagination, Page, Model, Field, Form, Notification } from './components';
+import { Pagination, Page, Model, Field, Form, Notification, PageNav } from './components';
 
 import * as helpers from './helpers';
 
@@ -22,6 +22,7 @@ const LaravelReactSync = {
 	Field,
 	Form,
 	Notification,
+	PageNav,
 	ReactSync,
 	Reducer,
 };
@@ -36,6 +37,7 @@ export {
 	Field,
 	Form,
 	Notification,
+	PageNav,
 	ReactSync,
 	Reducer,
 };

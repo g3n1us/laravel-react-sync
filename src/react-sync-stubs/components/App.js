@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom';
 
 import * as _models from 'models';
 
-import LaravelReactSync, { Model, helpers as react_sync_helpers } from 'laravel_react_sync';
+import LaravelReactSync, { Model, PageNav, helpers as react_sync_helpers } from 'laravel_react_sync';
 
 const { app_current } = react_sync_helpers;
 
@@ -21,7 +21,7 @@ class App extends Component {
 		super(props);
 		this.state = this.props.page_props;
 
-		window.app = window.app || function(){
+		typeof window.app !== "function" && window.app = function(){
 			return this;
 		}.bind(this);
 	}
@@ -35,7 +35,7 @@ class App extends Component {
 
 	components(){
 		const { App, ...rest } = require('./');
-		return rest;
+		return { PageNav, ...rest };
 	}
 
 	pages(){
@@ -61,8 +61,9 @@ class App extends Component {
                 throw new Error(`\n\nYou are trying to render a component called: '${renderable.dataset.reactRender}' that doesn't exist, or isn't exported from './Components'\n\nAvailable components are: ${Object.keys(renderables).join(', ')}\n\n`);
             }
             const { defaultProps = {} } = Renderable;
+            const defaultPageProps = this.CurrentPage ? this.CurrentPage.defaultProps : {};
             return ReactDOM.createPortal(
-                <Renderable attributes={{...renderable.dataset}} {...defaultProps} {...this.CurrentPage.defaultProps} {...this.state} />,
+                <Renderable attributes={{...renderable.dataset}} {...defaultProps} {...defaultPageProps} {...this.state} />,
                 renderable
             );
         });

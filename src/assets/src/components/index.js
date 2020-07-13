@@ -7,5 +7,6 @@ import Notification from './Notification';
 import Page from './Page';
 import Pagination from './Pagination';
 import Shell from './Shell';
+import PageNav from './PageNav';
 
-export { Alert, Field, Form, LegacyModel, Model, Notification, Page, Pagination, Shell };
+export { Alert, Field, Form, LegacyModel, Model, Notification, Page, Pagination, Shell, PageNav };
