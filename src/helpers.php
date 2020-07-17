@@ -130,6 +130,7 @@
             $relations = collect($reflection->getMethods())->filter(function($v) use($model_name, $reflected_relations){
                 if($v->class == $model_name){
 	                $function_text = returnFunctionText($v);
+
 	                $isrel = !!$reflected_relations->first(function($m) use($function_text){
 		                return str_contains($function_text, '->' . $m);
 	                });

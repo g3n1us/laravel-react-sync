@@ -100,6 +100,7 @@ class Eloquent extends Trait{
 		}
 		
 		const qs_string = qs.stringify(qs_object);
+
 		return map[q] + `?${qs_string}`;
 	}
 
@@ -118,7 +119,7 @@ class Eloquent extends Trait{
 		let renderAs = this.props.renderAs || this.props.render || 'Default';
 		let renderName = `render${studly_case(renderAs)}`;
 		if(typeof renderAs === 'function'){
-			return renderAs(this.props);
+			return renderAs(this.props, this);
 		}
 
 		if(typeof this[renderName] === 'function'){

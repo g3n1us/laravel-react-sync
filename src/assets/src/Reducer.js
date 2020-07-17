@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import ReactSync from './ReactSync';
 import { Model, Page } from './components';
+
+import { snake_case, studly_case } from './helpers';
 // import * as pages from 'pages';
 
 // import * as models from 'models';
@@ -14,17 +16,19 @@ export default function Reducer(){
 	const models = Model.models;
 
 	const pages = Page.pages;
-	
+
 	const ReactSyncInstance = new ReactSync;
-	
+
 	ReactSyncInstance.boot({pages: pages});
-	
+
 	const { state = {} } = ReactSyncInstance.page_data;
 
 	if(_.isEmpty(state)) return null;
 
 	const model_map = Object.values(models).reduce((accumulator, v) => {
 		accumulator[v.plural] = v;
+		accumulator[snake_case(v.plural)] = v;
+		accumulator[studly_case(v.plural)] = v;
 		return accumulator;
 	}, {});
 	const models_with_keys = Object.values(models).map(C => [C.plural, C]);

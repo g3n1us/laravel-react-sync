@@ -24,7 +24,8 @@ class Shell extends Component{
 
 	/** */
 	refresh(){
-		let { Model, url } = this.props;
+		let { url } = this.props;
+/*
 		let fromcache;
 		// this.setState({children: null});
 		if(!this.constructor.cached[url]){
@@ -34,6 +35,8 @@ class Shell extends Component{
 			this.constructor.cached[url] = axios.get(url);
 		}
 		this.constructor.cached[url].then(response => {
+*/
+		axios.get(url).then(response => {
 			this.setState({children: response.data});
 		}).catch((err) => {
 			console.log(err, err.response);
@@ -54,8 +57,9 @@ class Shell extends Component{
 			this.refresh();
 		}
 		else if(!this.constructor.cached[this.props.url]){
-			this.refresh();
+			// this.refresh();
 		}
+		// else this.refresh();
 	}
 
 	/** */
@@ -88,7 +92,10 @@ class Shell extends Component{
 		return (
 			<>{items.map((props, i) => {
 				const normal_props = Model.get_non_reserved_props(remainder);
-				return <Model key={i} {...normal_props} {...props} shell={this} refresh={this.refresh.bind(this)} />;
+				const kname = Model.getPrimaryKey();
+				// debugger
+				const k = Model.make_key(props[kname], 'shell');
+				return <Model key={k} {...normal_props} {...props} shell={this} refresh={this.refresh.bind(this)} />;
 			})}
 			</>
 		);
