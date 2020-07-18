@@ -12,7 +12,7 @@ class Field extends Component{
 
     this.field_type = Field.field_type.bind(this.props.model);
 
-    this.label = this.props.label || this.props.property;
+    this.label = (this.props.label === false) ? false : (this.props.label || this.props.property);
   }
 
 	/** */
@@ -91,6 +91,9 @@ class Field extends Component{
     }
     if(!field_renders[type.field]) return null;
     const classes = (this.props.className || '') + ' form-group';
+    if(this.label === false){
+	    return field_renders[type.field];
+    }
     return <fieldset className={classes}><label htmlFor={rand}>{this.label}</label> {field_renders[type.field]}</fieldset>;
   }
 

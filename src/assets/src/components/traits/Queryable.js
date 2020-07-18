@@ -39,7 +39,7 @@ class Queryable extends Trait{
  */
 	static find(id){
 		const { plural, repo } = this;
-		const dotstring = `${plural}.${id}`;		
+		const dotstring = `${plural}.${id}`;	
 		return app_get(dotstring);
 	}
 
@@ -190,14 +190,20 @@ class Queryable extends Trait{
 
 	/** */
 	static refresh_static(){
+		Shell.cache = {};
 		ReactSync.getInstance().update();
 	}
 
 
 	/** */
-	refresh(redirectEndpoint){
+	refresh(){
 		Shell.cache = {};
-		ReactSync.getInstance().update();
+		
+		if(this.props.refresh) this.props.refresh()
+		else{
+			ReactSync.getInstance().update();
+		}
+		
 	}
 
 }

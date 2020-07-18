@@ -18,6 +18,20 @@ class HasRelations extends Trait{
 	constructor(targetClass){
 		super(targetClass);
 	}
+	
+	
+	getRelation(relation_name){
+		const { definition } = this.schema[relation_name];
+		const { related, foreignKey } = definition;
+		const retval = { ...definition };
+		retval.RelatedModel = Model.getModel(related);
+		retval.render = (renderTypeOrFn = "default") => {
+			if(!this.props[foreignKey]) return null;
+			return <retval.RelatedModel find={this.props[foreignKey]} render={renderTypeOrFn} />
+		};
+		return retval;
+	}
+	
 
 	/** */
 	HasMany(relationship_definition_from_schema){
@@ -95,7 +109,7 @@ withDefault: null
 			return 
 		}
 */
-		console.log('BelongsTo found_item', Class_, found_item, found_item instanceof Model);
+// 		console.log('BelongsTo found_item', Class_, found_item, found_item instanceof Model);
 		return <Class_ {...app_get(`${plural}.${related_id}`)}/>
 
 	}

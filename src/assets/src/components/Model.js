@@ -97,10 +97,10 @@ class Model extends Component{
 				}
 			}
 			if(relationValueModels){
-				this[relationName] = relationValueModels;	
+				//this[relationName] = relationValueModels;
+				def(this, relationName, () => relationValueModels);
+				def(this.relations, relationName, () => relationValueModels);
 			}
-			
-// 			this.relations[relationName] = this[relationName];
 
 		}
 		else {
@@ -111,27 +111,12 @@ class Model extends Component{
 			else{
 				def(this, relationName, () => this[relation_type](definition));
 				def(this.relations, relationName, () => this[relation_type](definition));
-/*
-				const resolved = this[relation_type](definition);
-				this[relationName] = resolved;
-				this.relations[relationName] = resolved;
-*/
 			}
 			}
 		});
 
 		this.constructor.boot(this);
-		
-/*
-		for(const i in this.props){
-			if(i in this){
-				console.log(i + ' is alrady set');
-			}
-			else{
-				console.log(i);
-			}
-		}
-*/
+
 	}
 
 	/** */
