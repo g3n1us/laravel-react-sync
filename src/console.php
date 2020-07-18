@@ -3,7 +3,7 @@
 use Illuminate\Filesystem\Filesystem;
 use G3n1us\LaravelReactSync\ReactSyncPreset;
 use G3n1us\LaravelReactSync\Paths;
-
+use \G3n1us\LaravelReactSync\Utils;
 
 Artisan::command('make:react_model {name?}', function($name = null){
 	ReactSyncPreset::ensurePagesModelsDirectoriesExist();
@@ -64,14 +64,7 @@ Artisan::command('make:react_page {name?}', function($name = null){
 
 if(!function_exists('get_schemas')){
 	function get_schemas(){
-	    $models = json_decode(file_get_contents(Paths::app_path("Models/models.json")), true);
-	    $schemas = [];
-	    foreach($models as $model){
-		    $namespace = config('react_sync.namespace');
-	        $class = "\\$namespace\\Models\\$model";
-	        $schemas[$model] = get_schema(new $class);
-	    }
-	    return collect($schemas);
+	    return Utils::get_schemas();
 	}
 }
 
@@ -85,7 +78,7 @@ Artisan::command('react_sync:all', function(){
 
 Artisan::command('react_sync:write_schemas', function () {
     $path = Paths::resource_path('js/schema.js');
-    $file_contents = get_schemas();
+    $file_contents = Utils::get_schemas();
     $file_contents = "export default $file_contents;\n";
     $filecomments = "/****************************************************
  *
@@ -147,20 +140,7 @@ if(!function_exists('write_index_files')){
 	    });
 
     //update models.json
-    $possible_models = collect($fs->allFiles(Paths::app_path('Models')))
-        ->map(function($f) use($fs){
-	        if($f->getType() != 'file') return null;
-	        if($f->getExtension() != 'js') return null;
-	        $filename = $f->getFileName();
-	        $classname = preg_replace('/^(.*?)\.js$/', '$1', $filename);
-            if($fs->exists(Paths::app_path("Models/$classname.php"))){
-	            return $classname;
-            }
-            return null;
-        })
-        ->filter()
-        ->unique()
-        ->values();
+    $possible_models = Utils::listModels();
     $fs->put(Paths::app_path("Models/models.json"), $possible_models->toJSON());
 	$_this->comment("\n models.json updated in ".Paths::app_path("Models")." \n\n");
 	}

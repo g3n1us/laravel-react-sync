@@ -117,6 +117,8 @@ trait ReactSyncable{
      */
     public function syncable_boot()
     {
+		$this->loadMigrationsFrom(__DIR__.'/migrations');
+
         $this->loadRoutesFrom(__DIR__.'/routes.php');
 
         if ($this->app->runningInConsole()) {
@@ -145,6 +147,8 @@ trait ReactSyncable{
 			}
 
 		});
+
+		Utils::applyReactSyncAbilities();
 
     }
 
