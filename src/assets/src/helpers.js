@@ -3,6 +3,40 @@ import ReactSync from './ReactSync';
 const pluralize = require('pluralize');
 import { on } from './Event';
 import qs from 'qs';
+// import collect from 'collect.js';
+import { Collection, collect } from 'collect.js';
+
+
+class PagedCollection extends Collection{
+
+}
+
+/** */
+export function collect_paged(paginated){
+    // see if it is indeed a paginator
+
+    if(isPaginated(paginated)){
+        const { data, ...rest } = paginated;
+        for(const k in rest){
+            PagedCollection.prototype[k] = rest[k];
+        }
+        const coll = new PagedCollection(data);
+
+        return coll;
+    }
+    else if(Array.isArray(paginated)){
+        return collect(paginated);
+    }
+    else return paginated;
+}
+
+
+export function isPaginated(paginated){
+    if(paginated === null || typeof paginated !== "object" || Array.isArray(paginated)) return false;
+
+    const { current_page, last_page, per_page } = paginated || {};
+    return collect([current_page, last_page, per_page]).filter().count() === 3;
+}
 
 
 /** */
@@ -120,6 +154,6 @@ export function app_current(){
 export function def(obj, prop, callback){
 	Object.defineProperty(obj, prop, {
 		get: callback,
-		set: function(){ return null; }
+		set: function(){ throw new Error('constant has been set already'); return null; }
 	});
 }

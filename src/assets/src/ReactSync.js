@@ -42,7 +42,8 @@ class ReactSync{
 	boot(data){
 		ReactSync.pages = {...ReactSync.pages, ...data.pages};
 	}
-	
+
+	/** */
 	static getInstance(){
 		return new this;
 	}
@@ -80,6 +81,7 @@ class ReactSync{
 		return typeof this.user === "object";
 	}
 
+	/** */
 	getAjaxUrl(){
 		return getAjaxUrl();
 	}

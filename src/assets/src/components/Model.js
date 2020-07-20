@@ -258,6 +258,7 @@ new Queryable(Model);
 
 new Eloquent(Model);
 
+
 (function(){
 	/** */
 	Model.addModel = function(M){

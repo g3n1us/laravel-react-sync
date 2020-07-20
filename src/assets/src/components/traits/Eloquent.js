@@ -86,19 +86,19 @@ class Eloquent extends Trait{
 		if(per_page) {
 			qs_object.per_page = per_page;
 		}
-		
+
 		let { order_by, orderBy, sort_by, sortBy, order_direction, orderDirection, sort_direction, sortDirection } = this.props;
-		
+
 		order_by = order_by || orderBy || sort_by || sortBy;
 		if(order_by){
 			qs_object.order_by = order_by;
 		}
-		
+
 		order_direction = order_direction || orderDirection || sort_direction || sortDirection;
 		if(order_direction){
 			qs_object.order_direction = order_direction;
 		}
-		
+
 		const qs_string = qs.stringify(qs_object);
 
 		return map[q] + `?${qs_string}`;
@@ -133,6 +133,12 @@ class Eloquent extends Trait{
 	/** */
 	renderDebug(){
 		return (<div><code>{this.constructor.name} | {this.props.id}</code></div>);
+	}
+
+	/** */
+	show(addl_props = {}){
+    	const C = this.constructor;
+    	return <C {...this.props} {...addl_props} />
 	}
 
 }
