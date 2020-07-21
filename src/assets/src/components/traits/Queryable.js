@@ -5,9 +5,9 @@ import { get, camelCase, snakeCase } from 'lodash';
 import { app_get, snake_case, def } from '../../helpers';
 import Shell from '../Shell';
 import ReactSync from '../../ReactSync';
+import collect from 'collect.js';
 
 window.Find = (dotstring) => {
-	
 	return get(ReactSyncAppData.page_data.state, dotstring);
 };
 
@@ -22,16 +22,16 @@ class Queryable extends Trait{
 	constructor(targetClass){
 		super(targetClass);
 	}
-	
+
 	static repo = ReactSyncAppData.page_data.state;
-	
+
 	static hasBeenKeyed = false;
-	
+
 	static setKeyed(){
-		
+
 	}
-	
-	
+
+
 
 /**
  * (STATIC) - Query the data store and return the model with the supplied id
@@ -39,13 +39,13 @@ class Queryable extends Trait{
  */
 	static find(id){
 		const { plural, repo } = this;
-		const dotstring = `${plural}.${id}`;	
+		const dotstring = `${plural}.${id}`;
 		return app_get(dotstring);
 	}
 
 
 /**
- * (STATIC) - 
+ * (STATIC) -
  * @static
  */
 	static where(...args){
@@ -198,12 +198,12 @@ class Queryable extends Trait{
 	/** */
 	refresh(){
 		Shell.cache = {};
-		
+
 		if(this.props.refresh) this.props.refresh()
 		else{
 			ReactSync.getInstance().update();
 		}
-		
+
 	}
 
 }

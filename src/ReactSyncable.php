@@ -93,6 +93,8 @@ trait ReactSyncable{
 		        $route_name = $route->getName();
 
 		        $route_is_ok = $uses_trait || in_array($route_controller, config('react_sync.jsonable_controllers')) || in_array($route_name, config('react_sync.jsonable_routes'));
+
+
 				if(request()->input('asajax')){
 					$view->setPath(__DIR__ . '/views/as_json.blade.php');
 			        response($view)->header('Content-Type', 'application/json')->send();
