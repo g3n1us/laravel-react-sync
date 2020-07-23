@@ -70,8 +70,8 @@ if(!function_exists('get_schemas')){
 
 
 Artisan::command('react_sync:all', function(){
-	Artisan::call('react_sync:write_schemas');
-	Artisan::call('react_sync:write_index_files');
+	$this->call('react_sync:write_schemas');
+	$this->call('react_sync:write_index_files');
 })->describe('Write metadata and other data files required for Laravel React Sync');
 
 
@@ -143,6 +143,11 @@ if(!function_exists('write_index_files')){
     $possible_models = Utils::listModels();
     $fs->put(Paths::app_path("Models/models.json"), $possible_models->toJSON());
 	$_this->comment("\n models.json updated in ".Paths::app_path("Models")." \n\n");
+
+    //update pages.json
+    $possible_pages = Utils::listPages();
+    $fs->put(Paths::app_path("Pages/pages.json"), $possible_pages->toJSON());
+	$_this->comment("\n pages.json updated in ".Paths::app_path("Pages")." \n\n");
 	}
 }
 

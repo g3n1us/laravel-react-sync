@@ -2,17 +2,39 @@
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 
+// use Illuminate\Routing\Route;
+
 use G3n1us\LaravelReactSync\Pages\Core\Page;
+use G3n1us\LaravelReactSync\Paths;
+use G3n1us\LaravelReactSync\Utils;
+
+
+// Route::prefix()
+
+// Route::namespace('G3n1us\\LaravelReactSync\\Pages')->group(function () {
+// Route::namespace('App\\Pages')->group(function () {
+
+	Route::prefix(config('react_sync.pages_prefix', ''))->group(function () {
+
+		$pages = Page::listPageClasses();
+
+		foreach($pages as $page_class){
+			$route = Route::any($page_class::$pattern, $page_class . '@constructor');
+			if(!empty($page_class::$middleware)){
+				$route->middleware($page_class::$middleware);
+			}
+		}
+
+	});
+
+
+// });
+
+
+/*
 
 
 Route::middleware(config('react_sync.middleware'))->group(function () {
-
-/*
-	Route::get(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@test');
-	Route::post(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@save');
-	Route::put(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@create');
-	Route::delete(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@delete');
-*/
 
 	$page_class = Page::resolve();
 
@@ -28,3 +50,4 @@ Route::middleware(config('react_sync.middleware'))->group(function () {
 		    });
 	}
 });
+*/

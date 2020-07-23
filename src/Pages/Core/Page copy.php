@@ -3,12 +3,6 @@ namespace G3n1us\LaravelReactSync\Pages\Core;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Routing\Controller;
-
-
 use Illuminate\Support\Str;
 
 use G3n1us\LaravelReactSync\Paths;
@@ -16,11 +10,10 @@ use G3n1us\LaravelReactSync\Utils;
 
 
 abstract class Page{
-	use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     abstract public function form_request(Request $request);
 
-	// abstract public function constructor();
+	abstract public function constructor();
 
 	protected static $route_name;
 

@@ -52,4 +52,28 @@ class Utils	{
 
         return $possible_models;
 	}
+
+
+	public static function listPages(){
+		$fs = new Filesystem;
+		$namespace = config('react_sync.namespace');
+	    $possible_pages = collect($fs->allFiles(Paths::app_path('Pages')))
+	        ->map(function($f) use($fs, $namespace){
+		        if($f->getType() != 'file') return null;
+		        if($f->getExtension() != 'js') return null;
+		        $filename = $f->getFileName();
+		        $classname = preg_replace('/^(.*?)\.js$/', '$1', $filename);
+	            if($fs->exists(Paths::app_path("Pages/$classname.php"))){
+		            return "\\$namespace\\Pages\\$classname";
+	            }
+	            return null;
+	        })
+	        ->filter()
+	        ->unique()
+	        ->values();
+
+        return $possible_pages;
+	}
+
+
 }
