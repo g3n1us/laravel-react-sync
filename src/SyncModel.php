@@ -23,7 +23,7 @@ class SyncModel extends Model{
     {
         static::creating(function ($m) {
 	        if($m->extra){
-		        dd($m->extra);
+		        // dd($m->extra);
 	        }
             //
         });
