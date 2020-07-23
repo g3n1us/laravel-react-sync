@@ -42,7 +42,10 @@ Artisan::command('make:react_page {name?}', function($name = null){
 		$name = $this->ask('What is your name of the page?');
 	}
 	$name = preg_replace('/^(.*?)_page$/', '$1', snake_case($name));
-	$pathname = str_slug($name);
+	$prefix = config('react_sync.pages_prefix');
+
+	$pathname = Str::start($prefix.'/'.Str::kebab($name), '/');
+
 	$name = studly_case($name) . 'Page';
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
@@ -53,12 +56,13 @@ Artisan::command('make:react_page {name?}', function($name = null){
 	$rendered = str_replace('{{$name}}', $name, $tpl);
 	$namespace = config('react_sync.namespace');
 	$rendered = str_replace('{{ namespace }}', "$namespace\\Pages", $rendered);
+	$rendered = str_replace('{{$slug}}', $pathname, $rendered);
 
 	file_put_contents(Paths::app_path("Pages/$name.php"), $rendered);
 
 	Artisan::call('react_sync:all');
 	$this->comment("Page: $name created");
-	$this->comment("route registered at: " . url("/pages/$pathname"));
+	$this->comment("route registered at: " . url($pathname));
 });
 
 

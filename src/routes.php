@@ -12,6 +12,7 @@ Route::prefix(config('react_sync.pages_prefix', ''))->group(function () {
 
 	foreach($pages as $page_class){
 		$pattern = $page_class::$pattern ?? Str::start($page_class::slug(), '/');
+
 		$routes[] = Route::match(['get', 'options'], $pattern, $page_class . '@constructor');
 		if(method_exists($page_class, 'form_request')){
 			$routes[] = Route::match(['post', 'put', 'patch', 'delete'], $pattern, $page_class . '@form_request');

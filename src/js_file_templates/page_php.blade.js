@@ -3,7 +3,7 @@ namespace {{ namespace }};
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use G3n1us\LaravelReactSync\Pages\Core\Page;
+use G3n1us\LaravelReactSync\Page;
 
 class {{$name}} extends Page{
 
@@ -11,15 +11,18 @@ class {{$name}} extends Page{
 
     // public static $middleware = []; // default
 
-    // public static $pattern = '{one?}/{two?}/{three?}/{four?}/{five?}'; // default
+    // public static $pattern = '{{$slug}}'; // default
 
-    public function constructor($prop_one = null, $prop_two = null, $prop_three = null){
+    public function constructor(){
 		// return 'template.name'; // returns Blade template view at this path (defaults to config('react_sync.blade_template', 'react_sync::layout'))
 		// return response($somedata);
     }
 
-    public function form_request(Request $request){
+/*
+	// uncomment to handle non-GET requests to this endpoint
+    public function form_request(){
 		//
     }
+*/
 
 }
