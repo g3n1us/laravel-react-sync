@@ -2,52 +2,23 @@
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 
-// use Illuminate\Routing\Route;
-
 use G3n1us\LaravelReactSync\Pages\Core\Page;
 use G3n1us\LaravelReactSync\Paths;
 use G3n1us\LaravelReactSync\Utils;
 
+Route::prefix(config('react_sync.pages_prefix', ''))->group(function () {
 
-// Route::prefix()
+	$pages = Page::listPageClasses();
 
-// Route::namespace('G3n1us\\LaravelReactSync\\Pages')->group(function () {
-// Route::namespace('App\\Pages')->group(function () {
-
-	Route::prefix(config('react_sync.pages_prefix', ''))->group(function () {
-
-		$pages = Page::listPageClasses();
-
-		foreach($pages as $page_class){
-			$route = Route::any($page_class::$pattern, $page_class . '@constructor');
-			if(!empty($page_class::$middleware)){
-				$route->middleware($page_class::$middleware);
-			}
+	foreach($pages as $page_class){
+		$pattern = $page_class::$pattern ?? Str::start($page_class::slug(), '/');
+		$routes[] = Route::match(['get', 'options'], $pattern, $page_class . '@constructor');
+		if(method_exists($page_class, 'form_request')){
+			$routes[] = Route::match(['post', 'put', 'patch', 'delete'], $pattern, $page_class . '@form_request');
 		}
-
-	});
-
-
-// });
-
-
-/*
-
-
-Route::middleware(config('react_sync.middleware'))->group(function () {
-
-	$page_class = Page::resolve();
-
-	$page_prefix = trim(config('react_sync.pages_prefix', 'pages'), '/');
-	if(class_exists($page_class)){
-		$class_parameter = $page_class::slug();
-
-	    Route::prefix("{prefix}/$class_parameter")
-		    ->where(['prefix' => $page_prefix])
-		    ->namespace('G3n1us\\LaravelReactSync\\Pages')
-		    ->group(function($route) use($page_class, $class_parameter){
-			    Route::any($page_class::$pattern, 'PageController@run')->name('page_class');
-		    });
+		foreach($routes as $route){
+			$route->middleware((array) $page_class::$middleware + ['web', G3n1us\LaravelReactSync\HandleResponseMiddleware::class]);
+		}
 	}
+
 });
-*/
