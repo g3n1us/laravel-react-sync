@@ -4,6 +4,8 @@ namespace G3n1us\LaravelReactSync;
 
 use Illuminate\Filesystem\Filesystem;
 
+use Str;
+
 class Utils	{
 
 	public static function get_schemas(){
@@ -29,6 +31,14 @@ class Utils	{
 */
 		}
 // 		dd($models);
+	}
+
+
+	public static function standardizedModelString($m){
+		$str = class_basename($m);
+		$str = Str::studly($str);
+		$str = Str::snake(Str::plural($str));
+		return $str;
 	}
 
 

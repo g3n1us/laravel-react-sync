@@ -5,7 +5,7 @@ import { get, camelCase, snakeCase } from 'lodash';
 import { app_get, snake_case, def } from '../../helpers';
 import Shell from '../Shell';
 import ReactSync from '../../ReactSync';
-import collect from 'collect.js';
+import collect from '../../collect.js';
 
 window.Find = (dotstring) => {
 	return get(ReactSyncAppData.page_data.state, dotstring);

@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Page } from 'laravel_react_sync';
-
+{{$js_import}}
 class {{$name}} extends Page {
-
-    renderDefault() {
-		return (<h2>{this.constructor.name}</h2>);
-    }
+	{{$renders}}
+	renderDefault() {
+		{{$render_body}}
+	}
 
 }
 

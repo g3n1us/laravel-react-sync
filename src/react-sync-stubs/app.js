@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
-import { ReactSync } from 'laravel_react_sync';
+import { ReactSync, helpers, collect } from 'laravel_react_sync';
 import * as pages from 'pages';
 import * as models from 'models';
-import { collect } from 'collect.js';
+// import { collect } from 'collect.js';
 
 /**
  * First we will load all of this project's JavaScript dependencies which
@@ -23,7 +23,7 @@ require('./bootstrap');
 const ReactSyncInstance = new ReactSync;
 ReactSyncInstance.boot({pages: pages});
 
-const { state = {} } = ReactSyncInstance.page_data;
+const state = ReactSyncInstance.route.controller || {};
 
 const model_map = Object.values(models).reduce((accumulator, v) => {
 	accumulator[v.plural] = v;
@@ -34,7 +34,10 @@ const models_with_keys = Object.values(models).map(C => [C.plural, C]);
 
 const page_props = collect(state).map((v, i) => {
 
-	if(model_map[i]){
+	if(helpers.isPaginated(v)){
+		return helpers.collect_paged(v).map(c => new model_map[i]({...c}))
+	}
+	else if(model_map[i]){
 		return collect(v).map(c => new model_map[i]({...c}));
 	}
 	else if(Array.isArray(v)){

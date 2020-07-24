@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import collect from 'collect.js';
+import collect from '../collect.js';
 
 /** */
 class PageShell extends Component{

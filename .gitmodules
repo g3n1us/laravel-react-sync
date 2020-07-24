@@ -1,0 +1,3 @@
+[submodule "submodules/collect.js"]
+	path = submodules/collect.js
+	url = git@github.com:g3n1us/collect.js.git

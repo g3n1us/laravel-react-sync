@@ -5,6 +5,7 @@ use G3n1us\LaravelReactSync\ReactSyncPreset;
 use G3n1us\LaravelReactSync\Paths;
 use \G3n1us\LaravelReactSync\Utils;
 
+
 Artisan::command('make:react_model {name?}', function($name = null){
 	ReactSyncPreset::ensurePagesModelsDirectoriesExist();
 	if($name === null){
@@ -29,7 +30,7 @@ Artisan::command('make:react_model {name?}', function($name = null){
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/model.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
 	file_put_contents(Paths::app_path("Models/$name.js"), $rendered);
-	Artisan::call('react_sync:all');
+	$this->call('react_sync:all');
 	$this->comment("Model: $name created");
 });
 
@@ -41,29 +42,108 @@ Artisan::command('make:react_page {name?}', function($name = null){
 	if($name === null){
 		$name = $this->ask('What is your name of the page?');
 	}
-	$name = preg_replace('/^(.*?)_page$/', '$1', snake_case($name));
+	$name = $basenamestring = preg_replace('/^(.*?)_page$/', '$1', snake_case($name));
 	$prefix = config('react_sync.pages_prefix');
+	$namespace = config('react_sync.namespace');
 
 	$pathname = Str::start($prefix.'/'.Str::kebab($name), '/');
 
 	$name = studly_case($name) . 'Page';
-	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page.blade.js');
-	$rendered = str_replace('{{$name}}', $name, $tpl);
+	$models = Utils::listModels()->map(function($m){
+		return [Utils::standardizedModelString($m) => $m];
+	})->collapse(1);
 
-	file_put_contents(Paths::app_path("Pages/$name.js"), $rendered);
+	$replacements = [
+		'{{$name}}'       => $name,
+		'{{ namespace }}' => "$namespace\\Pages",
+		'{{$singular}}'   => Str::singular($basenamestring),
+		'{{$plural}}'     => $basenamestring,
+	];
 
-	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page_php.blade.js');
-	$rendered = str_replace('{{$name}}', $name, $tpl);
-	$namespace = config('react_sync.namespace');
-	$rendered = str_replace('{{ namespace }}', "$namespace\\Pages", $rendered);
-	$rendered = str_replace('{{$slug}}', $pathname, $rendered);
+	if($related_model = $models->get(Utils::standardizedModelString($basenamestring))){
+		$related_model = ltrim($related_model, '\\');
+		$singular = Str::singular($basenamestring);
+		$plural = Str::plural($basenamestring);
+		$this->comment("You appear to be creating a page associated with: " . $related_model);
+		if($this->confirm("Would you like to use this model with this page?", 'y')){
+			$replacements = $replacements + [
+				'{{$model_use_statement}}' => "use $related_model;" . PHP_EOL,
+				'{{$model_props}}'         => PHP_EOL."\tpublic $" . "$singular;" . PHP_EOL.PHP_EOL . "\tpublic $" . "$plural;".PHP_EOL,
+				'{{$model_arg}}'           => "$" . "$singular = null",
+				'{{$slug}}'                => $pathname . '/{' . $singular . '?}',
+				'{{$js_import}}'           => "import { BasicLayout } from 'laravel_react_sync';".PHP_EOL."import { ". class_basename($related_model) ." } from 'models';" . PHP_EOL,
+				'{{$php_fn_body}}'         => '
+		if($'.$singular.'){
+			$this->'.$singular.' = $'.$singular.';
+		}
+		else {
+			$this->'.$plural.' = '.class_basename($related_model).'::paginate();
+		}
+',
+				'{{$render_body}}'         => "
+		const { $singular } = this.props;
+		return (
+			<BasicLayout>
+				{".$singular." ? this.renderSingle() : this.renderMany()}
+			</BasicLayout>
+		);
+",
+				'{{$renders}}'             => "
+	renderSingle() {
+		const { $singular } = this.props;
+		return " . $singular . ".show();
+	}
+
+	renderMany() {
+		const { $plural } = this.props;
+		return $plural.map(v => v.show());
+	}
+
+",
+
+			];
+
+		}
+		else{
+			$replacements = $replacements + [
+				'{{$model_use_statement}}' => "",
+				'{{$model_props}}'         => '// public $props_item;',
+				'{{$model_arg}}'           => "",
+				'{{$slug}}'                => $pathname,
+				'{{$render_body}}'         => "return (<h2>$name</h2>);",
+				'{{$renders}}'             => "",
+				'{{$js_import}}'           => "",
+				'{{$php_fn_body}}'         => "",
+			];
+		}
+
+
+
+	}
+
+	$rendered = file_get_contents(__DIR__ . '/js_file_templates/page_php.blade.js');
+	$js_rendered = file_get_contents(__DIR__ . '/js_file_templates/page.blade.js');
+
+	foreach($replacements as $find => $replacement){
+		$rendered = str_replace($find, $replacement, $rendered);
+		$js_rendered = str_replace($find, $replacement, $js_rendered);
+	}
+
+	if(file_exists(Paths::app_path("Pages/$name.php")) || file_exists(Paths::app_path("Pages/$name.js"))){
+		throw new \Exception("The file already exists.");
+	}
 
 	file_put_contents(Paths::app_path("Pages/$name.php"), $rendered);
 
-	Artisan::call('react_sync:all');
-	$this->comment("Page: $name created");
-	$this->comment("route registered at: " . url($pathname));
+	file_put_contents(Paths::app_path("Pages/$name.js"), $js_rendered);
+
+	$this->info("Page: $name created");
+	$this->info("route registered at: " . url($pathname));
+
+	$this->call('react_sync:all');
 });
+
+
 
 
 if(!function_exists('get_schemas')){

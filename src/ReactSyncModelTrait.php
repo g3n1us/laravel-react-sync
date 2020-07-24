@@ -20,7 +20,7 @@ trait ReactSyncModelTrait{
 	}
 
 	public static function static_outline(){
-		return (new self)->outline();
+		return (new static)->outline();
 	}
 
 	public function outline(){
