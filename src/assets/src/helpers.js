@@ -47,14 +47,12 @@ export function collect_paged(paginated){
 */
 
 
-/*
 export function isPaginated(paginated){
     if(paginated === null || typeof paginated !== "object" || Array.isArray(paginated)) return false;
 
     const { current_page, last_page, per_page } = paginated || {};
     return collect([current_page, last_page, per_page]).filter().count() === 3;
 }
-*/
 
 
 /** */
@@ -71,7 +69,7 @@ export function ReactSyncData(){
 
 /** */
 export function getAjaxUrl(addl_query = {}){
-	const query = {...qs.parse(window.location.search), ...addl_query, asajax: true};
+	const query = {...qs.parse(window.location.search), ...addl_query};
 	return window.location.href + '?' + qs.stringify(query);
 }
 

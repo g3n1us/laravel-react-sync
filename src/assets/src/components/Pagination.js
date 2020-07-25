@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import qs from 'qs';
+import { axios, navigate } from '../fetchClient';
 
 // const REACT_SYNC_DATA = require('../ReactSync').default;
 
@@ -18,9 +19,10 @@ const str_rand = function(length = 5){
 
 class Pagination extends Component{
 
+
+
 	/** */
 	render(){
-		console.log('pagination', this.props);
 
 		let pagination;
 		if(this.props.pagination) pagination = this.props.pagination;
@@ -42,7 +44,7 @@ class Pagination extends Component{
 			else{
 				links.push(
 					<li className="page-item" key={str_rand(20)}>
-						<a className="page-link" href={`?${qs.stringify({...query, page: current_page})}`}>{current_page}</a>
+						<a className="page-link" onClick={navigate} href={`?${qs.stringify({...query, page: current_page})}`}>{current_page}</a>
 					</li>
 				);
 			}
@@ -80,14 +82,14 @@ class Pagination extends Component{
 				<ul className="pagination">
 					{pagination.prev_page_url
 						?
-					<li className="page-item"><a className="page-link" href={prev_page_url} rel="previous">«</a></li>
+					<li className="page-item"><a className="page-link" onClick={navigate} href={prev_page_url} rel="previous">«</a></li>
 						:
 			        <li className="page-item disabled"><span className="page-link">«</span></li>
 					}
 			        {links}
 					{pagination.next_page_url
 						?
-			        <li className="page-item"><a className="page-link" href={next_page_url} rel="next">»</a></li>
+			        <li className="page-item"><a className="page-link" onClick={navigate} href={next_page_url} rel="next">»</a></li>
 						:
 					<li className="page-item disabled"><span className="page-link">»</span></li>
 					}

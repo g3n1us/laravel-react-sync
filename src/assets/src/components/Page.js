@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Event from '../Event';
-import axios from 'axios';
+import axios from '../fetchClient';
 const { on } = Event;
 import PageShell from './PageShell';
 
@@ -9,6 +9,8 @@ import ReactSync from '../ReactSync';
 import Eloquent from './traits/Eloquent';
 
 import { studly_case, kebab_case } from '../helpers';
+
+import { navigate } from '../fetchClient';
 
 
 /** */
@@ -68,7 +70,7 @@ class Page extends Component{
 		const prefix = (new ReactSync).config.pages_prefix;
 		const link = `${prefix}/${path}`;
 		return (
-			<a key={`NavLink${link}`} href={link} className="nav-link">{human_name}</a>
+			<a key={`NavLink${link}`} href={link} onClick={navigate} className="nav-link">{human_name}</a>
 		);
 	}
 

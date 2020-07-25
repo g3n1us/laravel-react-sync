@@ -22,7 +22,12 @@ class HandleResponseMiddleware
 		    $response = $next($request);
 	        $potential_response = $response->getContent();
 
+
 	        if(empty($potential_response)){
+				if($request->ajax()){
+					return response(collect($maybePage))->header('Content-Type', 'application/json');
+				}
+
 		        return response()->view(config('react_sync.blade_template', 'react_sync::layout'), collect($maybePage));
 	        }
 	        else if(view()->exists($potential_response)){

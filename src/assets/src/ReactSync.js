@@ -4,6 +4,7 @@ import schemas from 'js/schema';
 import qs from 'qs';
 import Reducer from './Reducer';
 import { getAjaxUrl } from './helpers';
+import axios from './fetchClient';
 
 /** */
 class ReactSync{

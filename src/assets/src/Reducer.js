@@ -3,10 +3,10 @@ import ReactDOM from 'react-dom';
 import ReactSync from './ReactSync';
 import { Model, Page } from './components';
 
-import { snake_case, studly_case } from './helpers';
+import { snake_case, studly_case, isPaginated } from './helpers';
 import { collect } from './collect.js';
 
-export default function Reducer(){
+export default function Reducer(starting_with = null){
 
 	const models = Model.models;
 
@@ -17,7 +17,8 @@ export default function Reducer(){
 	ReactSyncInstance.boot({pages: pages});
 
 // 	const { state = {} } = ReactSyncInstance.page_data;
-	const state = ReactSyncAppData.route.controller || {};
+	const state = ReactSyncInstance.route.controller || {};
+
 
 	if(_.isEmpty(state)) return null;
 
@@ -44,7 +45,7 @@ export default function Reducer(){
     		// This is! a representation of a model or models, so turn it into one
     		if(typeof valueOrValues === "object" && valueOrValues === null) return null;
 
-    		if(Array.isArray(valueOrValues)){
+			if(isPaginated(valueOrValues) || Array.isArray(valueOrValues)){
         		return collect(valueOrValues).map(c => new model_map[propName]({...c}));
     		}
             else if(typeof valueOrValues === "object"){
