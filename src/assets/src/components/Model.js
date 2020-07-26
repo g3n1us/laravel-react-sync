@@ -15,6 +15,7 @@ import RenderableAsDiagram from './traits/RenderableAsDiagram';
 import RenderableDefault from './traits/RenderableDefault';
 import HasKeyProp from './traits/HasKeyProp';
 import Eloquent from './traits/Eloquent';
+import MorphsDates from './traits/MorphsDates';
 
 import Shell from './Shell';
 
@@ -53,6 +54,8 @@ class Model extends Component{
   constructor(props){
 
     super(props);
+
+    this.getDates();
 
     Model.addModel(this.constructor);
 
@@ -258,6 +261,8 @@ new HasKeyProp(Model);
 new Queryable(Model);
 
 new Eloquent(Model);
+
+new MorphsDates(Model);
 
 
 (function(){

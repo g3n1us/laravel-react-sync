@@ -6,7 +6,7 @@ import { Model, Page } from './components';
 import { snake_case, studly_case, isPaginated } from './helpers';
 import { collect } from './collect.js';
 
-export default function Reducer(starting_with = null){
+export default function Reducer(){
 
 	const models = Model.models;
 
@@ -16,7 +16,6 @@ export default function Reducer(starting_with = null){
 
 	ReactSyncInstance.boot({pages: pages});
 
-// 	const { state = {} } = ReactSyncInstance.page_data;
 	const state = ReactSyncInstance.route.controller || {};
 
 
@@ -48,6 +47,7 @@ export default function Reducer(starting_with = null){
 			if(isPaginated(valueOrValues) || Array.isArray(valueOrValues)){
         		return collect(valueOrValues).map(c => new model_map[propName]({...c}));
     		}
+
             else if(typeof valueOrValues === "object"){
                 return new model_map[propName]({...valueOrValues});
             }

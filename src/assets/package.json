@@ -21,6 +21,7 @@
 	"dependencies": {
 		"axios": "^0.19.0",
 		"g3n1us_helpers": "^1.0.7",
+		"moment": "^2.27.0",
 		"pluralize": "^8.0.0",
 		"qs": "^6.9.4",
 		"react": "^16.13.1",

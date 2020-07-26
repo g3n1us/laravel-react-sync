@@ -69,7 +69,7 @@ Artisan::command('make:react_page {name?}', function($name = null){
 			$replacements = $replacements + [
 				'{{$model_use_statement}}' => "use $related_model;" . PHP_EOL,
 				'{{$model_props}}'         => PHP_EOL."\tpublic $" . "$singular;" . PHP_EOL.PHP_EOL . "\tpublic $" . "$plural;".PHP_EOL,
-				'{{$model_arg}}'           => "$" . "$singular = null",
+				'{{$model_arg}}'           => class_basename($related_model) . " $" . "$singular = null",
 				'{{$slug}}'                => $pathname . '/{' . $singular . '?}',
 				'{{$js_import}}'           => "import { BasicLayout } from 'laravel_react_sync';".PHP_EOL."import { ". class_basename($related_model) ." } from 'models';" . PHP_EOL,
 				'{{$php_fn_body}}'         => '

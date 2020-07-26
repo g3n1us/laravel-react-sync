@@ -16,6 +16,11 @@ import { on, dispatch } from './Event';
 
 import collect from './collect.js';
 
+export { navigate } from './fetchClient';
+
+import fetchClient from './fetchClient';
+
+fetchClient
 
 /** */
 const LaravelReactSync = {
@@ -23,6 +28,7 @@ const LaravelReactSync = {
 	...layouts,
 	collect,
 	helpers,
+	fetchClient,
 	on,
 	dispatch,
 	Pagination,
@@ -43,6 +49,7 @@ export {
 	extras,
 	helpers,
 	collect,
+	fetchClient,
 	on,
 	dispatch,
 	Pagination,

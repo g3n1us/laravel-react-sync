@@ -39,9 +39,17 @@ class ReactSync{
 
 	}
 
+	static booted = false;
+
+	initialData = null;
+
 	/** */
 	boot(data){
+		if(!this.initialData){
+			this.initialData = this.route.controller;
+		}
 		ReactSync.pages = {...ReactSync.pages, ...data.pages};
+		this.constructor.booted = true;
 	}
 
 	/** */
@@ -91,6 +99,7 @@ class ReactSync{
 	update(callback){
 		return axios.get(getAjaxUrl()).then((new_page_data) => {
 			this.page_data = new_page_data.data;
+			this.route.controller = new_page_data.data
 			app().setState(Reducer());
 			if(typeof callback === 'function'){
 				callback(this.page_data);

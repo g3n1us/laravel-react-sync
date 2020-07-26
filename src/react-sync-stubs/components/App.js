@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom';
 
 import * as _models from 'models';
 
-import LaravelReactSync, { Model, PageNav, helpers as react_sync_helpers } from 'laravel_react_sync';
+import LaravelReactSync, { Model, PageNav, Reducer, helpers as react_sync_helpers } from 'laravel_react_sync';
 
 const { app_current } = react_sync_helpers;
 

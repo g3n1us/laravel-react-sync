@@ -37,22 +37,35 @@ const axios = fetchClient();
 
 const navigate = (e) => {
 	if(!ReactSyncInstance.route.controller) return;
+
 	e.preventDefault();
+	console.log(e, 'preventDefault' in e);
 	const url = e.target.href;
 	fetchClient().get(url)
 		.then(response => {
 			history.pushState(response.data, "", url);
-			const { page_class } = ReactSyncInstance.route.controller;
-			if(page_class !== response.data.page_class){
-				const containing_div = document.querySelector(`[data-react-render="${page_class}"]`);
-				containing_div.setAttribute('data-react-render', response.data.page_class);
-
-			}
-
-			ReactSyncInstance.route.controller = response.data;
-			app().setState(Reducer());
+			updatePage(response.data);
 	});
 }
+
+
+const updatePage = (data) => {
+	const { page_class } = ReactSyncInstance.route.controller;
+	if(page_class !== data.page_class){
+		const containing_div = document.querySelector(`[data-react-render="${page_class}"]`);
+		containing_div.setAttribute('data-react-render', data.page_class);
+
+	}
+
+	ReactSyncInstance.route.controller = data;
+	app().setState(Reducer());
+}
+
+window.addEventListener('popstate', function(e) {
+	const data = e.state || ReactSyncInstance.initialData;
+	updatePage(data);
+	return true;
+});
 
 export { navigate, axios };
 

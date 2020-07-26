@@ -6,18 +6,23 @@ function Collection(collection, pagination) {
 	}
 	else if(pagination){
 		this.items = collection;
-		Object.defineProperty(this.items, 'pagination', {
-			value: pagination,
-			// enumerable: true,
-		});
+		if(typeof this.items.pagination === 'undefined'){
+			Object.defineProperty(this.items, 'pagination', {
+				value: pagination,
+				// enumerable: true,
+			});
+		}
+
 	}
 	else if(isPaginated(collection)){
 		const { data, ...rest } = collection;
 		this.items = data;
-		Object.defineProperty(this.items, 'pagination', {
-			value: rest,
-			// enumerable: true,
-		});
+		if(typeof this.items.pagination === 'undefined'){
+			Object.defineProperty(this.items, 'pagination', {
+				value: rest,
+				// enumerable: true,
+			});
+		}
 	}
 	else if (collection instanceof this.constructor) {
 		this.items = collection.all();
