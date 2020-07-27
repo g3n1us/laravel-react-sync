@@ -99,11 +99,11 @@ class Model extends Component{
 					relationValueModels = new ThisModel;
 				}
 				else{
-					relationValueModels = new ThisModel(relationValue);
+    				if(isEmpty(relationValue)) relationValueModels = null;
+    				else relationValueModels = new ThisModel(relationValue);
 				}
 			}
 			if(relationValueModels){
-				//this[relationName] = relationValueModels;
 				def(this, relationName, () => relationValueModels);
 				def(this.relations, relationName, () => relationValueModels);
 			}

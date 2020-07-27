@@ -62,13 +62,15 @@ trait ReactSyncModelTrait{
 
 		$reflected_relations = new ReflectionClass(HasRelationships::class);
 		$reflected_relations = collect($reflected_relations->getMethods())->map->getName();
-
+// dd($reflected_relations);
 		$model_name = get_class($this);
 
         $relations = collect($reflection->getMethods())->filter(function($v) use($model_name, $reflected_relations){
             if($v->class == $model_name){
                 $function_text = returnFunctionText($v);
+//                 dump($function_text);
                 $isrel = !!$reflected_relations->first(function($m) use($function_text){
+//                     dump('->' . $m);
 	                return str_contains($function_text, '->' . $m);
                 });
 
@@ -78,7 +80,10 @@ trait ReactSyncModelTrait{
 
 		$relations = $relations->pluck('name')->map(function($relation_name){
 			$r = $this->{$relation_name}();
-			if(!is_object( $r )) return null;
+			if(!is_object( $r )) {
+    			dd($r); die();
+    			return null;
+			}
 			$relation_type = class_basename(get_class($r));
 			$arr = coerceAsArray($r);
 			$arr->transform(function($a){
