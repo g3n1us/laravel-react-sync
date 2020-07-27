@@ -18,6 +18,7 @@ class CreateReactSyncTable extends Migration
             $table->string('model', 250)->unique();
 			$table->json('casts')->nullable();
             $table->json('schema');
+            $table->json('properties');
             $table->timestamps();
         });
     }

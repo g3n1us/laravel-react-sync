@@ -19,6 +19,8 @@ import MorphsDates from './traits/MorphsDates';
 
 import Shell from './Shell';
 
+import ReactSync from '../ReactSync';
+
 import { pluralToClassName, classNameToPlural, isModel, studly_case, app_put, app_get, def } from '../helpers';
 const pluralize = require('pluralize');
 
@@ -149,7 +151,7 @@ class Model extends Component{
 
 	/** */
 	static getPrimaryKey(){
-		return collect(this.getSchema()).firstWhere('primaryKey')['name'];
+		return  this.getModelProperties().primaryKey;
 	}
 
 	/** */
@@ -172,9 +174,20 @@ class Model extends Component{
 		return this._calculatedProperties;
 	}
 
+    /** */
+	static getModelProperties(){
+        return ReactSync.getInstance().model_properties[this.name];
+	}
+
+	/** */
+	get model_properties(){
+		return this.constructor.getModelProperties();
+	}
+
+
 	/** */
 	static getSchema(){
-		return window[window.ReactSyncGlobal].schemas[this.name];
+		return ReactSync.getInstance().schemas[this.name];
 	}
 
 	/** */

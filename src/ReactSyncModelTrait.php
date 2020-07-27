@@ -23,6 +23,23 @@ trait ReactSyncModelTrait{
 		return (new static)->outline();
 	}
 
+	public static function static_properties(){
+		return (new static)->properties();
+	}
+
+	public function properties(){
+    	$tmp = new static;
+    	$props = coerceAsArray($this)->only('dateFormat', 'connection', 'primaryKey', 'keyType', 'incrementing', 'perPage', 'timestamps', 'dates', 'casts', 'appends', 'with'); // $this
+
+    	$props['table'] = $this->getTable();
+    	$props['dateFormat'] = $this->getDateFormat();
+    	if($props['timestamps']){
+            $props['dates'] = array_merge($props['dates'], [$tmp->getCreatedAtColumn(), $tmp->getUpdatedAtColumn()]);
+    	}
+
+    	return $props;
+	}
+
 	public function outline(){
 		$connection = Schema::getConnection();
 
@@ -62,15 +79,13 @@ trait ReactSyncModelTrait{
 
 		$reflected_relations = new ReflectionClass(HasRelationships::class);
 		$reflected_relations = collect($reflected_relations->getMethods())->map->getName();
-// dd($reflected_relations);
+
 		$model_name = get_class($this);
 
         $relations = collect($reflection->getMethods())->filter(function($v) use($model_name, $reflected_relations){
             if($v->class == $model_name){
                 $function_text = returnFunctionText($v);
-//                 dump($function_text);
                 $isrel = !!$reflected_relations->first(function($m) use($function_text){
-//                     dump('->' . $m);
 	                return str_contains($function_text, '->' . $m);
                 });
 
@@ -99,8 +114,9 @@ trait ReactSyncModelTrait{
 			]];
 		})->filter()->collapse();
 
+        $all = collect($attrs)->merge($relations);
 
-		return collect($attrs)->merge($relations);
+		return $all;
 	}
 
 }

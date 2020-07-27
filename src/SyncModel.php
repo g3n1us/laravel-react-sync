@@ -13,10 +13,11 @@ class SyncModel extends Model{
 	protected $casts = [
 		"casts" => "collection",
 		"schema" => "collection",
+		"properties" => "collection",
 	];
 
 	protected $fillable = [
-		"model", "casts", "schema"
+		"model", "casts", "schema", "properties"
 	];
 
     protected static function booted()
@@ -36,6 +37,8 @@ class SyncModel extends Model{
 	    return $models->map(function($model){
 		    $schema = $model::static_outline();
 
+		    $properties = $model::static_properties();
+
 		    $casts = $schema->reduce(function($curr, $v){
 			    $c = @collect($v)->get('extra')['casts'];
 			    if($c){
@@ -46,6 +49,7 @@ class SyncModel extends Model{
 		    return static::create([
 			    "model" => get_class(new $model),
 			    "schema" => $schema,
+			    "properties" => $properties,
 			    "casts" => $casts,
 		    ]);
 

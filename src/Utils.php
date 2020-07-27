@@ -12,13 +12,21 @@ class Utils	{
 
 	    $schemas = [];
 
-
-
 	    foreach(SyncModel::generate() as $model){
 		    $schemas[class_basename($model->model)] = $model->schema;
 	    }
 	    return collect($schemas);
 
+	}
+
+
+	public static function get_model_properties(){
+	    $props = [];
+
+	    foreach(SyncModel::all() as $model){
+		    $props[class_basename($model->model)] = $model->properties;
+	    }
+	    return collect($props);
 	}
 
 

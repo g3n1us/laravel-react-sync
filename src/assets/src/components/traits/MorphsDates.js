@@ -12,11 +12,16 @@ class MorphsDates extends Trait{
     }
 
     getDates(){
-		const dates = _.toPairs(this.schema).filter(tuple => tuple[1].type.match(/date.*?/)).map(tuple => tuple[0]);
+		let { dates, dateFormat } = this.model_properties
+		if(this.dateFormat) dateFormat = this.dateFormat;
+
 		dates.forEach(d => {
     		const props = this.props || {};
+
+    		const mmnt = moment(props[d]).format(dateFormat);
+
 			Object.defineProperty(this, d, {
-				value: new moment(props[d]),
+				value: mmnt,
 			});
 		});
     }

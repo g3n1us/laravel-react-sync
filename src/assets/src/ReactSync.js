@@ -1,6 +1,7 @@
 import React from 'react';
 import { dispatch } from './Event';
 import schemas from 'js/schema';
+import model_properties from 'js/model_properties';
 import qs from 'qs';
 import Reducer from './Reducer';
 import { getAjaxUrl } from './helpers';
@@ -33,6 +34,7 @@ class ReactSync{
 			}
 		});
 		this.schemas = schemas;
+		this.model_properties = model_properties;
 		if(this.user){
 			this.user.can = (ability) => this.user_can[ability] === true;
 		}
@@ -47,6 +49,7 @@ class ReactSync{
 	boot(data){
 		if(!this.initialData){
 			this.initialData = this.route.controller;
+			history.replaceState(this.initialData, null, null);
 		}
 		ReactSync.pages = {...ReactSync.pages, ...data.pages};
 		this.constructor.booted = true;
