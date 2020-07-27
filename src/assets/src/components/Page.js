@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Event from '../Event';
 import axios from '../fetchClient';
-const { on } = Event;
+const { on, once } = Event;
 import PageShell from './PageShell';
 
 import ReactSync from '../ReactSync';
@@ -22,13 +22,28 @@ class Page extends Component{
 		components.push(this);
 
 		ReactSync.pages[this.constructor.name] = this.constructor;
+
+// 		this.ref = React.createRef();
 	}
 
 	/** */
 	componentDidMount(){
+
+    	once('navigating', e => {
+        	this.getDomNode().setAttribute('data-react-sync-navigation', "navigating");
+    	});
+
+    	once('navigated', e => {
+        	this.getDomNode().removeAttribute('data-react-sync-navigation');
+    	});
+
 		on('refresh-state', (e) => {
 			this.setState(REACT_SYNC_DATA.page_data);
 		});
+	}
+
+	getDomNode(){
+    	return this.props.domNode || document.querySelector(`[data-react-render="${this.constructor.name}"]`);
 	}
 
 	/** */
@@ -87,6 +102,34 @@ class Page extends Component{
 		)
 	}
 
+
+}
+
+if(!Page.styleTagCreated){
+    Page.styleTagCreated = true;
+    const tag = document.createElement('style');
+    tag.type = 'text/css';
+    tag.innerHTML = `
+    [data-react-sync-navigation]{
+        position: relative;
+    }
+    [data-react-sync-navigation]::after{
+        content: "loading...";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 25px;
+        cursor: wait;
+    }
+    `;
+    document.head.appendChild(tag);
 
 }
 

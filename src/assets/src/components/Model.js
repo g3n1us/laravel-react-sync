@@ -55,6 +55,8 @@ class Model extends Component{
 
     super(props);
 
+//     if(props === null) debugger
+
     this.getDates();
 
     Model.addModel(this.constructor);
@@ -90,7 +92,7 @@ class Model extends Component{
 					relationValue.push({});
 				}
 				relationValueModels = relationValue.map((i, index) => {
-					return new ThisModel({key: `${index}${class_name}${i.id}`, ...i})
+					return ThisModel ? new ThisModel({key: `${index}${class_name}${i.id}`, ...i}) : i;
 				});
 				relationValueModels = collect(relationValueModels);
 			}
@@ -100,7 +102,7 @@ class Model extends Component{
 				}
 				else{
     				if(isEmpty(relationValue)) relationValueModels = null;
-    				else relationValueModels = new ThisModel(relationValue);
+    				else relationValueModels = ThisModel ? new ThisModel(relationValue) : relationValue;
 				}
 			}
 			if(relationValueModels){

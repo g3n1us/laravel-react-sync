@@ -1,7 +1,11 @@
 import _axios from 'axios';
 import ReactSync from './ReactSync';
 import Reducer from './Reducer';
+import { dispatch } from './Event';
 
+if (history.scrollRestoration) {
+    history.scrollRestoration = 'auto';
+}
 
 const ReactSyncInstance = new ReactSync;
 
@@ -37,14 +41,14 @@ const axios = fetchClient();
 
 const navigate = (e) => {
 	if(!ReactSyncInstance.route.controller) return;
-
 	e.preventDefault();
-	console.log(e, 'preventDefault' in e);
+    dispatch('navigating', e);
 	const url = e.target.href;
 	fetchClient().get(url)
 		.then(response => {
 			history.pushState(response.data, "", url);
 			updatePage(response.data);
+			dispatch('navigated', e);
 	});
 }
 
