@@ -82,22 +82,24 @@ class Model extends Component{
 		const { relation_type, definition } = relationDefinition;
 		if(relationName in this.props){
 			const relationValue = this.props[relationName];
-			const ThisModel = Model.getModel(pluralToClassName(relationName));
+			const class_name = pluralToClassName(relationName);
+			const ThisModel = Model.getModel(class_name);
 			let relationValueModels = null;
 			if(relationValue && ('map' in relationValue)) {
 				if(definition.withDefault && isEmpty(relationValue)){
 					relationValue.push({});
 				}
 				relationValueModels = relationValue.map((i, index) => {
-					return (<ThisModel key={index} {...i} />);
+					return new ThisModel({key: `${index}${class_name}${i.id}`, ...i})
 				});
+				relationValueModels = collect(relationValueModels);
 			}
 			else {
 				if(definition.withDefault && isEmpty(relationValue)){
-					relationValueModels = (<ThisModel {...{}} />);
+					relationValueModels = new ThisModel;
 				}
 				else{
-					relationValueModels = (<ThisModel {...relationValue} />);
+					relationValueModels = new ThisModel(relationValue);
 				}
 			}
 			if(relationValueModels){

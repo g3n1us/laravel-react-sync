@@ -18,8 +18,8 @@ class HasRelations extends Trait{
 	constructor(targetClass){
 		super(targetClass);
 	}
-	
-	
+
+
 	getRelation(relation_name){
 		const { definition } = this.schema[relation_name];
 		const { related, foreignKey } = definition;
@@ -31,10 +31,11 @@ class HasRelations extends Trait{
 		};
 		return retval;
 	}
-	
+
 
 	/** */
 	HasMany(relationship_definition_from_schema){
+		console.log(relationship_definition_from_schema);
 		const { related, localKey, foreignKey } = relationship_definition_from_schema;
 		const M = Model.getModel(related);
 		return M.where('props.'+dot_basename(foreignKey), this.props[localKey]);
@@ -106,7 +107,7 @@ withDefault: null
 		}
 /*
 		if(!Class_){
-			return 
+			return
 		}
 */
 // 		console.log('BelongsTo found_item', Class_, found_item, found_item instanceof Model);
