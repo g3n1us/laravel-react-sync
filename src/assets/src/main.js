@@ -20,7 +20,6 @@ export { navigate } from './fetchClient';
 
 import fetchClient from './fetchClient';
 
-fetchClient
 
 /** */
 const LaravelReactSync = {

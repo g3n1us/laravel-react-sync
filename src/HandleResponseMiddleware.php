@@ -17,21 +17,21 @@ class HandleResponseMiddleware
      */
     public function handle($request, Closure $next){
 	    $maybePage = $request->route()->getController();
-
 	    if($maybePage instanceof Page){
 		    $response = $next($request);
 	        $potential_response = $response->getContent();
 
+			if($request->ajax()){
+				return response(collect($maybePage)->all())->header('Content-Type', 'application/json');
+			}
 
-	        if(empty($potential_response)){
-				if($request->ajax()){
-					return response(collect($maybePage))->header('Content-Type', 'application/json');
-				}
+	        else if(empty($potential_response)){
 
-		        return response()->view(config('react_sync.blade_template', 'react_sync::layout'), collect($maybePage));
+		        return response()->view(config('react_sync.blade_template', 'react_sync::layout'), collect($maybePage)->all());
 	        }
 	        else if(view()->exists($potential_response)){
-		        return response()->view($potential_response, collect($maybePage));
+
+		        return response()->view($potential_response, collect($maybePage)->all());
 	        }
 
 			return $next($request);
