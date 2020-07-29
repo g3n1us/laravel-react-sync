@@ -9,6 +9,26 @@ use ReflectionClass;
 
 trait ReactSyncModelTrait{
 
+
+	public static function bootReactSyncModelTrait(){
+		static::retrieved(function ($model) {
+			$model->setAppends(array_merge($model->appends, [
+				'moment_dates',
+			]));
+
+        });
+	}
+
+
+	public function getMomentDatesAttribute(){
+		$momentDates = [];
+		foreach($this->getDates() as $d){
+			$momentDates[$d] = $this->{$d}->toIso8601String();
+		}
+		return $momentDates;
+	}
+
+
 	public static $is_react_sync_model = true;
 
 	public function sync_model(){
@@ -29,7 +49,7 @@ trait ReactSyncModelTrait{
 
 	public function properties(){
     	$tmp = new static;
-    	$props = coerceAsArray($this)->only('dateFormat', 'connection', 'primaryKey', 'keyType', 'incrementing', 'perPage', 'timestamps', 'dates', 'casts', 'appends', 'with'); // $this
+    	$props = coerceAsArray($this)->only('dateFormat', 'connection', 'primaryKey', 'keyType', 'incrementing', 'perPage', 'timestamps', 'dates', 'casts', 'appends', 'with');
 
     	$props['table'] = $this->getTable();
     	$props['dateFormat'] = $this->getDateFormat();
