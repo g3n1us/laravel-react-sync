@@ -5,6 +5,7 @@ use Illuminate\Routing\Router;
 use G3n1us\LaravelReactSync\Pages\Core\Page;
 use G3n1us\LaravelReactSync\Paths;
 use G3n1us\LaravelReactSync\Utils;
+use G3n1us\LaravelReactSync\HandleResponseMiddleware;
 
 Route::prefix(config('react_sync.pages_prefix', ''))->group(function () {
 
@@ -19,8 +20,14 @@ Route::prefix(config('react_sync.pages_prefix', ''))->group(function () {
 			$routes[] = Route::match(['post', 'put', 'patch', 'delete'], $pattern, $page_class . '@form_request');
 		}
 
+		$default_middleware = config('react_sync.middleware');
+		$required_middleware = ['web', HandleResponseMiddleware::class];
+		$page_middleware = (array) $page_class::$middleware;
+		$resolved_midleware = array_merge($default_middleware, $page_middleware, $required_middleware);
+		$resolved_midleware = array_unique($resolved_midleware);
+
 		foreach($routes as $route){
-			$route->middleware((array) $page_class::$middleware + ['web', G3n1us\LaravelReactSync\HandleResponseMiddleware::class]);
+			$route->middleware($resolved_midleware);
 		}
 	}
 

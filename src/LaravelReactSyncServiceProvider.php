@@ -33,6 +33,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
     public function boot()
     {
 	    $this->syncable_boot();
+
     }
 }
 

@@ -20,7 +20,7 @@ abstract class Page{
 
 	protected static $route_name;
 
-    public static $middleware = ['web'];
+    public static $middleware = [];
 
     public static $pattern = null;
 

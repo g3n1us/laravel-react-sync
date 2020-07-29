@@ -108,6 +108,7 @@ trait ReactSyncable{
 		        }
 	        }
 	    });
+// 	    (new Kernel)->appendMiddlewareToGroup('react_sync', HandleResponseMiddleware::class);
 	}
 
 
@@ -119,6 +120,7 @@ trait ReactSyncable{
      */
     public function syncable_boot()
     {
+		
 		$this->loadMigrationsFrom(__DIR__.'/migrations');
 
         $this->loadRoutesFrom(__DIR__.'/routes.php');
