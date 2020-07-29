@@ -1,6 +1,6 @@
 import Trait from './Trait';
 import moment from 'moment';
-
+window.moment = moment;
 /**
 @kind mixin
 @extends Trait
@@ -12,13 +12,15 @@ class MorphsDates extends Trait{
     }
 
     getDates(){
-		let { dates, dateFormat } = this.model_properties
+	    const { moment_dates } = this.props;
+	    console.log('moment_dates', moment_dates);
+		let { dateFormat } = this.model_properties
 		if(this.dateFormat) dateFormat = this.dateFormat;
 
-		dates.forEach(d => {
+		Object.keys(moment_dates).forEach(d => {
     		const props = this.props || {};
 
-    		const mmnt = moment(props[d]).format(dateFormat);
+    		const mmnt = moment(moment_dates[d]).format(dateFormat);
 
 			Object.defineProperty(this, d, {
 				value: mmnt,

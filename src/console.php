@@ -32,7 +32,7 @@ Artisan::command('make:react_model {name?}', function($name = null){
 	file_put_contents(Paths::app_path("Models/$name.js"), $rendered);
 	$this->call('react_sync:all');
 	$this->comment("Model: $name created");
-});
+})->describe('Create a new Model and corresponding React component');
 
 
 
@@ -141,7 +141,7 @@ Artisan::command('make:react_page {name?}', function($name = null){
 	$this->info("route registered at: " . url($pathname));
 
 	$this->call('react_sync:all');
-});
+})->describe('Create a new Page and corresponding React component');
 
 
 
