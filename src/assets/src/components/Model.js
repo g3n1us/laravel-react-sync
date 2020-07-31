@@ -244,7 +244,6 @@ class Model extends Component{
 		return this.constructor.plural;
 	}
 
-
 	/** */
 	static get plural(){
 		return pluralize(kebabCase(this.name));
@@ -255,11 +254,35 @@ class Model extends Component{
 		return this.constructor.singular;
 	}
 
-
 	/** */
 	static get singular(){
 		return pluralize.singular(this.plural);
 	}
+
+
+
+	/** */
+	get plural_handle(){
+		return this.constructor.plural_handle;
+	}
+
+	/** */
+	static get plural_handle(){
+		return pluralize(snakeCase(this.name));
+	}
+
+	/** */
+	get singular_handle(){
+		return this.constructor.singular_handle;
+	}
+
+	/** */
+	static get singular_handle(){
+		return pluralize.singular(this.plural_handle);
+	}
+
+
+
 
 }
 

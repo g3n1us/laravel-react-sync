@@ -41,9 +41,20 @@ const axios = fetchClient();
 
 const navigate = (e) => {
 	if(!ReactSyncInstance.route.controller) return;
-	e.preventDefault();
+	let url;
+
+	if(typeof e === 'string'){
+    	// this is just a url, not an event handler
+    	url = e;
+	}
+	else {
+    	e.preventDefault();
+    	url = e.target.href;
+	}
+
+
     dispatch('navigating', e);
-	const url = e.target.href;
+
 	fetchClient().get(url)
 		.then(response => {
 			history.pushState(response.data, "", url);
@@ -54,11 +65,11 @@ const navigate = (e) => {
 
 
 const updatePage = (data) => {
+    debugger
 	const { page_class } = ReactSyncInstance.route.controller;
 	if(page_class !== data.page_class){
 		const containing_div = document.querySelector(`[data-react-render="${page_class}"]`);
 		containing_div.setAttribute('data-react-render', data.page_class);
-
 	}
 
 	ReactSyncInstance.route.controller = data;

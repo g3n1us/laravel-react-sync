@@ -89,6 +89,8 @@ Artisan::command('make:react_page {name?}', function($name = null){
 		);
 ",
 				'{{$renders}}'             => "
+    static associatedModel = $singular;
+
 	renderSingle() {
 		const { $singular } = this.props;
 		return " . $singular . ".show();

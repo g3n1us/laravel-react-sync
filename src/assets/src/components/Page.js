@@ -15,6 +15,10 @@ import { navigate } from '../fetchClient';
 
 /** */
 class Page extends Component{
+
+    /** */
+    static associatedModel = null;
+
 	/** */
 	constructor(props){
 		super(props);
@@ -128,6 +132,23 @@ if(!Page.styleTagCreated){
         justify-content: center;
         font-size: 25px;
         cursor: wait;
+    }
+    .react_sync_table th{
+        cursor: pointer;
+    }
+    .react_sync_table th > span{
+        white-space: nowrap;
+        display: flex;
+    }
+    .react_sync_table th[data-currentsort] > span::after{
+        margin-left: auto;
+        padding-left: 1rem;
+    }
+    .react_sync_table th[data-currentsort="desc"] > span::after{
+        content: "↑"
+    }
+    .react_sync_table th[data-currentsort="asc"] > span::after{
+        content: "↓"
     }
     `;
     document.head.appendChild(tag);
