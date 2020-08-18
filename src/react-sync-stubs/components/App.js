@@ -47,7 +47,7 @@ class App extends Component {
 	}
 
 	get CurrentPage(){
-		const { page_class } = this.props;
+		const { page_class } = this.state || this.props;
 
         return this.pages()[page_class];
 	}

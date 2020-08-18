@@ -78,7 +78,6 @@ export default function Reducer(){
 
 	});
 
-
 	return page_props;
 
 }

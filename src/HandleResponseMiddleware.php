@@ -18,6 +18,7 @@ class HandleResponseMiddleware
     public function handle($request, Closure $next){
 	    $maybePage = $request->route()->getController();
 	    if($maybePage instanceof Page){
+
 		    $response = $next($request);
 	        $potential_response = $response->getContent();
 
@@ -33,6 +34,8 @@ class HandleResponseMiddleware
 
 		        return response()->view($potential_response, collect($maybePage)->all());
 	        }
+
+	        return $response;
 
 			return $next($request);
 	    }

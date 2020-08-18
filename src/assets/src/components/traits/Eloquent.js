@@ -112,6 +112,7 @@ class Eloquent extends Trait{
 
 	/** */
 	render(){
+
 		if(this.is_query){
 			return this.queryRender();
 		}

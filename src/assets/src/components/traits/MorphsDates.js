@@ -22,10 +22,8 @@ class MorphsDates extends Trait{
 
 		Object.keys(moment_dates).forEach(d => {
 			if(casts[d]){
-				console.log(casts[d])
 				const dateFormatFromCast = casts[d].match(/^.*?:(.*?)$/, '$1')
 				if(dateFormatFromCast){
-					console.log(dateFormatFromCast);
 					dateFormat = dateFormatFromCast[1];
 				}
 			}

@@ -16,6 +16,9 @@ import RenderableDefault from './traits/RenderableDefault';
 import HasKeyProp from './traits/HasKeyProp';
 import Eloquent from './traits/Eloquent';
 import MorphsDates from './traits/MorphsDates';
+import HasAttributes from './traits/HasAttributes';
+
+
 
 import Shell from './Shell';
 
@@ -25,6 +28,8 @@ import { pluralToClassName, classNameToPlural, isModel, studly_case, app_put, ap
 const pluralize = require('pluralize');
 
 import { filter, flatten, isEmpty, toPairs, pick, kebabCase, snakeCase, difference, intersection } from 'lodash';
+
+
 
 /**
   @extends Component
@@ -81,10 +86,14 @@ class Model extends Component{
 	let relations = filter(toPairs(this.schema), (v) => v[1].type == "relation");
 	this.relations = {};
 
+	const joining_ids = [];
+
 	relations.forEach((v_array) => {
 		let [ relationName, relationDefinition ] = v_array;
 		const { relation_type, definition } = relationDefinition;
 		if(relationName in this.props){
+// 			console.log('definition', definition);
+			joining_ids.push(definition.foreignKey);
 			const relationValue = this.props[relationName];
 			const class_name = pluralToClassName(relationName);
 			const ThisModel = Model.getModel(class_name);
@@ -125,8 +134,12 @@ class Model extends Component{
 			}
 		});
 
-		this.constructor.boot(this);
 
+		this.setAttributes();
+
+// console.log(joining_ids, 'joining_ids');
+		this.constructor.boot(this);
+// debugger
 	}
 
 	/** */
@@ -303,6 +316,8 @@ new Queryable(Model);
 new Eloquent(Model);
 
 new MorphsDates(Model);
+
+new HasAttributes(Model);
 
 
 (function(){

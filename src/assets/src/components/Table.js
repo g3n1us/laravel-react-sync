@@ -57,15 +57,6 @@ export default class Table extends Component{
 
         this.setSortServer({ order_direction, order_by });
 
-/*
-        if(this.props.serverSort){
-            this.setSortServer({ order_direction, order_by });
-        }
-
-        else{
-            this.setState({ order_direction, order_by });
-        }
-*/
 
 
 		if(this.model.relations[sort_column]){
@@ -74,16 +65,17 @@ export default class Table extends Component{
 	}
 
 	setSortServer = (newProps) => {
+		console.log(newProps);
+    	this.setState({ ...newProps }, () => {
+	    	let query = qs.parse(window.location.search.slice(1));
+	    	const api_sort = {
+	        	order_by: newProps.order_by,
+	        	order_direction: newProps.order_direction
+	    	}
+	    	const query_string = qs.stringify({...query, ...api_sort});
 
-    	this.setState({ ...newProps });
-    	let query = qs.parse(window.location.search.slice(1));
-    	const api_sort = {
-        	order_by: newProps.order_by,
-        	order_direction: newProps.order_direction
-    	}
-    	const query_string = qs.stringify({...query, ...api_sort});
-
-    	navigate(window.location.pathname + '?' + query_string);
+	    	navigate(window.location.pathname + '?' + query_string);
+    	});
 	}
 
 
@@ -172,7 +164,13 @@ export default class Table extends Component{
 		};
 */
 
-        return this.props.data || associatedModel && app().state[associatedModel.plural_handle];
+		const rows = this.props.data || associatedModel && app().state[associatedModel.plural_handle];
+
+		if(collect(rows).isEmpty()){
+			return null;
+		}
+
+        return rows;
 
 
 /*
@@ -211,9 +209,22 @@ export default class Table extends Component{
 
         let sorted_rows = this.getRows();
 
-        sorted_rows = sorted_rows.map(v => this.render_table_row(v.props, v)).all();
+        let pagination = null;
 
-        const pagination = <Pagination {...this.getRows()} />;
+        if(sorted_rows === null){
+	        sorted_rows = (
+		        <tr>
+			        <td colSpan={headings.length}> No Data </td>
+		        </tr>
+	        );
+        }
+		else{
+	        pagination = <Pagination {...sorted_rows} />;
+
+
+	        sorted_rows = sorted_rows.map(v => this.render_table_row(v.props, v)).all();
+
+		}
 
         return (
             <>

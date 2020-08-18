@@ -65,8 +65,7 @@ const navigate = (e) => {
 
 
 const updatePage = (data) => {
-    debugger
-	const { page_class } = ReactSyncInstance.route.controller;
+	const { page_class } = ReactSyncInstance.route.controller; // TODO make the source of state data a more memorable place
 	if(page_class !== data.page_class){
 		const containing_div = document.querySelector(`[data-react-render="${page_class}"]`);
 		containing_div.setAttribute('data-react-render', data.page_class);

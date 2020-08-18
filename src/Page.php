@@ -35,7 +35,7 @@ abstract class Page{
 		    throw new \Exception("There is no 'constructor' method implemented in the class " . static::class . ". This must be present to handle incoming GET requests");
 	    }
 
-        $this->page_name_class = snake_case(class_basename($this));
+        $this->page_name_class = Str::snake(class_basename($this));
         $this->page_class = class_basename($this);
         $this->request = collect(request());
     }
