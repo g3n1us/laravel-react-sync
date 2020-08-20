@@ -7,8 +7,10 @@ use Schema;
 
 use ReflectionClass;
 
-trait ReactSyncModelTrait{
+use G3n1us\ModelApi\ModelTrait;
 
+trait ReactSyncModelTrait{
+    use ModelTrait;
 
 	public static function bootReactSyncModelTrait(){
 		static::retrieved(function ($model) {
@@ -23,7 +25,7 @@ trait ReactSyncModelTrait{
 	public function getMomentDatesAttribute(){
 		$momentDates = [];
 		foreach($this->getDates() as $d){
-			$momentDates[$d] = $this->{$d}->toIso8601String();
+			$momentDates[$d] = $this->{$d} ? $this->{$d}->toIso8601String() : $this->{$d};
 		}
 		return $momentDates;
 	}
@@ -71,6 +73,8 @@ trait ReactSyncModelTrait{
 
 		$attrs = Schema::getColumnListing($this->getTable());
 
+
+
 		$attrs = collect($attrs)->map(function($column) use($table, $connection, $primary_key, $per_page){
 			$column_definition = $connection->getDoctrineColumn($table, $column)->toArray();
 
@@ -92,6 +96,8 @@ trait ReactSyncModelTrait{
 
 			return [$column => $column_definition];
 		})->values()->collapse();
+
+
 
 		$appended_attrs = coerceAsArray($this)->only(['with', 'appends'])->flatten();
 
@@ -116,7 +122,7 @@ trait ReactSyncModelTrait{
 		$relations = $relations->pluck('name')->map(function($relation_name){
 			$r = $this->{$relation_name}();
 			if(!is_object( $r )) {
-    			dd($r); die();
+
     			return null;
 			}
 			$relation_type = class_basename(get_class($r));
@@ -135,6 +141,7 @@ trait ReactSyncModelTrait{
 		})->filter()->collapse();
 
         $all = collect($attrs)->merge($relations);
+        $all->put('rest_properties', $this->rest_properties());
 
 		return $all;
 	}

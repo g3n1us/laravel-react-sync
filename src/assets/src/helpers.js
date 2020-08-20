@@ -70,7 +70,8 @@ export function ReactSyncData(){
 /** */
 export function getAjaxUrl(addl_query = {}){
 	const query = {...qs.parse(window.location.search), ...addl_query};
-	return window.location.href + '?' + qs.stringify(query);
+	const { protocol, hostname, pathname } = window.location;
+	return `${protocol}//${hostname}${pathname}`  + '?' + qs.stringify(query);
 }
 
 

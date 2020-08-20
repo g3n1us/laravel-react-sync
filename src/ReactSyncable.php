@@ -31,6 +31,24 @@ trait ReactSyncable{
 
 			View::share('randomized_var', 'react_sync_random_' . rand() . rand() . '_var');
 
+/*
+            ->map(function($v,$k){
+
+        		$item = [];
+        		$item['methods'] = implode('|', $v->methods());
+        		$item['name'] = $v->getName();
+        		$uri = $v->uri;
+        		foreach($v->wheres as $key => $where){
+            		$uri = str_replace("$key", $where, $uri);
+        		}
+        		$item['wheres'] = $v->wheres;
+        		$item['uri'] = $uri;
+
+        		return $item;
+            });
+*/
+
+
 
 			Blade::directive('output_alldata', function(){
 				return '<?php echo $$randomized_var->toJson(); if(json_last_error() > 0) throw new \Exception("Data passed to the view cannot be serialized. This may be due to a circular structure being included. Data includes: " . $$randomized_var->keys()->implode(", \n")); ?>';
@@ -120,7 +138,7 @@ trait ReactSyncable{
      */
     public function syncable_boot()
     {
-		
+
 		$this->loadMigrationsFrom(__DIR__.'/migrations');
 
         $this->loadRoutesFrom(__DIR__.'/routes.php');

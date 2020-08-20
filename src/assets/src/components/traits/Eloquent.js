@@ -74,11 +74,13 @@ class Eloquent extends Trait{
 			}
 			else where_prop = this.props.where;
 		}
+
+		const { singular_url, plural_url } = this.schema.rest_properties;
 		const map = {
-			find: `/api/${this.singular}/${this.props.find}`,
-			where: `/api/${this.plural}/where/${where_prop}`,
-			all: `/api/${this.plural}`,
-			first: `/api/${this.singular}`,
+			find: `${singular_url}/${this.props.find}`,
+			where: `${plural_url}/where/${where_prop}`,
+			all: plural_url,
+			first: singular_url,
 		}
 		const qs_object = {};
 		let { per_page, perPage } = this.props;

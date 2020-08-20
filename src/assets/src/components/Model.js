@@ -74,10 +74,11 @@ class Model extends Component{
 
 	const res = app_put(`${this.plural}.${this.id}`, this);
 
+	const { singular_url, plural_url } = this.schema.rest_properties;
 
     this._calculatedProperties = {
 		endpoint: `${window.location.protocol}//${window.location.hostname}/${this.constructor.plural}`,
-		api_url: `${window.location.protocol}//${window.location.hostname}/api/${this.singular}/${this.props.id}`,
+		api_url: `${singular_url}/${this.props.id}`,
 		url: `${window.location.protocol}//${window.location.hostname}/${this.constructor.singular}/${this.props.id}`,
     };
 
@@ -259,7 +260,9 @@ class Model extends Component{
 
 	/** */
 	static get plural(){
-		return pluralize(kebabCase(this.name));
+    	const { plural } = this.getSchema().rest_properties;
+
+		return plural;
 	}
 
 	/** */
@@ -269,7 +272,8 @@ class Model extends Component{
 
 	/** */
 	static get singular(){
-		return pluralize.singular(this.plural);
+    	const { singular } = this.getSchema().rest_properties;
+    	return singular;
 	}
 
 
@@ -281,7 +285,7 @@ class Model extends Component{
 
 	/** */
 	static get plural_handle(){
-		return pluralize(snakeCase(this.name));
+		return snakeCase(this.plural);
 	}
 
 	/** */
@@ -291,10 +295,16 @@ class Model extends Component{
 
 	/** */
 	static get singular_handle(){
-		return pluralize.singular(this.plural_handle);
+    	return snakeCase(this.singular);
 	}
 
+    static get plural_url(){
+        return this.getSchema().rest_properties.plural_url;
+    }
 
+    static get singular_url(){
+        return this.getSchema().rest_properties.singular_url;
+    }
 
 
 }

@@ -10,7 +10,7 @@ window.moment = moment;
 class MorphsDates extends Trait{
 
     getDates(){
-	    const { moment_dates } = this.props;
+	    const { moment_dates = {} } = this.props;
 		let { dateFormat, casts } = this.model_properties
 		if(this.dateFormat) dateFormat = this.dateFormat;
 

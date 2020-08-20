@@ -7,6 +7,7 @@ import Shell from '../Shell';
 import ReactSync from '../../ReactSync';
 import collect from '../../collect.js';
 import axios from '../../fetchClient';
+import { dispatch, on } from '../../Event.js';
 
 
 window.Find = (dotstring) => {
@@ -63,12 +64,14 @@ class Queryable extends Trait{
 
 
 	static list(additional_props = {}){
-		return <Shell url={`/api/${this.plural}`} Model={this} {...additional_props} />
+
+		return <Shell url={this.plural_url} Model={this} {...additional_props} />
 	}
 
 
 	/** */
 	static all(additional_props = {}){
+    	debugger;
 		this.refresher = React.createRef();
 		const plural = this.plural;
 		let items = app_get('state.'+plural) || app_get('state.'+ snakeCase(plural)) || app_get(plural) || app_get(snakeCase(plural));
@@ -130,30 +133,41 @@ class Queryable extends Trait{
 
 
 	/** */
-	static create_path = `/${this.plural}?asajax=true`;
+	static get create_path(){
+		return this.plural_url;
+	}
 
 
 
 	/**
-	 * Store the model's state back to the database
+	 * Create a new model and insert into the database
 	 */
 	static create(initialProps = {}){
-		axios.post(this.create_path, initialProps)
-			.then(response => {
-				if(window.location.href != response.request.responseURL){
-					history.pushState(response.data, "", response.request.responseURL);
-					this.refresh_static();
-				}
-				else{
-					this.refresh_static();
-				}
+    	return new Promise((resolve, reject) => {
+    		axios.post(this.create_path, initialProps)
+    			.then(response => {
+        			const { href } = window.location;
+        			const { responseURL } = response.request;
+    				if(responseURL !== this.create_path && href !== responseURL){
+    					history.pushState(response.data, "", response.request.responseURL);
+    					this.refresh_static();
+    				}
+    				else{
+    					this.refresh_static();
+    				}
 
-				react_sync_notification('Saved');
-			})
-			.catch(err => {
-				console.error(err);
-				react_sync_notification({text: 'An error occurred', level: 'danger'});
-			});
+    				react_sync_notification('Saved');
+
+    				resolve(response.data);
+
+    				dispatch('model_created', new this(response.data));
+    			})
+    			.catch(err => {
+    				console.error(err);
+    				react_sync_notification({text: 'An error occurred', level: 'danger'});
+    				reject(err);
+    			});
+    	});
 	}
 
 	/**
@@ -207,6 +221,8 @@ class Queryable extends Trait{
 		}
 
 	}
+
+
 
 }
 

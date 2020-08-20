@@ -23,11 +23,11 @@ Route::prefix(config('react_sync.pages_prefix', ''))->group(function () {
 		$default_middleware = config('react_sync.middleware');
 		$required_middleware = ['web', HandleResponseMiddleware::class];
 		$page_middleware = (array) $page_class::$middleware;
-		$resolved_midleware = array_merge($default_middleware, $page_middleware, $required_middleware);
-		$resolved_midleware = array_unique($resolved_midleware);
+		$resolved_middleware = array_merge($default_middleware, $page_middleware, $required_middleware);
+		$resolved_middleware = array_unique($resolved_middleware);
 
 		foreach($routes as $route){
-			$route->middleware($resolved_midleware);
+			$route->middleware($resolved_middleware);
 		}
 	}
 
