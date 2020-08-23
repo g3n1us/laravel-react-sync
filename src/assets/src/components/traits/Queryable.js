@@ -112,7 +112,9 @@ class Queryable extends Trait{
 
 	/**
 	 */
-
+	get save_path(){
+		return this.api_url;
+	}
 
 	/**
 	 * Store the model's state back to the database
@@ -146,10 +148,10 @@ class Queryable extends Trait{
     	return new Promise((resolve, reject) => {
     		axios.post(this.create_path, initialProps)
     			.then(response => {
-        			const { href } = window.location;
-        			const { responseURL } = response.request;
-    				if(responseURL !== this.create_path && href !== responseURL){
-    					history.pushState(response.data, "", response.request.responseURL);
+        			const redirect_url = this.response_is_redirect(response);
+
+    				if(redirect_url){
+    					history.pushState(response.data, "", redirect_url);
     					this.refresh_static();
     				}
     				else{
@@ -167,6 +169,7 @@ class Queryable extends Trait{
     				react_sync_notification({text: 'An error occurred', level: 'danger'});
     				reject(err);
     			});
+
     	});
 	}
 
@@ -178,28 +181,39 @@ class Queryable extends Trait{
 
 	/** */
 	get delete_path(){
-		return `/api/${this.singular}/${this.id}`;
+
+		return this.api_url;
 	}
 
 	/**
 	 * Delete a model
 	 */
-	delete(){
-		axios.delete(this.delete_path)
-			.then(response => {
-				if(window.location.href != response.request.responseURL){
-					history.pushState(response.data, "", response.request.responseURL);
-					this.refresh();
-				}
-				else{
-					this.refresh();
-				}
+	delete(callback = false){
+    	return new Promise((resolve, reject) => {
+    		axios.delete(this.delete_path)
+    			.then(response => {
+        			const redirect_url = this.constructor.response_is_redirect(response);
+    				if(redirect_url){
+    					history.pushState(response.data, "", redirect_url);
+    					this.refresh();
+    				}
+    				else{
+    					this.refresh();
+    				}
 
-				react_sync_notification('Deleted');
-			})
-			.catch(err => {
-				console.log(err);
-				react_sync_notification({text: 'An error occurred', level: 'danger'});
+    				react_sync_notification('Deleted');
+    				dispatch('model_deleted', response);
+    				resolve(response);
+    				if(typeof callback === 'function'){
+	    				callback(response);
+    				}
+
+    			})
+    			.catch(err => {
+    				console.log(err);
+    				react_sync_notification({text: 'An error occurred', level: 'danger'});
+    				reject(err);
+    			});
 			});
 	}
 
@@ -222,8 +236,20 @@ class Queryable extends Trait{
 
 	}
 
+    static response_is_redirect(response){
+    	const { href } = window.location;
+    	const { responseURL } = response.request;
+    	const { url } = response.config;
+    	console.log(url, responseURL);
+    	if(responseURL !== url && href !== responseURL){
+        	return responseURL;
+    	}
+    	return false;
+    }
+
 
 
 }
+
 
 export default Queryable;

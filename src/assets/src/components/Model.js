@@ -306,6 +306,10 @@ class Model extends Component{
         return this.getSchema().rest_properties.singular_url;
     }
 
+    to(){
+        return <this.constructor {...this.props} />;
+    }
+
 
 }
 
