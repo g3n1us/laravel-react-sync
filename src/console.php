@@ -3,6 +3,7 @@
 use Illuminate\Filesystem\Filesystem;
 use G3n1us\LaravelReactSync\ReactSyncPreset;
 use G3n1us\LaravelReactSync\Paths;
+use \G3n1us\LaravelReactSync\Utils;
 
 
 Artisan::command('make:react_model {name?}', function($name = null){
@@ -29,9 +30,9 @@ Artisan::command('make:react_model {name?}', function($name = null){
 	$tpl = file_get_contents(__DIR__ . '/js_file_templates/model.blade.js');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
 	file_put_contents(Paths::app_path("Models/$name.js"), $rendered);
-	Artisan::call('write_index_files');
+	$this->call('react_sync:all');
 	$this->comment("Model: $name created");
-});
+})->describe('Create a new Model and corresponding React component');
 
 
 
@@ -41,46 +42,132 @@ Artisan::command('make:react_page {name?}', function($name = null){
 	if($name === null){
 		$name = $this->ask('What is your name of the page?');
 	}
-	$name = preg_replace('/^(.*?)_page$/', '$1', snake_case($name));
-	$pathname = str_slug($name);
-	$name = studly_case($name) . 'Page';
-	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page.blade.js');
-	$rendered = str_replace('{{$name}}', $name, $tpl);
-	
-	file_put_contents(Paths::app_path("Pages/$name.js"), $rendered);
-
-	$tpl = file_get_contents(__DIR__ . '/js_file_templates/page_php.blade.js');
-	$rendered = str_replace('{{$name}}', $name, $tpl);
+	$name = $basenamestring = preg_replace('/^(.*?)_page$/', '$1', snake_case($name));
+	$prefix = config('react_sync.pages_prefix');
 	$namespace = config('react_sync.namespace');
-	$rendered = str_replace('{{ namespace }}', "$namespace\\Pages", $rendered);
-	
+
+	$pathname = Str::start($prefix.'/'.Str::kebab($name), '/');
+
+	$name = studly_case($name) . 'Page';
+	$models = Utils::listModels()->map(function($m){
+		return [Utils::standardizedModelString($m) => $m];
+	})->collapse(1);
+
+	$replacements = [
+		'{{$name}}'       => $name,
+		'{{ namespace }}' => "$namespace\\Pages",
+		'{{$singular}}'   => Str::singular($basenamestring),
+		'{{$plural}}'     => $basenamestring,
+	];
+
+	if($related_model = $models->get(Utils::standardizedModelString($basenamestring))){
+		$related_model = ltrim($related_model, '\\');
+		$singular = Str::singular($basenamestring);
+		$plural = Str::plural($basenamestring);
+		$this->comment("You appear to be creating a page associated with: " . $related_model);
+		if($this->confirm("Would you like to use this model with this page?", 'y')){
+			$replacements = $replacements + [
+				'{{$model_use_statement}}' => "use $related_model;" . PHP_EOL,
+				'{{$model_props}}'         => PHP_EOL."\tpublic $" . "$singular;" . PHP_EOL.PHP_EOL . "\tpublic $" . "$plural;".PHP_EOL,
+				'{{$model_arg}}'           => class_basename($related_model) . " $" . "$singular = null",
+				'{{$slug}}'                => $pathname . '/{' . $singular . '?}',
+				'{{$js_import}}'           => "import { BasicLayout } from 'laravel_react_sync';".PHP_EOL."import { ". class_basename($related_model) ." } from 'models';" . PHP_EOL,
+				'{{$php_fn_body}}'         => '
+		if($'.$singular.'){
+			$this->'.$singular.' = $'.$singular.';
+		}
+		else {
+			$this->'.$plural.' = '.class_basename($related_model).'::paginate();
+		}
+',
+				'{{$render_body}}'         => "
+		const { $singular } = this.props;
+		return (
+			<BasicLayout>
+				{".$singular." ? this.renderSingle() : this.renderMany()}
+			</BasicLayout>
+		);
+",
+				'{{$renders}}'             => "
+    static associatedModel = $singular;
+
+	renderSingle() {
+		const { $singular } = this.props;
+		return " . $singular . ".show();
+	}
+
+	renderMany() {
+		const { $plural } = this.props;
+		return $plural.map(v => v.show());
+	}
+
+",
+
+			];
+
+		}
+		else{
+			$replacements = $replacements + [
+				'{{$model_use_statement}}' => "",
+				'{{$model_props}}'         => '// public $props_item;',
+				'{{$model_arg}}'           => "",
+				'{{$slug}}'                => $pathname,
+				'{{$render_body}}'         => "return (<h2>$name</h2>);",
+				'{{$renders}}'             => "",
+				'{{$js_import}}'           => "",
+				'{{$php_fn_body}}'         => "",
+			];
+		}
+
+
+
+	}
+
+	$rendered = file_get_contents(__DIR__ . '/js_file_templates/page_php.blade.js');
+	$js_rendered = file_get_contents(__DIR__ . '/js_file_templates/page.blade.js');
+
+	foreach($replacements as $find => $replacement){
+		$rendered = str_replace($find, $replacement, $rendered);
+		$js_rendered = str_replace($find, $replacement, $js_rendered);
+	}
+
+	if(file_exists(Paths::app_path("Pages/$name.php")) || file_exists(Paths::app_path("Pages/$name.js"))){
+		throw new \Exception("The file already exists.");
+	}
+
 	file_put_contents(Paths::app_path("Pages/$name.php"), $rendered);
 
-	Artisan::call('write_index_files');
-	$this->comment("Page: $name created");
-	$this->comment("route registered at: " . url("/pages/$pathname"));
-});
+	file_put_contents(Paths::app_path("Pages/$name.js"), $js_rendered);
+
+	$this->info("Page: $name created");
+	$this->info("route registered at: " . url($pathname));
+
+	$this->call('react_sync:all');
+})->describe('Create a new Page and corresponding React component');
+
+
 
 
 if(!function_exists('get_schemas')){
 	function get_schemas(){
-	    $models = json_decode(file_get_contents(Paths::app_path("Models/models.json")), true);
-	    $schemas = [];
-	    foreach($models as $model){
-		    $namespace = config('react_sync.namespace');
-	        $class = "\\$namespace\\Models\\$model";
-	        $schemas[$model] = get_schema(new $class);
-	    }
-	    return collect($schemas);
+	    return Utils::get_schemas();
 	}
 }
 
 
+Artisan::command('react_sync:all', function(){
+	$this->call('react_sync:write_schemas');
+	$this->call('react_sync:write_index_files');
+})->describe('Write metadata and other data files required for Laravel React Sync');
 
-Artisan::command('write_schemas', function () {
-    $path = Paths::resource_path('js/schema.js');
-    $file_contents = get_schemas();
-    $file_contents = "export default $file_contents;\n";
+
+
+Artisan::command('react_sync:write_schemas', function () {
+    $items = [
+        [Paths::resource_path('js/schema.js'), Utils::get_schemas()],
+        [Paths::resource_path('js/model_properties.js'), Utils::get_model_properties()],
+    ];
+
     $filecomments = "/****************************************************
  *
  * THIS FILE IS AUTOMATICALLY GENERATED. DO NOT EDIT.
@@ -88,8 +175,17 @@ Artisan::command('write_schemas', function () {
  ****************************************************
  */
  ";
-    file_put_contents($path, "$filecomments$file_contents");
-    $this->comment("\n schema.js written to $path \n\n");
+
+    foreach($items as $tuple){
+        [$path, $file_contents] = $tuple;
+
+        $file_contents = "export default $file_contents;\n";
+        file_put_contents($path, "$filecomments$file_contents");
+        $name = basename($path);
+        $this->comment("\n $name written to $path \n\n");
+
+    }
+
 
 })->describe('Write out schemas to js directory');
 
@@ -141,27 +237,19 @@ if(!function_exists('write_index_files')){
 	    });
 
     //update models.json
-    $possible_models = collect($fs->allFiles(Paths::app_path('Models')))
-        ->map(function($f) use($fs){
-	        if($f->getType() != 'file') return null;
-	        if($f->getExtension() != 'js') return null;
-	        $filename = $f->getFileName();
-	        $classname = preg_replace('/^(.*?)\.js$/', '$1', $filename);
-            if($fs->exists(Paths::app_path("Models/$classname.php"))){
-	            return $classname;
-            }
-            return null;
-        })
-        ->filter()
-        ->unique()
-        ->values();
+    $possible_models = Utils::listModels();
     $fs->put(Paths::app_path("Models/models.json"), $possible_models->toJSON());
 	$_this->comment("\n models.json updated in ".Paths::app_path("Models")." \n\n");
+
+    //update pages.json
+    $possible_pages = Utils::listPages();
+    $fs->put(Paths::app_path("Pages/pages.json"), $possible_pages->toJSON());
+	$_this->comment("\n pages.json updated in ".Paths::app_path("Pages")." \n\n");
 	}
 }
 
 
-Artisan::command('write_index_files', function(){
+Artisan::command('react_sync:write_index_files', function(){
     // put a file called .index in a directory you want to index
     write_index_files($this);
 });

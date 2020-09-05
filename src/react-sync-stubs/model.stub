@@ -4,7 +4,11 @@ namespace {{ namespace }};
 
 use Illuminate\Database\Eloquent\Model;
 
+use G3n1us\LaravelReactSync\ReactSyncModelTrait;
+
 class {{ class }} extends Model
 {
+    use ReactSyncModelTrait;
+
     //
 }

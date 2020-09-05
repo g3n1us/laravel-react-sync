@@ -17,6 +17,11 @@ export class Event{
 	}
 
 	/** */
+	static once(event_handle, callback){
+		Event.registeredEventHandlers[event_handle] = [callback];
+	}
+
+	/** */
 	static dispatch(event_handle, ...addl_args){
 		const handlers = Event.registeredEventHandlers[event_handle] || [];
 		const resp = handlers.map(cb => cb.apply(Event, addl_args));
@@ -30,6 +35,11 @@ Event.registeredEventHandlers = {};
 /** */
 export function on(event_handle, callback){
 	return Event.on(event_handle, callback);
+}
+
+/** */
+export function once(event_handle, callback){
+	return Event.once(event_handle, callback);
 }
 
 /** */

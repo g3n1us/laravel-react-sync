@@ -31,6 +31,24 @@ trait ReactSyncable{
 
 			View::share('randomized_var', 'react_sync_random_' . rand() . rand() . '_var');
 
+/*
+            ->map(function($v,$k){
+
+        		$item = [];
+        		$item['methods'] = implode('|', $v->methods());
+        		$item['name'] = $v->getName();
+        		$uri = $v->uri;
+        		foreach($v->wheres as $key => $where){
+            		$uri = str_replace("$key", $where, $uri);
+        		}
+        		$item['wheres'] = $v->wheres;
+        		$item['uri'] = $uri;
+
+        		return $item;
+            });
+*/
+
+
 
 			Blade::directive('output_alldata', function(){
 				return '<?php echo $$randomized_var->toJson(); if(json_last_error() > 0) throw new \Exception("Data passed to the view cannot be serialized. This may be due to a circular structure being included. Data includes: " . $$randomized_var->keys()->implode(", \n")); ?>';
@@ -93,6 +111,7 @@ trait ReactSyncable{
 		        $route_name = $route->getName();
 
 		        $route_is_ok = $uses_trait || in_array($route_controller, config('react_sync.jsonable_controllers')) || in_array($route_name, config('react_sync.jsonable_routes'));
+
 				if(request()->input('asajax')){
 					$view->setPath(__DIR__ . '/views/as_json.blade.php');
 			        response($view)->header('Content-Type', 'application/json')->send();
@@ -100,12 +119,14 @@ trait ReactSyncable{
 				}
 
 		        if(request()->ajax() && request()->getMethod() === 'GET' && $route_is_ok ){
+
 					$view->setPath(__DIR__ . '/views/as_json.blade.php');
 			        response($view)->header('Content-Type', 'application/json')->send();
 			        exit();
 		        }
 	        }
 	    });
+// 	    (new Kernel)->appendMiddlewareToGroup('react_sync', HandleResponseMiddleware::class);
 	}
 
 
@@ -117,9 +138,14 @@ trait ReactSyncable{
      */
     public function syncable_boot()
     {
+
+		$this->loadMigrationsFrom(__DIR__.'/migrations');
+
         $this->loadRoutesFrom(__DIR__.'/routes.php');
 
-        $this->loadRoutesFrom(__DIR__.'/console.php');
+        if ($this->app->runningInConsole()) {
+	        $this->loadRoutesFrom(__DIR__.'/console.php');
+        }
 
 	    $this->loadViewsFrom(__DIR__.'/views', 'react_sync');
 
@@ -127,19 +153,24 @@ trait ReactSyncable{
 		if(!file_exists(Paths::config_path('react_sync.php'))){
 			$publishes[__DIR__.'/config.php'] = Paths::config_path('react_sync.php');
 		}
-/*
-		if(!is_dir($this->getJsPath() . '/vendor/laravel-react-sync')){
-			$publishes[__DIR__.'/assets/dist'] = $this->getJsPath() . '/vendor/laravel-react-sync';
-		}
-*/
+
+		$publishes[__DIR__.'/views'] = Paths::resource_path('views/vendor/react_sync');  // resource_path('views/vendor/courier')
+
         $this->publishes($publishes, 'laravel-react-sync');
 
-        // Load this into the `preset` Artisan command as the type: `react-sync`
+        // Load this into the `ui` Artisan command as the type: `react-sync`
 
+		UiCommand::macro('react-sync', function ($command) {
+			if($command instanceof UiCommand){
+				ReactSyncPreset::install($command);
+			}
+			else{
+				ReactSyncPreset::install_auth($command);
+			}
 
-		UiCommand::macro('react-sync', function (UiCommand $command) {
-			ReactSyncPreset::install($command);
 		});
+
+		Utils::applyReactSyncAbilities();
 
     }
 

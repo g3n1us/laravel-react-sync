@@ -1,4 +1,5 @@
 let mix = require('laravel-mix');
+const fs = require('fs');
 const path = require('path');
 
 /*
@@ -12,11 +13,16 @@ const path = require('path');
  |
  */
 
+fs.writeFile('public/APP_VERSION', `v${(new Date).getTime()}`, (err) => {
+	if (err) throw err;
+	console.log('The file has been saved!');
+});
 
 mix.webpackConfig({
     resolve: {
         alias: {
-            laravel_react_sync: path.resolve('./vendor/g3n1us/laravel-react-sync/src/assets/dist/LaravelReactSync.js'),
+//            laravel_react_sync: path.resolve('./vendor/g3n1us/laravel-react-sync/src/assets/dist/LaravelReactSync.js'),
+            laravel_react_sync: path.resolve('./vendor/g3n1us/laravel-react-sync/src/assets/src/main.js'),
             pages: path.resolve('./app/Pages'),
             models: path.resolve('./app/Models'),
             js: path.resolve('./resources/js'),

@@ -1,6 +1,6 @@
 import React from 'react';
 import Trait from './Trait';
-import collect from 'collect.js';
+import collect from '../../collect.js';
 
 /**
 @kind mixin

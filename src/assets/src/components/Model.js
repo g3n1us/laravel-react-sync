@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import collect from 'collect.js';
+import collect from '../collect.js';
+import axios from '../fetchClient';
 import Field from './Field';
 import qs from 'qs';
 // import PrimordialModel from './PrimordialModel';
@@ -13,13 +14,22 @@ import RenderableAsBasicForm from './traits/RenderableAsBasicForm';
 import RenderableAsDiagram from './traits/RenderableAsDiagram';
 import RenderableDefault from './traits/RenderableDefault';
 import HasKeyProp from './traits/HasKeyProp';
+import Eloquent from './traits/Eloquent';
+import MorphsDates from './traits/MorphsDates';
+import HasAttributes from './traits/HasAttributes';
+
+
 
 import Shell from './Shell';
+
+import ReactSync from '../ReactSync';
 
 import { pluralToClassName, classNameToPlural, isModel, studly_case, app_put, app_get, def } from '../helpers';
 const pluralize = require('pluralize');
 
 import { filter, flatten, isEmpty, toPairs, pick, kebabCase, snakeCase, difference, intersection } from 'lodash';
+
+
 
 /**
   @extends Component
@@ -52,6 +62,10 @@ class Model extends Component{
 
     super(props);
 
+//     if(props === null) debugger
+
+    this.getDates();
+
     Model.addModel(this.constructor);
 
 	if(!app_get(this.plural)){
@@ -60,10 +74,11 @@ class Model extends Component{
 
 	const res = app_put(`${this.plural}.${this.id}`, this);
 
+	const { singular_url, plural_url } = this.schema.rest_properties;
 
     this._calculatedProperties = {
 		endpoint: `${window.location.protocol}//${window.location.hostname}/${this.constructor.plural}`,
-		api_url: `${window.location.protocol}//${window.location.hostname}/api/${this.singular}/${this.props.id}`,
+		api_url: `${singular_url}/${this.props.id}`,
 		url: `${window.location.protocol}//${window.location.hostname}/${this.constructor.singular}/${this.props.id}`,
     };
 
@@ -72,34 +87,40 @@ class Model extends Component{
 	let relations = filter(toPairs(this.schema), (v) => v[1].type == "relation");
 	this.relations = {};
 
+	const joining_ids = [];
+
 	relations.forEach((v_array) => {
 		let [ relationName, relationDefinition ] = v_array;
 		const { relation_type, definition } = relationDefinition;
 		if(relationName in this.props){
+// 			console.log('definition', definition);
+			joining_ids.push(definition.foreignKey);
 			const relationValue = this.props[relationName];
-			const ThisModel = Model.getModel(pluralToClassName(relationName));
+			const class_name = pluralToClassName(relationName);
+			const ThisModel = Model.getModel(class_name);
 			let relationValueModels = null;
 			if(relationValue && ('map' in relationValue)) {
 				if(definition.withDefault && isEmpty(relationValue)){
 					relationValue.push({});
 				}
 				relationValueModels = relationValue.map((i, index) => {
-					return (<ThisModel key={index} {...i} />);
+					return ThisModel ? new ThisModel({key: `${index}${class_name}${i.id}`, ...i}) : i;
 				});
+				relationValueModels = collect(relationValueModels);
 			}
 			else {
 				if(definition.withDefault && isEmpty(relationValue)){
-					relationValueModels = (<ThisModel {...{}} />);
+					relationValueModels = new ThisModel;
 				}
 				else{
-					relationValueModels = (<ThisModel {...relationValue} />);
+    				if(isEmpty(relationValue)) relationValueModels = null;
+    				else relationValueModels = ThisModel ? new ThisModel(relationValue) : relationValue;
 				}
 			}
 			if(relationValueModels){
-				this[relationName] = relationValueModels;	
+				def(this, relationName, () => relationValueModels);
+				def(this.relations, relationName, () => relationValueModels);
 			}
-			
-// 			this.relations[relationName] = this[relationName];
 
 		}
 		else {
@@ -110,16 +131,16 @@ class Model extends Component{
 			else{
 				def(this, relationName, () => this[relation_type](definition));
 				def(this.relations, relationName, () => this[relation_type](definition));
-/*
-				const resolved = this[relation_type](definition);
-				this[relationName] = resolved;
-				this.relations[relationName] = resolved;
-*/
 			}
 			}
 		});
 
+
+		this.setAttributes();
+
+// console.log(joining_ids, 'joining_ids');
 		this.constructor.boot(this);
+// debugger
 	}
 
 	/** */
@@ -144,7 +165,7 @@ class Model extends Component{
 
 	/** */
 	static getPrimaryKey(){
-		return collect(this.getSchema()).firstWhere('primaryKey')['name'];
+		return  this.getModelProperties().primaryKey;
 	}
 
 	/** */
@@ -167,9 +188,20 @@ class Model extends Component{
 		return this._calculatedProperties;
 	}
 
+    /** */
+	static getModelProperties(){
+        return ReactSync.getInstance().model_properties[this.name];
+	}
+
+	/** */
+	get model_properties(){
+		return this.constructor.getModelProperties();
+	}
+
+
 	/** */
 	static getSchema(){
-		return window[window.ReactSyncGlobal].schemas[this.name];
+		return ReactSync.getInstance().schemas[this.name];
 	}
 
 	/** */
@@ -226,10 +258,11 @@ class Model extends Component{
 		return this.constructor.plural;
 	}
 
-
 	/** */
 	static get plural(){
-		return pluralize(kebabCase(this.name));
+    	const { plural } = this.getSchema().rest_properties;
+
+		return plural;
 	}
 
 	/** */
@@ -237,112 +270,47 @@ class Model extends Component{
 		return this.constructor.singular;
 	}
 
-
 	/** */
 	static get singular(){
-		return pluralize.singular(this.plural);
+    	const { singular } = this.getSchema().rest_properties;
+    	return singular;
+	}
+
+
+
+	/** */
+	get plural_handle(){
+		return this.constructor.plural_handle;
 	}
 
 	/** */
-	static query_props = ['find', 'where', 'all', 'first'];
-
-	/** */
-	static pagination_props = ['per_page'];
-
-	/** */
-	static get reserved_props(){
-		return [...this.query_props, ...this.pagination_props, 'order_by', 'sort_by'];
+	static get plural_handle(){
+		return snakeCase(this.plural);
 	}
 
 	/** */
-	static get_non_reserved_props(props){
-		const ret = difference(Object.keys(props), this.reserved_props);
-// 		debugger
-		const val = {};
-		for(const i in ret){
-			val[ret[i]] = props[ret[i]];
-		}
-		return val;
+	get singular_handle(){
+		return this.constructor.singular_handle;
 	}
 
 	/** */
-	get_non_reserved_props(){
-		return this.constructor.get_non_reserved_props(this.props);
+	static get singular_handle(){
+    	return snakeCase(this.singular);
 	}
 
-	/** */
-	get non_reserved_props(){
-		return this.get_non_reserved_props();
-	}
+    static get plural_url(){
+        return this.getSchema().rest_properties.plural_url;
+    }
 
-	/** */
-	get_query_prop(){
-		const i = intersection(this.constructor.query_props, Object.keys(this.props));
-		return i.length ? i[0] : null;
-	}
+    static get singular_url(){
+        return this.getSchema().rest_properties.singular_url;
+    }
 
-	/** */
-	get query_prop(){
-		return this.get_query_prop();
-	}
+    to(){
+        return <this.constructor {...this.props} />;
+    }
 
-	/** */
-	get is_query(){
-		return !!this.get_query_prop();
-	}
 
-	/** */
-	get_query_endpoint(){
-		const q = this.get_query_prop();
-		let where_prop;
-		if(q == 'where'){
-			if(Array.isArray(this.props.where)){
-				where_prop = this.props.where.join('|');
-			}
-			else where_prop = this.props.where;
-		}
-		const map = {
-			find: `/api/${this.singular}/${this.props.find}`,
-			where: `/api/${this.plural}/where/${where_prop}`,
-			all: `/api/${this.plural}`,
-			first: `/api/${this.singular}`,
-		}
-		const qs_object = {};
-		if(this.props.per_page) qs_object.per_page = this.props.per_page;
-		const qs_string = qs.stringify(qs_object);
-		return map[q] + `?${qs_string}`;
-	}
-
-	/** */
-	queryRender(){
-		const q = this.get_query_endpoint();
-		return <Shell url={q} Model={this.constructor} {...this.non_reserved_props} />
-	}
-
-	/** */
-	render(){
-		if(this.is_query){
-			return this.queryRender();
-		}
-
-		let renderAs = this.props.renderAs || this.props.render || 'Default';
-		let renderName = `render${studly_case(renderAs)}`;
-		if(typeof renderAs === 'function'){
-			return renderAs(this.props);
-		}
-
-		if(typeof this[renderName] === 'function'){
-			return this[renderName]();
-		}
-
-		// return the default render method.
-		return this.renderDefault();
-	}
-
-	/** */
-	renderDebug(){
-		return (<div><code>{this.constructor.name} | {this.props.id}</code></div>);
-	}
 }
 
 new RenderableAsBasicForm(Model);
@@ -358,6 +326,13 @@ new HasRelations(Model);
 new HasKeyProp(Model);
 
 new Queryable(Model);
+
+new Eloquent(Model);
+
+new MorphsDates(Model);
+
+new HasAttributes(Model);
+
 
 (function(){
 	/** */
