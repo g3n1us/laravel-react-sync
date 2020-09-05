@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: Event.js</title>
+    <title>JSDoc: Source: components/traits/MorphsDates.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: Event.js</h1>
+    <h1 class="page-title">Source: components/traits/MorphsDates.js</h1>
 
     
 
@@ -26,57 +26,70 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-/** */
-export class Event{
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+import Trait from './Trait';
+import moment from 'moment';
+window.moment = moment;
 
-	// Event System
-	/** */
-	static events = {
-		willUpdate: () => this.current_state,
-		updated: () => this.current_state,
-		countries_loading: () => this.current_state,
+/**
+@kind mixin
+@extends Trait
+*/
+class MorphsDates extends Trait{
+
+    getDates(){
+	    const { moment_dates = {} } = this.props;
+		let { dateFormat, casts } = this.model_properties
+		if(this.dateFormat) dateFormat = this.dateFormat;
+
+		const replacements = {
+			'Y-m-d H:i:s': 'Y-M-D hh:mm:ss',
+		}
+
+		dateFormat = replacements[dateFormat] || dateFormat;
+
+		Object.keys(moment_dates).forEach(d => {
+			if(casts[d]){
+				const dateFormatFromCast = casts[d].match(/^.*?:(.*?)$/, '$1')
+				if(dateFormatFromCast){
+					dateFormat = dateFormatFromCast[1];
+				}
+			}
+
+    		const props = this.props || {};
+
+    		// const mmnt = moment(moment_dates[d]).format(dateFormat);
+    		const mmnt = moment(moment_dates[d]);
+
+			const D = &lt;ReactDate date={mmnt} dateFormat={dateFormat} />;
+
+			Object.defineProperty(this, d, {
+				value: D,
+			});
+		});
+    }
+
+}
+
+class ReactDate extends Component{
+
+	constructor(props){
+		super(props);
+		this.date = this.props.date;
+		this.dateFormat = this.props.dateFormat;
 	}
 
-	/** */
-	static on(event_handle, callback){
-		Event.registeredEventHandlers[event_handle] = Event.registeredEventHandlers[event_handle] || [];
-		Event.registeredEventHandlers[event_handle].push(callback);
-	}
-
-	/** */
-	static once(event_handle, callback){
-		Event.registeredEventHandlers[event_handle] = [callback];
-	}
-
-	/** */
-	static dispatch(event_handle, ...addl_args){
-		const handlers = Event.registeredEventHandlers[event_handle] || [];
-		const resp = handlers.map(cb => cb.apply(Event, addl_args));
-		return resp;
+	render(){
+		const { date, dateFormat } = this.props;
+		return date.format(dateFormat);
 	}
 
 }
 
-Event.registeredEventHandlers = {};
+export default MorphsDates;
 
-/** */
-export function on(event_handle, callback){
-	return Event.on(event_handle, callback);
-}
-
-/** */
-export function once(event_handle, callback){
-	return Event.once(event_handle, callback);
-}
-
-/** */
-export function dispatch(event_handle, ...addl_args){
-	return Event.dispatch(event_handle, ...addl_args);
-}
-
-
-export default Event;
+// d = moment.utc('2020-07-22T02:07:14+00:00')
+// Y-m-d H:i:s
 </code></pre>
         </article>
     </section>

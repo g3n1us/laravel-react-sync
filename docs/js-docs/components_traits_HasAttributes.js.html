@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: Event.js</title>
+    <title>JSDoc: Source: components/traits/HasAttributes.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: Event.js</h1>
+    <h1 class="page-title">Source: components/traits/HasAttributes.js</h1>
 
     
 
@@ -26,57 +26,41 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-/** */
-export class Event{
+            <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
+import Trait from './Trait';
+import collect from '../../collect.js';
+import { def } from '../../helpers';
 
-	// Event System
-	/** */
-	static events = {
-		willUpdate: () => this.current_state,
-		updated: () => this.current_state,
-		countries_loading: () => this.current_state,
-	}
+/**
+@kind mixin
+@extends Trait
+*/
+class hasAttributes extends Trait{
 
-	/** */
-	static on(event_handle, callback){
-		Event.registeredEventHandlers[event_handle] = Event.registeredEventHandlers[event_handle] || [];
-		Event.registeredEventHandlers[event_handle].push(callback);
-	}
+	attributes = {};
 
-	/** */
-	static once(event_handle, callback){
-		Event.registeredEventHandlers[event_handle] = [callback];
-	}
+    setAttributes(){
+		const keys = Object.keys(this.props);
 
-	/** */
-	static dispatch(event_handle, ...addl_args){
-		const handlers = Event.registeredEventHandlers[event_handle] || [];
-		const resp = handlers.map(cb => cb.apply(Event, addl_args));
-		return resp;
-	}
+		this.attributes = keys.reduce((acc, v) => {
+			if(typeof this[v] !== "undefined"){
+				acc[v] = this[v];
+			}
+			else {
+				acc[v] = this.props[v];
+			}
+			return acc;
+		}, {});
+
+
+// 		console.log(this.relations);
+// 		console.log(this.schema);
+// 		console.log(this.attributes);
+    }
 
 }
 
-Event.registeredEventHandlers = {};
-
-/** */
-export function on(event_handle, callback){
-	return Event.on(event_handle, callback);
-}
-
-/** */
-export function once(event_handle, callback){
-	return Event.once(event_handle, callback);
-}
-
-/** */
-export function dispatch(event_handle, ...addl_args){
-	return Event.dispatch(event_handle, ...addl_args);
-}
-
-
-export default Event;
+export default hasAttributes;
 </code></pre>
         </article>
     </section>

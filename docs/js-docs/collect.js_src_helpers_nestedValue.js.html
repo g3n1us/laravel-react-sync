@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: Event.js</title>
+    <title>JSDoc: Source: collect.js/src/helpers/nestedValue.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: Event.js</h1>
+    <h1 class="page-title">Source: collect.js/src/helpers/nestedValue.js</h1>
 
     
 
@@ -26,57 +26,23 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-/** */
-export class Event{
+            <pre class="prettyprint source linenums"><code>'use strict';
 
-	// Event System
-	/** */
-	static events = {
-		willUpdate: () => this.current_state,
-		updated: () => this.current_state,
-		countries_loading: () => this.current_state,
-	}
-
-	/** */
-	static on(event_handle, callback){
-		Event.registeredEventHandlers[event_handle] = Event.registeredEventHandlers[event_handle] || [];
-		Event.registeredEventHandlers[event_handle].push(callback);
-	}
-
-	/** */
-	static once(event_handle, callback){
-		Event.registeredEventHandlers[event_handle] = [callback];
-	}
-
-	/** */
-	static dispatch(event_handle, ...addl_args){
-		const handlers = Event.registeredEventHandlers[event_handle] || [];
-		const resp = handlers.map(cb => cb.apply(Event, addl_args));
-		return resp;
-	}
-
-}
-
-Event.registeredEventHandlers = {};
-
-/** */
-export function on(event_handle, callback){
-	return Event.on(event_handle, callback);
-}
-
-/** */
-export function once(event_handle, callback){
-	return Event.once(event_handle, callback);
-}
-
-/** */
-export function dispatch(event_handle, ...addl_args){
-	return Event.dispatch(event_handle, ...addl_args);
-}
-
-
-export default Event;
+/**
+ * Get value of a nested property
+ *
+ * @param mainObject
+ * @param key
+ * @returns {*}
+ */
+module.exports = function nestedValue(mainObject, key) {
+  try {
+    return key.split('.').reduce((obj, property) => obj[property], mainObject);
+  } catch (err) {
+    // If we end up here, we're not working with an object, and @var mainObject is the value itself
+    return mainObject;
+  }
+};
 </code></pre>
         </article>
     </section>

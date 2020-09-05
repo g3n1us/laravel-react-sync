@@ -28,7 +28,8 @@
         <article>
             <pre class="prettyprint source linenums"><code>import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import collect from 'collect.js';
+import collect from '../collect.js';
+import axios from '../fetchClient';
 import Field from './Field';
 import qs from 'qs';
 // import PrimordialModel from './PrimordialModel';
@@ -41,13 +42,22 @@ import RenderableAsBasicForm from './traits/RenderableAsBasicForm';
 import RenderableAsDiagram from './traits/RenderableAsDiagram';
 import RenderableDefault from './traits/RenderableDefault';
 import HasKeyProp from './traits/HasKeyProp';
+import Eloquent from './traits/Eloquent';
+import MorphsDates from './traits/MorphsDates';
+import HasAttributes from './traits/HasAttributes';
+
+
 
 import Shell from './Shell';
+
+import ReactSync from '../ReactSync';
 
 import { pluralToClassName, classNameToPlural, isModel, studly_case, app_put, app_get, def } from '../helpers';
 const pluralize = require('pluralize');
 
 import { filter, flatten, isEmpty, toPairs, pick, kebabCase, snakeCase, difference, intersection } from 'lodash';
+
+
 
 /**
   @extends Component
@@ -80,6 +90,10 @@ class Model extends Component{
 
     super(props);
 
+//     if(props === null) debugger
+
+    this.getDates();
+
     Model.addModel(this.constructor);
 
 	if(!app_get(this.plural)){
@@ -88,10 +102,11 @@ class Model extends Component{
 
 	const res = app_put(`${this.plural}.${this.id}`, this);
 
+	const { singular_url, plural_url } = this.schema.rest_properties;
 
     this._calculatedProperties = {
 		endpoint: `${window.location.protocol}//${window.location.hostname}/${this.constructor.plural}`,
-		api_url: `${window.location.protocol}//${window.location.hostname}/api/${this.singular}/${this.props.id}`,
+		api_url: `${singular_url}/${this.props.id}`,
 		url: `${window.location.protocol}//${window.location.hostname}/${this.constructor.singular}/${this.props.id}`,
     };
 
@@ -100,34 +115,40 @@ class Model extends Component{
 	let relations = filter(toPairs(this.schema), (v) => v[1].type == "relation");
 	this.relations = {};
 
+	const joining_ids = [];
+
 	relations.forEach((v_array) => {
 		let [ relationName, relationDefinition ] = v_array;
 		const { relation_type, definition } = relationDefinition;
 		if(relationName in this.props){
+// 			console.log('definition', definition);
+			joining_ids.push(definition.foreignKey);
 			const relationValue = this.props[relationName];
-			const ThisModel = Model.getModel(pluralToClassName(relationName));
+			const class_name = pluralToClassName(relationName);
+			const ThisModel = Model.getModel(class_name);
 			let relationValueModels = null;
 			if(relationValue &amp;&amp; ('map' in relationValue)) {
 				if(definition.withDefault &amp;&amp; isEmpty(relationValue)){
 					relationValue.push({});
 				}
 				relationValueModels = relationValue.map((i, index) => {
-					return (&lt;ThisModel key={index} {...i} />);
+					return ThisModel ? new ThisModel({key: `${index}${class_name}${i.id}`, ...i}) : i;
 				});
+				relationValueModels = collect(relationValueModels);
 			}
 			else {
 				if(definition.withDefault &amp;&amp; isEmpty(relationValue)){
-					relationValueModels = (&lt;ThisModel {...{}} />);
+					relationValueModels = new ThisModel;
 				}
 				else{
-					relationValueModels = (&lt;ThisModel {...relationValue} />);
+    				if(isEmpty(relationValue)) relationValueModels = null;
+    				else relationValueModels = ThisModel ? new ThisModel(relationValue) : relationValue;
 				}
 			}
 			if(relationValueModels){
-				this[relationName] = relationValueModels;	
+				def(this, relationName, () => relationValueModels);
+				def(this.relations, relationName, () => relationValueModels);
 			}
-			
-// 			this.relations[relationName] = this[relationName];
 
 		}
 		else {
@@ -138,16 +159,16 @@ class Model extends Component{
 			else{
 				def(this, relationName, () => this[relation_type](definition));
 				def(this.relations, relationName, () => this[relation_type](definition));
-/*
-				const resolved = this[relation_type](definition);
-				this[relationName] = resolved;
-				this.relations[relationName] = resolved;
-*/
 			}
 			}
 		});
 
+
+		this.setAttributes();
+
+// console.log(joining_ids, 'joining_ids');
 		this.constructor.boot(this);
+// debugger
 	}
 
 	/** */
@@ -172,7 +193,7 @@ class Model extends Component{
 
 	/** */
 	static getPrimaryKey(){
-		return collect(this.getSchema()).firstWhere('primaryKey')['name'];
+		return  this.getModelProperties().primaryKey;
 	}
 
 	/** */
@@ -195,9 +216,20 @@ class Model extends Component{
 		return this._calculatedProperties;
 	}
 
+    /** */
+	static getModelProperties(){
+        return ReactSync.getInstance().model_properties[this.name];
+	}
+
+	/** */
+	get model_properties(){
+		return this.constructor.getModelProperties();
+	}
+
+
 	/** */
 	static getSchema(){
-		return window[window.ReactSyncGlobal].schemas[this.name];
+		return ReactSync.getInstance().schemas[this.name];
 	}
 
 	/** */
@@ -254,10 +286,11 @@ class Model extends Component{
 		return this.constructor.plural;
 	}
 
-
 	/** */
 	static get plural(){
-		return pluralize(kebabCase(this.name));
+    	const { plural } = this.getSchema().rest_properties;
+
+		return plural;
 	}
 
 	/** */
@@ -265,112 +298,47 @@ class Model extends Component{
 		return this.constructor.singular;
 	}
 
-
 	/** */
 	static get singular(){
-		return pluralize.singular(this.plural);
+    	const { singular } = this.getSchema().rest_properties;
+    	return singular;
+	}
+
+
+
+	/** */
+	get plural_handle(){
+		return this.constructor.plural_handle;
 	}
 
 	/** */
-	static query_props = ['find', 'where', 'all', 'first'];
-
-	/** */
-	static pagination_props = ['per_page'];
-
-	/** */
-	static get reserved_props(){
-		return [...this.query_props, ...this.pagination_props, 'order_by', 'sort_by'];
+	static get plural_handle(){
+		return snakeCase(this.plural);
 	}
 
 	/** */
-	static get_non_reserved_props(props){
-		const ret = difference(Object.keys(props), this.reserved_props);
-// 		debugger
-		const val = {};
-		for(const i in ret){
-			val[ret[i]] = props[ret[i]];
-		}
-		return val;
+	get singular_handle(){
+		return this.constructor.singular_handle;
 	}
 
 	/** */
-	get_non_reserved_props(){
-		return this.constructor.get_non_reserved_props(this.props);
+	static get singular_handle(){
+    	return snakeCase(this.singular);
 	}
 
-	/** */
-	get non_reserved_props(){
-		return this.get_non_reserved_props();
-	}
+    static get plural_url(){
+        return this.getSchema().rest_properties.plural_url;
+    }
 
-	/** */
-	get_query_prop(){
-		const i = intersection(this.constructor.query_props, Object.keys(this.props));
-		return i.length ? i[0] : null;
-	}
+    static get singular_url(){
+        return this.getSchema().rest_properties.singular_url;
+    }
 
-	/** */
-	get query_prop(){
-		return this.get_query_prop();
-	}
+    to(){
+        return &lt;this.constructor {...this.props} />;
+    }
 
-	/** */
-	get is_query(){
-		return !!this.get_query_prop();
-	}
 
-	/** */
-	get_query_endpoint(){
-		const q = this.get_query_prop();
-		let where_prop;
-		if(q == 'where'){
-			if(Array.isArray(this.props.where)){
-				where_prop = this.props.where.join('|');
-			}
-			else where_prop = this.props.where;
-		}
-		const map = {
-			find: `/api/${this.singular}/${this.props.find}`,
-			where: `/api/${this.plural}/where/${where_prop}`,
-			all: `/api/${this.plural}`,
-			first: `/api/${this.singular}`,
-		}
-		const qs_object = {};
-		if(this.props.per_page) qs_object.per_page = this.props.per_page;
-		const qs_string = qs.stringify(qs_object);
-		return map[q] + `?${qs_string}`;
-	}
-
-	/** */
-	queryRender(){
-		const q = this.get_query_endpoint();
-		return &lt;Shell url={q} Model={this.constructor} {...this.non_reserved_props} />
-	}
-
-	/** */
-	render(){
-		if(this.is_query){
-			return this.queryRender();
-		}
-
-		let renderAs = this.props.renderAs || this.props.render || 'Default';
-		let renderName = `render${studly_case(renderAs)}`;
-		if(typeof renderAs === 'function'){
-			return renderAs(this.props);
-		}
-
-		if(typeof this[renderName] === 'function'){
-			return this[renderName]();
-		}
-
-		// return the default render method.
-		return this.renderDefault();
-	}
-
-	/** */
-	renderDebug(){
-		return (&lt;div>&lt;code>{this.constructor.name} | {this.props.id}&lt;/code>&lt;/div>);
-	}
 }
 
 new RenderableAsBasicForm(Model);
@@ -386,6 +354,13 @@ new HasRelations(Model);
 new HasKeyProp(Model);
 
 new Queryable(Model);
+
+new Eloquent(Model);
+
+new MorphsDates(Model);
+
+new HasAttributes(Model);
+
 
 (function(){
 	/** */
@@ -555,13 +530,13 @@ export default Model;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Alert.html">Alert</a></li><li><a href="Eloquent.html">Eloquent</a></li><li><a href="Event.html">Event</a></li><li><a href="Field.html">Field</a></li><li><a href="Form.html">Form</a></li><li><a href="HasKeyProp.html">HasKeyProp</a></li><li><a href="hasPluralForm.html">hasPluralForm</a></li><li><a href="HasReflection.html">HasReflection</a></li><li><a href="HasRelations.html">HasRelations</a></li><li><a href="LegacyModel.html">LegacyModel</a></li><li><a href="Mockable.html">Mockable</a></li><li><a href="Model.html">Model</a></li><li><a href="Notification.html">Notification</a></li><li><a href="Page.html">Page</a></li><li><a href="PageShell.html">PageShell</a></li><li><a href="PrimordialModel.html">PrimordialModel</a></li><li><a href="Queryable.html">Queryable</a></li><li><a href="ReactSync.html">ReactSync</a></li><li><a href="RenderableAsBasicForm.html">RenderableAsBasicForm</a></li><li><a href="RenderableAsDiagram.html">RenderableAsDiagram</a></li><li><a href="RenderableDefault.html">RenderableDefault</a></li><li><a href="Shell.html">Shell</a></li><li><a href="Trait.html">Trait</a></li></ul><h3>Global</h3><ul><li><a href="global.html#app_current">app_current</a></li><li><a href="global.html#app_get">app_get</a></li><li><a href="global.html#app_put">app_put</a></li><li><a href="global.html#brackets_to_dots">brackets_to_dots</a></li><li><a href="global.html#classNameToPlural">classNameToPlural</a></li><li><a href="global.html#Csrf">Csrf</a></li><li><a href="global.html#def">def</a></li><li><a href="global.html#dispatch">dispatch</a></li><li><a href="global.html#isModel">isModel</a></li><li><a href="global.html#LaravelReactSync">LaravelReactSync</a></li><li><a href="global.html#on">on</a></li><li><a href="global.html#pluralToClassName">pluralToClassName</a></li><li><a href="global.html#ReactSyncData">ReactSyncData</a></li><li><a href="global.html#snake_case">snake_case</a></li><li><a href="global.html#studly_case">studly_case</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Alert.html">Alert</a></li><li><a href="Eloquent.html">Eloquent</a></li><li><a href="Event.html">Event</a></li><li><a href="Field.html">Field</a></li><li><a href="Form.html">Form</a></li><li><a href="HasKeyProp.html">HasKeyProp</a></li><li><a href="hasPluralForm.html">hasPluralForm</a></li><li><a href="HasReflection.html">HasReflection</a></li><li><a href="HasRelations.html">HasRelations</a></li><li><a href="LegacyModel.html">LegacyModel</a></li><li><a href="Mockable.html">Mockable</a></li><li><a href="Model.html">Model</a></li><li><a href="Notification.html">Notification</a></li><li><a href="Page.html">Page</a></li><li><a href="PageShell.html">PageShell</a></li><li><a href="PrimordialModel.html">PrimordialModel</a></li><li><a href="Queryable.html">Queryable</a></li><li><a href="ReactSync.html">ReactSync</a></li><li><a href="RenderableAsBasicForm.html">RenderableAsBasicForm</a></li><li><a href="RenderableAsDiagram.html">RenderableAsDiagram</a></li><li><a href="RenderableDefault.html">RenderableDefault</a></li><li><a href="Shell.html">Shell</a></li><li><a href="Trait.html">Trait</a></li></ul><h3>Mixins</h3><ul><li><a href="hasAttributes.html">hasAttributes</a></li><li><a href="MorphsDates.html">MorphsDates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_toConsumableArray">_toConsumableArray</a></li><li><a href="global.html#app_current">app_current</a></li><li><a href="global.html#app_get">app_get</a></li><li><a href="global.html#app_put">app_put</a></li><li><a href="global.html#brackets_to_dots">brackets_to_dots</a></li><li><a href="global.html#classNameToPlural">classNameToPlural</a></li><li><a href="global.html#Csrf">Csrf</a></li><li><a href="global.html#def">def</a></li><li><a href="global.html#dispatch">dispatch</a></li><li><a href="global.html#fromRenderedComponent">fromRenderedComponent</a></li><li><a href="global.html#getAjaxUrl">getAjaxUrl</a></li><li><a href="global.html#isModel">isModel</a></li><li><a href="global.html#kebab_case">kebab_case</a></li><li><a href="global.html#LaravelReactSync">LaravelReactSync</a></li><li><a href="global.html#on">on</a></li><li><a href="global.html#once">once</a></li><li><a href="global.html#pluralToClassName">pluralToClassName</a></li><li><a href="global.html#ReactSyncData">ReactSyncData</a></li><li><a href="global.html#snake_case">snake_case</a></li><li><a href="global.html#studly_case">studly_case</a></li><li><a href="global.html#SymbolIterator">SymbolIterator</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Tue May 12 2020 11:11:31 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.5</a> on Sat Sep 05 2020 14:09:51 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

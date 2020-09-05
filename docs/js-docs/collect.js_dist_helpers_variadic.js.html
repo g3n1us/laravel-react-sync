@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: Event.js</title>
+    <title>JSDoc: Source: collect.js/dist/helpers/variadic.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: Event.js</h1>
+    <h1 class="page-title">Source: collect.js/dist/helpers/variadic.js</h1>
 
     
 
@@ -26,58 +26,22 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-/** */
-export class Event{
+            <pre class="prettyprint source linenums"><code>'use strict';
 
-	// Event System
-	/** */
-	static events = {
-		willUpdate: () => this.current_state,
-		updated: () => this.current_state,
-		countries_loading: () => this.current_state,
-	}
+/**
+ * Variadic helper function
+ *
+ * @param args
+ * @returns {*}
+ */
 
-	/** */
-	static on(event_handle, callback){
-		Event.registeredEventHandlers[event_handle] = Event.registeredEventHandlers[event_handle] || [];
-		Event.registeredEventHandlers[event_handle].push(callback);
-	}
+module.exports = function variadic(args) {
+  if (Array.isArray(args[0])) {
+    return args[0];
+  }
 
-	/** */
-	static once(event_handle, callback){
-		Event.registeredEventHandlers[event_handle] = [callback];
-	}
-
-	/** */
-	static dispatch(event_handle, ...addl_args){
-		const handlers = Event.registeredEventHandlers[event_handle] || [];
-		const resp = handlers.map(cb => cb.apply(Event, addl_args));
-		return resp;
-	}
-
-}
-
-Event.registeredEventHandlers = {};
-
-/** */
-export function on(event_handle, callback){
-	return Event.on(event_handle, callback);
-}
-
-/** */
-export function once(event_handle, callback){
-	return Event.once(event_handle, callback);
-}
-
-/** */
-export function dispatch(event_handle, ...addl_args){
-	return Event.dispatch(event_handle, ...addl_args);
-}
-
-
-export default Event;
-</code></pre>
+  return args;
+};</code></pre>
         </article>
     </section>
 

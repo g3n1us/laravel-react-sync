@@ -32,9 +32,13 @@ import Trait from './Trait';
 import { get, camelCase, snakeCase } from 'lodash';
 import { app_get, snake_case, def } from '../../helpers';
 import Shell from '../Shell';
+import ReactSync from '../../ReactSync';
+import collect from '../../collect.js';
+import axios from '../../fetchClient';
+import { dispatch, on } from '../../Event.js';
+
 
 window.Find = (dotstring) => {
-	
 	return get(ReactSyncAppData.page_data.state, dotstring);
 };
 
@@ -49,14 +53,16 @@ class Queryable extends Trait{
 	constructor(targetClass){
 		super(targetClass);
 	}
-	
+
 	static repo = ReactSyncAppData.page_data.state;
-	
+
 	static hasBeenKeyed = false;
-	
+
 	static setKeyed(){
-		
+
 	}
+
+
 
 /**
  * (STATIC) - Query the data store and return the model with the supplied id
@@ -65,21 +71,17 @@ class Queryable extends Trait{
 	static find(id){
 		const { plural, repo } = this;
 		const dotstring = `${plural}.${id}`;
-		console.log('plural, repo', plural, repo, dotstring);
-		
 		return app_get(dotstring);
 	}
 
 
 /**
- * (STATIC) - TODO -- Work in Progress -- DO NOT USE
+ * (STATIC) -
  * @static
  */
-	static where(a,b,c){
-		// WIP!!!
-		let query = [].slice.call(arguments);
-
+	static where(...args){
 		this.refresher = React.createRef();
+		return collect(appGet(this.plural)).where(...args);
 	}
 
 
@@ -90,12 +92,14 @@ class Queryable extends Trait{
 
 
 	static list(additional_props = {}){
-		return &lt;Shell url={`/api/${this.plural}`} Model={this} {...additional_props} />
+
+		return &lt;Shell url={this.plural_url} Model={this} {...additional_props} />
 	}
 
 
 	/** */
 	static all(additional_props = {}){
+    	debugger;
 		this.refresher = React.createRef();
 		const plural = this.plural;
 		let items = app_get('state.'+plural) || app_get('state.'+ snakeCase(plural)) || app_get(plural) || app_get(snakeCase(plural));
@@ -136,7 +140,9 @@ class Queryable extends Trait{
 
 	/**
 	 */
-
+	get save_path(){
+		return this.api_url;
+	}
 
 	/**
 	 * Store the model's state back to the database
@@ -157,35 +163,42 @@ class Queryable extends Trait{
 
 
 	/** */
-	static create_path = `/${this.plural}`;
+	static get create_path(){
+		return this.plural_url;
+	}
+
 
 
 	/**
-	 * Store the model's state back to the database
+	 * Create a new model and insert into the database
 	 */
 	static create(initialProps = {}){
-		const react_sync_instance = window[window.ReactSyncGlobal];
-		axios.post(this.create_path, initialProps)
-			.then(response => {
-				if(window.location.href != response.request.responseURL){
-					react_sync_instance.components.forEach(function(component){
-						history.pushState(response.data, "", response.request.responseURL);
-						component.setState(response.data);
-					});
+    	return new Promise((resolve, reject) => {
+    		axios.post(this.create_path, initialProps)
+    			.then(response => {
+        			const redirect_url = this.response_is_redirect(response);
 
-					react_sync_instance.page_data = response.data;
+    				if(redirect_url){
+    					history.pushState(response.data, "", redirect_url);
+    					this.refresh_static();
+    				}
+    				else{
+    					this.refresh_static();
+    				}
 
-				}
-				else{
-					this.refresh_static();
-				}
+    				react_sync_notification('Saved');
 
-				react_sync_notification('Saved');
-			})
-			.catch(err => {
-				console.error(err);
-				react_sync_notification({text: 'An error occurred', level: 'danger'});
-			});
+    				resolve(response.data);
+
+    				dispatch('model_created', new this(response.data));
+    			})
+    			.catch(err => {
+    				console.error(err);
+    				react_sync_notification({text: 'An error occurred', level: 'danger'});
+    				reject(err);
+    			});
+
+    	});
 	}
 
 	/**
@@ -193,65 +206,79 @@ class Queryable extends Trait{
 	 * @todo complete this method
 	 */
 
-/*
-	static create_static(initialProps = {}){
-		return axios.post(`/${this.plural}`, initialProps)
-			.then(data => {
-				this.refresh_static();
-				react_sync_notification('Created');
-			})
-			.catch(err => {
-				react_sync_notification({text: 'An error occurred', level: 'danger'});
-			});
-	}
-*/
 
 	/** */
 	get delete_path(){
-		return `/api/${this.singular}/${this.id}`;
+
+		return this.api_url;
 	}
 
 	/**
 	 * Delete a model
 	 */
-	delete(){
-		const react_sync_instance = window[window.ReactSyncGlobal];
-		axios.delete(this.delete_path)
-			.then(response => {
-				if(window.location.href != response.request.responseURL){
-					react_sync_instance.components.forEach(function(component){
-						history.pushState(response.data, "", response.request.responseURL);
-						component.setState(response.data);
-					});
+	delete(callback = false){
+    	return new Promise((resolve, reject) => {
+    		axios.delete(this.delete_path)
+    			.then(response => {
+        			const redirect_url = this.constructor.response_is_redirect(response);
+    				if(redirect_url){
+    					history.pushState(response.data, "", redirect_url);
+    					this.refresh();
+    				}
+    				else{
+    					this.refresh();
+    				}
 
-					react_sync_instance.page_data = response.data;
-				}
-				else{
-					this.refresh();
-				}
+    				react_sync_notification('Deleted');
+    				dispatch('model_deleted', response);
+    				resolve(response);
+    				if(typeof callback === 'function'){
+	    				callback(response);
+    				}
 
-				react_sync_notification('Deleted');
-			})
-			.catch(err => {
-				console.log(err);
-				react_sync_notification({text: 'An error occurred', level: 'danger'});
+    			})
+    			.catch(err => {
+    				console.log(err);
+    				react_sync_notification({text: 'An error occurred', level: 'danger'});
+    				reject(err);
+    			});
 			});
 	}
 
 
 	/** */
 	static refresh_static(){
-		window.ReactSyncAppData.update();
+		Shell.cache = {};
+		ReactSync.getInstance().update();
 	}
 
 
 	/** */
-	refresh(redirectEndpoint){
+	refresh(){
 		Shell.cache = {};
-		window.ReactSyncAppData.update();
+
+		if(this.props.refresh) this.props.refresh()
+		else{
+			ReactSync.getInstance().update();
+		}
+
 	}
 
+    static response_is_redirect(response){
+    	const { href } = window.location;
+    	const { responseURL } = response.request;
+    	const { url } = response.config;
+    	console.log(url, responseURL);
+    	if(responseURL !== url &amp;&amp; href !== responseURL){
+        	return responseURL;
+    	}
+    	return false;
+    }
+
+
+
 }
+
 
 export default Queryable;
 </code></pre>
@@ -264,13 +291,13 @@ export default Queryable;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Alert.html">Alert</a></li><li><a href="Eloquent.html">Eloquent</a></li><li><a href="Event.html">Event</a></li><li><a href="Field.html">Field</a></li><li><a href="Form.html">Form</a></li><li><a href="HasKeyProp.html">HasKeyProp</a></li><li><a href="hasPluralForm.html">hasPluralForm</a></li><li><a href="HasReflection.html">HasReflection</a></li><li><a href="HasRelations.html">HasRelations</a></li><li><a href="LegacyModel.html">LegacyModel</a></li><li><a href="Mockable.html">Mockable</a></li><li><a href="Model.html">Model</a></li><li><a href="Notification.html">Notification</a></li><li><a href="Page.html">Page</a></li><li><a href="PageShell.html">PageShell</a></li><li><a href="PrimordialModel.html">PrimordialModel</a></li><li><a href="Queryable.html">Queryable</a></li><li><a href="ReactSync.html">ReactSync</a></li><li><a href="RenderableAsBasicForm.html">RenderableAsBasicForm</a></li><li><a href="RenderableAsDiagram.html">RenderableAsDiagram</a></li><li><a href="RenderableDefault.html">RenderableDefault</a></li><li><a href="Shell.html">Shell</a></li><li><a href="Trait.html">Trait</a></li></ul><h3>Global</h3><ul><li><a href="global.html#app_current">app_current</a></li><li><a href="global.html#app_get">app_get</a></li><li><a href="global.html#app_put">app_put</a></li><li><a href="global.html#brackets_to_dots">brackets_to_dots</a></li><li><a href="global.html#classNameToPlural">classNameToPlural</a></li><li><a href="global.html#Csrf">Csrf</a></li><li><a href="global.html#def">def</a></li><li><a href="global.html#dispatch">dispatch</a></li><li><a href="global.html#isModel">isModel</a></li><li><a href="global.html#LaravelReactSync">LaravelReactSync</a></li><li><a href="global.html#on">on</a></li><li><a href="global.html#pluralToClassName">pluralToClassName</a></li><li><a href="global.html#ReactSyncData">ReactSyncData</a></li><li><a href="global.html#snake_case">snake_case</a></li><li><a href="global.html#studly_case">studly_case</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Alert.html">Alert</a></li><li><a href="Eloquent.html">Eloquent</a></li><li><a href="Event.html">Event</a></li><li><a href="Field.html">Field</a></li><li><a href="Form.html">Form</a></li><li><a href="HasKeyProp.html">HasKeyProp</a></li><li><a href="hasPluralForm.html">hasPluralForm</a></li><li><a href="HasReflection.html">HasReflection</a></li><li><a href="HasRelations.html">HasRelations</a></li><li><a href="LegacyModel.html">LegacyModel</a></li><li><a href="Mockable.html">Mockable</a></li><li><a href="Model.html">Model</a></li><li><a href="Notification.html">Notification</a></li><li><a href="Page.html">Page</a></li><li><a href="PageShell.html">PageShell</a></li><li><a href="PrimordialModel.html">PrimordialModel</a></li><li><a href="Queryable.html">Queryable</a></li><li><a href="ReactSync.html">ReactSync</a></li><li><a href="RenderableAsBasicForm.html">RenderableAsBasicForm</a></li><li><a href="RenderableAsDiagram.html">RenderableAsDiagram</a></li><li><a href="RenderableDefault.html">RenderableDefault</a></li><li><a href="Shell.html">Shell</a></li><li><a href="Trait.html">Trait</a></li></ul><h3>Mixins</h3><ul><li><a href="hasAttributes.html">hasAttributes</a></li><li><a href="MorphsDates.html">MorphsDates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_toConsumableArray">_toConsumableArray</a></li><li><a href="global.html#app_current">app_current</a></li><li><a href="global.html#app_get">app_get</a></li><li><a href="global.html#app_put">app_put</a></li><li><a href="global.html#brackets_to_dots">brackets_to_dots</a></li><li><a href="global.html#classNameToPlural">classNameToPlural</a></li><li><a href="global.html#Csrf">Csrf</a></li><li><a href="global.html#def">def</a></li><li><a href="global.html#dispatch">dispatch</a></li><li><a href="global.html#fromRenderedComponent">fromRenderedComponent</a></li><li><a href="global.html#getAjaxUrl">getAjaxUrl</a></li><li><a href="global.html#isModel">isModel</a></li><li><a href="global.html#kebab_case">kebab_case</a></li><li><a href="global.html#LaravelReactSync">LaravelReactSync</a></li><li><a href="global.html#on">on</a></li><li><a href="global.html#once">once</a></li><li><a href="global.html#pluralToClassName">pluralToClassName</a></li><li><a href="global.html#ReactSyncData">ReactSyncData</a></li><li><a href="global.html#snake_case">snake_case</a></li><li><a href="global.html#studly_case">studly_case</a></li><li><a href="global.html#SymbolIterator">SymbolIterator</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Tue May 12 2020 11:11:31 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.5</a> on Sat Sep 05 2020 14:09:51 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

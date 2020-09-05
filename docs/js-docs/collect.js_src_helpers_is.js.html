@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: Event.js</title>
+    <title>JSDoc: Source: collect.js/src/helpers/is.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: Event.js</h1>
+    <h1 class="page-title">Source: collect.js/src/helpers/is.js</h1>
 
     
 
@@ -26,57 +26,24 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-/** */
-export class Event{
+            <pre class="prettyprint source linenums"><code>'use strict';
 
-	// Event System
-	/** */
-	static events = {
-		willUpdate: () => this.current_state,
-		updated: () => this.current_state,
-		countries_loading: () => this.current_state,
-	}
+module.exports = {
+  /**
+   * @returns {boolean}
+   */
+  isArray: item => Array.isArray(item),
 
-	/** */
-	static on(event_handle, callback){
-		Event.registeredEventHandlers[event_handle] = Event.registeredEventHandlers[event_handle] || [];
-		Event.registeredEventHandlers[event_handle].push(callback);
-	}
+  /**
+   * @returns {boolean}
+   */
+  isObject: item => typeof item === 'object' &amp;&amp; Array.isArray(item) === false &amp;&amp; item !== null,
 
-	/** */
-	static once(event_handle, callback){
-		Event.registeredEventHandlers[event_handle] = [callback];
-	}
-
-	/** */
-	static dispatch(event_handle, ...addl_args){
-		const handlers = Event.registeredEventHandlers[event_handle] || [];
-		const resp = handlers.map(cb => cb.apply(Event, addl_args));
-		return resp;
-	}
-
-}
-
-Event.registeredEventHandlers = {};
-
-/** */
-export function on(event_handle, callback){
-	return Event.on(event_handle, callback);
-}
-
-/** */
-export function once(event_handle, callback){
-	return Event.once(event_handle, callback);
-}
-
-/** */
-export function dispatch(event_handle, ...addl_args){
-	return Event.dispatch(event_handle, ...addl_args);
-}
-
-
-export default Event;
+  /**
+   * @returns {boolean}
+   */
+  isFunction: item => typeof item === 'function',
+};
 </code></pre>
         </article>
     </section>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: collect.js/dist/index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: collect.js/dist/index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+var _typeof = typeof Symbol === "function" &amp;&amp; typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj &amp;&amp; typeof Symbol === "function" &amp;&amp; obj.constructor === Symbol &amp;&amp; obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function Collection(collection) {
+  if (collection !== undefined &amp;&amp; !Array.isArray(collection) &amp;&amp; (typeof collection === 'undefined' ? 'undefined' : _typeof(collection)) !== 'object') {
+    this.items = [collection];
+  } else if (collection instanceof this.constructor) {
+    this.items = collection.all();
+  } else {
+    this.items = collection || [];
+  }
+}
+
+/**
+ * Symbol.iterator
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/iterator
+ */
+var SymbolIterator = require('./methods/symbol.iterator');
+
+if (typeof Symbol !== 'undefined') {
+  Collection.prototype[Symbol.iterator] = SymbolIterator;
+}
+
+/**
+ * Support JSON.stringify
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+ */
+Collection.prototype.toJSON = function toJSON() {
+  return this.items;
+};
+
+Collection.prototype.all = require('./methods/all');
+Collection.prototype.average = require('./methods/average');
+Collection.prototype.avg = require('./methods/avg');
+Collection.prototype.chunk = require('./methods/chunk');
+Collection.prototype.collapse = require('./methods/collapse');
+Collection.prototype.combine = require('./methods/combine');
+Collection.prototype.concat = require('./methods/concat');
+Collection.prototype.contains = require('./methods/contains');
+Collection.prototype.count = require('./methods/count');
+Collection.prototype.countBy = require('./methods/countBy');
+Collection.prototype.crossJoin = require('./methods/crossJoin');
+Collection.prototype.dd = require('./methods/dd');
+Collection.prototype.diff = require('./methods/diff');
+Collection.prototype.diffAssoc = require('./methods/diffAssoc');
+Collection.prototype.diffKeys = require('./methods/diffKeys');
+Collection.prototype.dump = require('./methods/dump');
+Collection.prototype.duplicates = require('./methods/duplicates');
+Collection.prototype.each = require('./methods/each');
+Collection.prototype.eachSpread = require('./methods/eachSpread');
+Collection.prototype.every = require('./methods/every');
+Collection.prototype.except = require('./methods/except');
+Collection.prototype.filter = require('./methods/filter');
+Collection.prototype.first = require('./methods/first');
+Collection.prototype.firstWhere = require('./methods/firstWhere');
+Collection.prototype.flatMap = require('./methods/flatMap');
+Collection.prototype.flatten = require('./methods/flatten');
+Collection.prototype.flip = require('./methods/flip');
+Collection.prototype.forPage = require('./methods/forPage');
+Collection.prototype.forget = require('./methods/forget');
+Collection.prototype.get = require('./methods/get');
+Collection.prototype.groupBy = require('./methods/groupBy');
+Collection.prototype.has = require('./methods/has');
+Collection.prototype.implode = require('./methods/implode');
+Collection.prototype.intersect = require('./methods/intersect');
+Collection.prototype.intersectByKeys = require('./methods/intersectByKeys');
+Collection.prototype.isEmpty = require('./methods/isEmpty');
+Collection.prototype.isNotEmpty = require('./methods/isNotEmpty');
+Collection.prototype.join = require('./methods/join');
+Collection.prototype.keyBy = require('./methods/keyBy');
+Collection.prototype.keys = require('./methods/keys');
+Collection.prototype.last = require('./methods/last');
+Collection.prototype.macro = require('./methods/macro');
+Collection.prototype.make = require('./methods/make');
+Collection.prototype.map = require('./methods/map');
+Collection.prototype.mapSpread = require('./methods/mapSpread');
+Collection.prototype.mapToDictionary = require('./methods/mapToDictionary');
+Collection.prototype.mapInto = require('./methods/mapInto');
+Collection.prototype.mapToGroups = require('./methods/mapToGroups');
+Collection.prototype.mapWithKeys = require('./methods/mapWithKeys');
+Collection.prototype.max = require('./methods/max');
+Collection.prototype.median = require('./methods/median');
+Collection.prototype.merge = require('./methods/merge');
+Collection.prototype.mergeRecursive = require('./methods/mergeRecursive');
+Collection.prototype.min = require('./methods/min');
+Collection.prototype.mode = require('./methods/mode');
+Collection.prototype.nth = require('./methods/nth');
+Collection.prototype.only = require('./methods/only');
+Collection.prototype.pad = require('./methods/pad');
+Collection.prototype.partition = require('./methods/partition');
+Collection.prototype.pipe = require('./methods/pipe');
+Collection.prototype.pluck = require('./methods/pluck');
+Collection.prototype.pop = require('./methods/pop');
+Collection.prototype.prepend = require('./methods/prepend');
+Collection.prototype.pull = require('./methods/pull');
+Collection.prototype.push = require('./methods/push');
+Collection.prototype.put = require('./methods/put');
+Collection.prototype.random = require('./methods/random');
+Collection.prototype.reduce = require('./methods/reduce');
+Collection.prototype.reject = require('./methods/reject');
+Collection.prototype.replace = require('./methods/replace');
+Collection.prototype.replaceRecursive = require('./methods/replaceRecursive');
+Collection.prototype.reverse = require('./methods/reverse');
+Collection.prototype.search = require('./methods/search');
+Collection.prototype.shift = require('./methods/shift');
+Collection.prototype.shuffle = require('./methods/shuffle');
+Collection.prototype.skip = require('./methods/skip');
+Collection.prototype.skipUntil = require('./methods/skipUntil');
+Collection.prototype.skipWhile = require('./methods/skipWhile');
+Collection.prototype.slice = require('./methods/slice');
+Collection.prototype.some = require('./methods/some');
+Collection.prototype.sort = require('./methods/sort');
+Collection.prototype.sortDesc = require('./methods/sortDesc');
+Collection.prototype.sortBy = require('./methods/sortBy');
+Collection.prototype.sortByDesc = require('./methods/sortByDesc');
+Collection.prototype.sortKeys = require('./methods/sortKeys');
+Collection.prototype.sortKeysDesc = require('./methods/sortKeysDesc');
+Collection.prototype.splice = require('./methods/splice');
+Collection.prototype.split = require('./methods/split');
+Collection.prototype.sum = require('./methods/sum');
+Collection.prototype.take = require('./methods/take');
+Collection.prototype.takeUntil = require('./methods/takeUntil');
+Collection.prototype.takeWhile = require('./methods/takeWhile');
+Collection.prototype.tap = require('./methods/tap');
+Collection.prototype.times = require('./methods/times');
+Collection.prototype.toArray = require('./methods/toArray');
+Collection.prototype.toJson = require('./methods/toJson');
+Collection.prototype.transform = require('./methods/transform');
+Collection.prototype.unless = require('./methods/unless');
+Collection.prototype.unlessEmpty = require('./methods/whenNotEmpty');
+Collection.prototype.unlessNotEmpty = require('./methods/whenEmpty');
+Collection.prototype.union = require('./methods/union');
+Collection.prototype.unique = require('./methods/unique');
+Collection.prototype.unwrap = require('./methods/unwrap');
+Collection.prototype.values = require('./methods/values');
+Collection.prototype.when = require('./methods/when');
+Collection.prototype.whenEmpty = require('./methods/whenEmpty');
+Collection.prototype.whenNotEmpty = require('./methods/whenNotEmpty');
+Collection.prototype.where = require('./methods/where');
+Collection.prototype.whereBetween = require('./methods/whereBetween');
+Collection.prototype.whereIn = require('./methods/whereIn');
+Collection.prototype.whereInstanceOf = require('./methods/whereInstanceOf');
+Collection.prototype.whereNotBetween = require('./methods/whereNotBetween');
+Collection.prototype.whereNotIn = require('./methods/whereNotIn');
+Collection.prototype.whereNull = require('./methods/whereNull');
+Collection.prototype.whereNotNull = require('./methods/whereNotNull');
+Collection.prototype.wrap = require('./methods/wrap');
+Collection.prototype.zip = require('./methods/zip');
+
+var collect = function collect(collection) {
+  return new Collection(collection);
+};
+
+module.exports = collect;
+module.exports.collect = collect;
+module.exports.default = collect;
+module.exports.Collection = Collection;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Alert.html">Alert</a></li><li><a href="Eloquent.html">Eloquent</a></li><li><a href="Event.html">Event</a></li><li><a href="Field.html">Field</a></li><li><a href="Form.html">Form</a></li><li><a href="HasKeyProp.html">HasKeyProp</a></li><li><a href="hasPluralForm.html">hasPluralForm</a></li><li><a href="HasReflection.html">HasReflection</a></li><li><a href="HasRelations.html">HasRelations</a></li><li><a href="LegacyModel.html">LegacyModel</a></li><li><a href="Mockable.html">Mockable</a></li><li><a href="Model.html">Model</a></li><li><a href="Notification.html">Notification</a></li><li><a href="Page.html">Page</a></li><li><a href="PageShell.html">PageShell</a></li><li><a href="PrimordialModel.html">PrimordialModel</a></li><li><a href="Queryable.html">Queryable</a></li><li><a href="ReactSync.html">ReactSync</a></li><li><a href="RenderableAsBasicForm.html">RenderableAsBasicForm</a></li><li><a href="RenderableAsDiagram.html">RenderableAsDiagram</a></li><li><a href="RenderableDefault.html">RenderableDefault</a></li><li><a href="Shell.html">Shell</a></li><li><a href="Trait.html">Trait</a></li></ul><h3>Mixins</h3><ul><li><a href="hasAttributes.html">hasAttributes</a></li><li><a href="MorphsDates.html">MorphsDates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_toConsumableArray">_toConsumableArray</a></li><li><a href="global.html#app_current">app_current</a></li><li><a href="global.html#app_get">app_get</a></li><li><a href="global.html#app_put">app_put</a></li><li><a href="global.html#brackets_to_dots">brackets_to_dots</a></li><li><a href="global.html#classNameToPlural">classNameToPlural</a></li><li><a href="global.html#Csrf">Csrf</a></li><li><a href="global.html#def">def</a></li><li><a href="global.html#dispatch">dispatch</a></li><li><a href="global.html#fromRenderedComponent">fromRenderedComponent</a></li><li><a href="global.html#getAjaxUrl">getAjaxUrl</a></li><li><a href="global.html#isModel">isModel</a></li><li><a href="global.html#kebab_case">kebab_case</a></li><li><a href="global.html#LaravelReactSync">LaravelReactSync</a></li><li><a href="global.html#on">on</a></li><li><a href="global.html#once">once</a></li><li><a href="global.html#pluralToClassName">pluralToClassName</a></li><li><a href="global.html#ReactSyncData">ReactSyncData</a></li><li><a href="global.html#snake_case">snake_case</a></li><li><a href="global.html#studly_case">studly_case</a></li><li><a href="global.html#SymbolIterator">SymbolIterator</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.5</a> on Sat Sep 05 2020 14:09:51 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

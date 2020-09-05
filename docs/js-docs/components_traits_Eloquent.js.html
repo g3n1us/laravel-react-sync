@@ -28,6 +28,8 @@
         <article>
             <pre class="prettyprint source linenums"><code>import React from 'react';
 import Trait from './Trait';
+import Shell from '../Shell';
+import qs from 'qs';
 
 import { studly_case } from '../../helpers';
 
@@ -44,11 +46,14 @@ class Eloquent extends Trait{
 	static query_props = ['find', 'where', 'all', 'first'];
 
 	/** */
-	static pagination_props = ['per_page'];
+	static pagination_props = ['per_page', 'perPage'];
+
+	/** */
+	static ordering_props = ['order_by', 'sort_by', 'orderBy', 'sortBy'];
 
 	/** */
 	static get reserved_props(){
-		return [...this.query_props, ...this.pagination_props, 'order_by', 'sort_by'];
+		return [ ...this.query_props, ...this.pagination_props, ...this.ordering_props ];
 	}
 
 	/** */
@@ -68,7 +73,7 @@ class Eloquent extends Trait{
 
 	/** */
 	get non_reserved_props(){
-		return this.get_non_reserved_props();
+		return this.constructor.get_non_reserved_props(this.props);
 	}
 
 	/** */
@@ -97,15 +102,35 @@ class Eloquent extends Trait{
 			}
 			else where_prop = this.props.where;
 		}
+
+		const { singular_url, plural_url } = this.schema.rest_properties;
 		const map = {
-			find: `/api/${this.singular}/${this.props.find}`,
-			where: `/api/${this.plural}/where/${where_prop}`,
-			all: `/api/${this.plural}`,
-			first: `/api/${this.singular}`,
+			find: `${singular_url}/${this.props.find}`,
+			where: `${plural_url}/where/${where_prop}`,
+			all: plural_url,
+			first: singular_url,
 		}
 		const qs_object = {};
-		if(this.props.per_page) qs_object.per_page = this.props.per_page;
+		let { per_page, perPage } = this.props;
+		per_page = per_page || perPage;
+		if(per_page) {
+			qs_object.per_page = per_page;
+		}
+
+		let { order_by, orderBy, sort_by, sortBy, order_direction, orderDirection, sort_direction, sortDirection } = this.props;
+
+		order_by = order_by || orderBy || sort_by || sortBy;
+		if(order_by){
+			qs_object.order_by = order_by;
+		}
+
+		order_direction = order_direction || orderDirection || sort_direction || sortDirection;
+		if(order_direction){
+			qs_object.order_direction = order_direction;
+		}
+
 		const qs_string = qs.stringify(qs_object);
+
 		return map[q] + `?${qs_string}`;
 	}
 
@@ -117,6 +142,7 @@ class Eloquent extends Trait{
 
 	/** */
 	render(){
+
 		if(this.is_query){
 			return this.queryRender();
 		}
@@ -124,7 +150,7 @@ class Eloquent extends Trait{
 		let renderAs = this.props.renderAs || this.props.render || 'Default';
 		let renderName = `render${studly_case(renderAs)}`;
 		if(typeof renderAs === 'function'){
-			return renderAs(this.props);
+			return renderAs(this.props, this);
 		}
 
 		if(typeof this[renderName] === 'function'){
@@ -140,11 +166,18 @@ class Eloquent extends Trait{
 		return (&lt;div>&lt;code>{this.constructor.name} | {this.props.id}&lt;/code>&lt;/div>);
 	}
 
+	/** */
+	show(addl_props = {}){
+    	const C = this.constructor;
+    	return &lt;C {...this.props} {...addl_props} />
+	}
+
 }
 
 window.Eloquent = Eloquent;
 
-export default Eloquent;</code></pre>
+export default Eloquent;
+</code></pre>
         </article>
     </section>
 
@@ -154,13 +187,13 @@ export default Eloquent;</code></pre>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Alert.html">Alert</a></li><li><a href="Eloquent.html">Eloquent</a></li><li><a href="Event.html">Event</a></li><li><a href="Field.html">Field</a></li><li><a href="Form.html">Form</a></li><li><a href="HasKeyProp.html">HasKeyProp</a></li><li><a href="hasPluralForm.html">hasPluralForm</a></li><li><a href="HasReflection.html">HasReflection</a></li><li><a href="HasRelations.html">HasRelations</a></li><li><a href="LegacyModel.html">LegacyModel</a></li><li><a href="Mockable.html">Mockable</a></li><li><a href="Model.html">Model</a></li><li><a href="Notification.html">Notification</a></li><li><a href="Page.html">Page</a></li><li><a href="PageShell.html">PageShell</a></li><li><a href="PrimordialModel.html">PrimordialModel</a></li><li><a href="Queryable.html">Queryable</a></li><li><a href="ReactSync.html">ReactSync</a></li><li><a href="RenderableAsBasicForm.html">RenderableAsBasicForm</a></li><li><a href="RenderableAsDiagram.html">RenderableAsDiagram</a></li><li><a href="RenderableDefault.html">RenderableDefault</a></li><li><a href="Shell.html">Shell</a></li><li><a href="Trait.html">Trait</a></li></ul><h3>Global</h3><ul><li><a href="global.html#app_current">app_current</a></li><li><a href="global.html#app_get">app_get</a></li><li><a href="global.html#app_put">app_put</a></li><li><a href="global.html#brackets_to_dots">brackets_to_dots</a></li><li><a href="global.html#classNameToPlural">classNameToPlural</a></li><li><a href="global.html#Csrf">Csrf</a></li><li><a href="global.html#def">def</a></li><li><a href="global.html#dispatch">dispatch</a></li><li><a href="global.html#isModel">isModel</a></li><li><a href="global.html#LaravelReactSync">LaravelReactSync</a></li><li><a href="global.html#on">on</a></li><li><a href="global.html#pluralToClassName">pluralToClassName</a></li><li><a href="global.html#ReactSyncData">ReactSyncData</a></li><li><a href="global.html#snake_case">snake_case</a></li><li><a href="global.html#studly_case">studly_case</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Alert.html">Alert</a></li><li><a href="Eloquent.html">Eloquent</a></li><li><a href="Event.html">Event</a></li><li><a href="Field.html">Field</a></li><li><a href="Form.html">Form</a></li><li><a href="HasKeyProp.html">HasKeyProp</a></li><li><a href="hasPluralForm.html">hasPluralForm</a></li><li><a href="HasReflection.html">HasReflection</a></li><li><a href="HasRelations.html">HasRelations</a></li><li><a href="LegacyModel.html">LegacyModel</a></li><li><a href="Mockable.html">Mockable</a></li><li><a href="Model.html">Model</a></li><li><a href="Notification.html">Notification</a></li><li><a href="Page.html">Page</a></li><li><a href="PageShell.html">PageShell</a></li><li><a href="PrimordialModel.html">PrimordialModel</a></li><li><a href="Queryable.html">Queryable</a></li><li><a href="ReactSync.html">ReactSync</a></li><li><a href="RenderableAsBasicForm.html">RenderableAsBasicForm</a></li><li><a href="RenderableAsDiagram.html">RenderableAsDiagram</a></li><li><a href="RenderableDefault.html">RenderableDefault</a></li><li><a href="Shell.html">Shell</a></li><li><a href="Trait.html">Trait</a></li></ul><h3>Mixins</h3><ul><li><a href="hasAttributes.html">hasAttributes</a></li><li><a href="MorphsDates.html">MorphsDates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_toConsumableArray">_toConsumableArray</a></li><li><a href="global.html#app_current">app_current</a></li><li><a href="global.html#app_get">app_get</a></li><li><a href="global.html#app_put">app_put</a></li><li><a href="global.html#brackets_to_dots">brackets_to_dots</a></li><li><a href="global.html#classNameToPlural">classNameToPlural</a></li><li><a href="global.html#Csrf">Csrf</a></li><li><a href="global.html#def">def</a></li><li><a href="global.html#dispatch">dispatch</a></li><li><a href="global.html#fromRenderedComponent">fromRenderedComponent</a></li><li><a href="global.html#getAjaxUrl">getAjaxUrl</a></li><li><a href="global.html#isModel">isModel</a></li><li><a href="global.html#kebab_case">kebab_case</a></li><li><a href="global.html#LaravelReactSync">LaravelReactSync</a></li><li><a href="global.html#on">on</a></li><li><a href="global.html#once">once</a></li><li><a href="global.html#pluralToClassName">pluralToClassName</a></li><li><a href="global.html#ReactSyncData">ReactSyncData</a></li><li><a href="global.html#snake_case">snake_case</a></li><li><a href="global.html#studly_case">studly_case</a></li><li><a href="global.html#SymbolIterator">SymbolIterator</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Tue May 12 2020 11:11:31 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.5</a> on Sat Sep 05 2020 14:09:51 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
