@@ -8,11 +8,6 @@ import Trait from './Trait';
 class hasPluralForm extends Trait{
 
 	/** */
-  constructor(targetClass){
-    super(targetClass);
-  }
-
-	/** */
 	  get plural(){
 	    return pluralize(this.constructor.name.toLowerCase());
 	  }

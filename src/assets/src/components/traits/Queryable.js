@@ -22,10 +22,6 @@ window.Find = (dotstring) => {
 */
 class Queryable extends Trait{
 
-	constructor(targetClass){
-		super(targetClass);
-	}
-
 	static repo = ReactSyncAppData.page_data.state;
 
 	static hasBeenKeyed = false;

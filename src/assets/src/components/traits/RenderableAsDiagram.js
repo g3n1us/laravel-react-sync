@@ -8,10 +8,6 @@ import Trait from './Trait';
 */
 class RenderableAsDiagram extends Trait{
 
-  constructor(targetClass){
-    super(targetClass);
-  }
-
 /**
 
 */

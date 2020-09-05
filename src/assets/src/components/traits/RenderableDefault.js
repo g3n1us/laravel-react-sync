@@ -8,10 +8,6 @@ import collect from '../../collect.js';
 */
 class RenderableDefault extends Trait{
 
-  constructor(targetClass){
-    super(targetClass);
-  }
-
 /**
 
 */

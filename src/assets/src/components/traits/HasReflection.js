@@ -6,10 +6,6 @@ import Trait from './Trait';
 */
 class HasReflection extends Trait{
 
-  constructor(targetClass){
-    super(targetClass);
-  }
-
 /**
  * Returns the class properties that represent a relation to another model
  */

@@ -15,11 +15,7 @@ function dot_basename(str){
 */
 class HasRelations extends Trait{
 
-	constructor(targetClass){
-		super(targetClass);
-	}
-
-
+	/** */
 	getRelation(relation_name){
 		const { definition } = this.schema[relation_name];
 		const { related, foreignKey } = definition;
