@@ -8,11 +8,6 @@ import Trait from './Trait';
 class HasKeyProp extends Trait{
 
 	/** */
-  constructor(targetClass){
-    super(targetClass);
-  }
-
-	/** */
   static make_key(id, prefix = ''){
     return `${prefix}_${this.plural}_${id}`;
   }

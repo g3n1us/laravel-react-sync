@@ -7,7 +7,10 @@ import { studly_case } from '../../helpers';
 
 import { difference, intersection } from 'lodash';
 
-/** */
+/**
+@kind mixin
+@extends Trait
+*/
 class Eloquent extends Trait{
 	/** */
 	constructor(targetClass){
