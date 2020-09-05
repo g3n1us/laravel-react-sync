@@ -5,6 +5,9 @@ import * as models from '../../models/models';
 const pluralize = require('pluralize');
 import { app_get, pluralToClassName } from '../../helpers';
 
+function dot_basename(str){
+	return str.split(/\./g).pop();
+}
 
 /**
 @kind mixin
@@ -16,11 +19,26 @@ class HasRelations extends Trait{
 		super(targetClass);
 	}
 
+
+	getRelation(relation_name){
+		const { definition } = this.schema[relation_name];
+		const { related, foreignKey } = definition;
+		const retval = { ...definition };
+		retval.RelatedModel = Model.getModel(related);
+		retval.render = (renderTypeOrFn = "default") => {
+			if(!this.props[foreignKey]) return null;
+			return <retval.RelatedModel find={this.props[foreignKey]} render={renderTypeOrFn} />
+		};
+		return retval;
+	}
+
+
 	/** */
 	HasMany(relationship_definition_from_schema){
+		console.log(relationship_definition_from_schema);
 		const { related, localKey, foreignKey } = relationship_definition_from_schema;
 		const M = Model.getModel(related);
-		return M.where(foreignKey, this.props[localKey]);
+		return M.where('props.'+dot_basename(foreignKey), this.props[localKey]);
 	}
 
 	/** */
@@ -89,10 +107,10 @@ withDefault: null
 		}
 /*
 		if(!Class_){
-			return 
+			return
 		}
 */
-		console.log('BelongsTo found_item', Class_, found_item, found_item instanceof Model);
+// 		console.log('BelongsTo found_item', Class_, found_item, found_item instanceof Model);
 		return <Class_ {...app_get(`${plural}.${related_id}`)}/>
 
 	}

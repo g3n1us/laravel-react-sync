@@ -1,5 +1,11 @@
 import React from 'react';
 import { dispatch } from './Event';
+import schemas from 'js/schema';
+import model_properties from 'js/model_properties';
+import qs from 'qs';
+import Reducer from './Reducer';
+import { getAjaxUrl } from './helpers';
+import axios from './fetchClient';
 
 /** */
 class ReactSync{
@@ -27,17 +33,31 @@ class ReactSync{
 				}
 			}
 		});
-
+		this.schemas = schemas;
+		this.model_properties = model_properties;
 		if(this.user){
 			this.user.can = (ability) => this.user_can[ability] === true;
 		}
-		
-		
+
 	}
+
+	static booted = false;
+
+	initialData = null;
 
 	/** */
 	boot(data){
+		if(!this.initialData){
+			this.initialData = this.route.controller;
+			history.replaceState(this.initialData, null, null);
+		}
 		ReactSync.pages = {...ReactSync.pages, ...data.pages};
+		this.constructor.booted = true;
+	}
+
+	/** */
+	static getInstance(){
+		return new this;
 	}
 
 	/** */
@@ -64,19 +84,26 @@ class ReactSync{
 	/** */
 	static pages = {};
 
+	get pages(){
+		return ReactSync.pages;
+	}
+
 	/** */
 	get logged_in(){
 		return typeof this.user === "object";
 	}
 
 	/** */
-	update(callback){
-		return axios.get('').then((new_page_data) => {
-			this.components.forEach(function(component){
-				component.setState(new_page_data.data);
-			});
+	getAjaxUrl(){
+		return getAjaxUrl();
+	}
 
+	/** */
+	update(callback){
+		return axios.get(getAjaxUrl()).then((new_page_data) => {
 			this.page_data = new_page_data.data;
+			this.route.controller = new_page_data.data
+			app().setState(Reducer());
 			if(typeof callback === 'function'){
 				callback(this.page_data);
 			}

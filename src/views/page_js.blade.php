@@ -5,7 +5,7 @@
 $randomid = "page_context_" . rand();
 $basedata = collect([
 	"config" => collect(config("react_sync")),
-	"schemas" => get_schemas(),
+	// "schemas" => get_schemas(),
 	"user" => auth()->user() ?? false,
 	"user_abilities" => get_user_abilities(),
 	"route" => current_route(),

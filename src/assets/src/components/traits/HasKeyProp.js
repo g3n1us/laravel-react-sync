@@ -13,6 +13,12 @@ class HasKeyProp extends Trait{
   }
 
 	/** */
+  static make_key(id, prefix = ''){
+    return `${prefix}_${this.plural}_${id}`;
+  }
+
+
+	/** */
   unique_key(prefix = ''){
     return `${prefix}_${this.plural}_${this.id}`;
   }

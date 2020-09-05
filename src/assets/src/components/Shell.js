@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-import collect from 'collect.js';
+import axios from '../fetchClient';
+import collect from '../collect.js';
+import { dispatch, on } from '../Event.js';
+
+const loading = require('../images/loading.svg');
+
 
 /** */
 class Shell extends Component{
@@ -9,6 +13,11 @@ class Shell extends Component{
 	static defaultProps = {
 		url: null,
 		Model: null,
+		loading_icon: (
+    		<div style={{paddingTop: '1rem'}}>
+                <img src={loading} style={{width: 40, height: 'auto', margin: 'auto'}} />
+    		</div>
+		),
 	}
 
 	/** */
@@ -17,6 +26,12 @@ class Shell extends Component{
 		this.state = {
 			children: null,
 		}
+
+		on('model_created', new_model => {
+            if(new_model instanceof this.props.Model){
+                this.refresh();
+            }
+		});
 	}
 
 	/** */
@@ -24,16 +39,9 @@ class Shell extends Component{
 
 	/** */
 	refresh(){
-		let { Model, url } = this.props;
-		let fromcache;
-		this.setState({children: null});
-		if(!this.constructor.cached[url]){
-			this.constructor.cached[url] = axios.get(url);
-		}
-		else{
-			//
-		}
-		this.constructor.cached[url].then(response => {
+		let { url } = this.props;
+
+		axios.get(url).then(response => {
 			this.setState({children: response.data});
 		}).catch((err) => {
 			console.log(err, err.response);
@@ -54,13 +62,15 @@ class Shell extends Component{
 			this.refresh();
 		}
 		else if(!this.constructor.cached[this.props.url]){
-			this.refresh();
+			// this.refresh();
 		}
+		// else this.refresh();
 	}
 
 	/** */
 	render(){
-		if(!this.state.children) return null;
+		if(!this.state.children) return this.props.loading_icon;
+
 		const { Model, url, then, ...remainder } = this.props;
 
 		const { children } = this.state;
@@ -88,7 +98,10 @@ class Shell extends Component{
 		return (
 			<>{items.map((props, i) => {
 				const normal_props = Model.get_non_reserved_props(remainder);
-				return <Model key={i} {...normal_props} {...props} />;
+				const kname = Model.getPrimaryKey();
+				// debugger
+				const k = Model.make_key(props[kname], 'shell');
+				return <Model key={k} {...normal_props} {...props} shell={this} refresh={this.refresh.bind(this)} />;
 			})}
 			</>
 		);

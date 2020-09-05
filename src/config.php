@@ -22,7 +22,7 @@ return [
 	'namespace' => env('REACT_SYNC_NAMESPACE', 'App'),
 
 	'jsonable_controllers' => [
-
+        'PageController',
 	],
 
 	'jsonable_routes' => [

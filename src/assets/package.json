@@ -2,7 +2,7 @@
 	"name": "laravel_react_sync",
 	"version": "1.0.0",
 	"description": "A companion to the Laravel React Sync package for Laravel",
-	"main": "dist/LaravelReactSync.js",
+	"main": "src/main.js",
 	"scripts": {
 		"dev": "npm run development",
 		"development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
@@ -18,20 +18,21 @@
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
-	"dependencies": {},
-	"devDependencies": {
-		"@babel/plugin-proposal-class-properties": "^7.7.4",
-		"@babel/preset-react": "^7.9.4",
+	"dependencies": {
 		"axios": "^0.19.0",
-		"collect.js": "^4.25.0",
-		"cross-env": "^6.0.3",
 		"g3n1us_helpers": "^1.0.7",
-		"jsdoc": "^3.6.4",
-		"laravel-mix": "^4.1.2",
+		"moment": "^2.27.0",
 		"pluralize": "^8.0.0",
 		"qs": "^6.9.4",
 		"react": "^16.13.1",
-		"react-dom": "^16.13.1",
+		"react-dom": "^16.13.1"
+	},
+	"devDependencies": {
+		"@babel/plugin-proposal-class-properties": "^7.7.4",
+		"@babel/preset-react": "^7.9.4",
+		"cross-env": "^6.0.3",
+		"jsdoc": "^3.6.4",
+		"laravel-mix": "^4.1.2",
 		"vue-template-compiler": "^2.6.10"
 	}
 }

@@ -3,26 +3,32 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 
 use G3n1us\LaravelReactSync\Pages\Core\Page;
+use G3n1us\LaravelReactSync\Paths;
+use G3n1us\LaravelReactSync\Utils;
+use G3n1us\LaravelReactSync\HandleResponseMiddleware;
 
+Route::prefix(config('react_sync.pages_prefix', ''))->group(function () {
 
-Route::middleware(config('react_sync.middleware'))->group(function () {
+	$pages = Page::listPageClasses();
 
-	Route::get(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@test');
-	Route::post(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@save');
-	Route::put(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@create');
-	Route::delete(config('react_sync.api_path', '/update-state'), '\\G3n1us\\LaravelReactSync\\ReactUpdateController@delete');
-	
-	$page_class = Page::resolve();
+	foreach($pages as $page_class){
+		$pattern = $page_class::$pattern ?? Str::start($page_class::slug(), '/');
 
-	$page_prefix = config('react_sync.pages_prefix', 'pages');
-	if(class_exists($page_class)){
-		$class_parameter = $page_class::slug();
+		$routes[] = Route::match(['get', 'options'], $pattern, $page_class . '@constructor');
 
-	    Route::prefix("{prefix}/$class_parameter")
-		    ->where(['prefix' => $page_prefix])
-		    ->namespace('G3n1us\\LaravelReactSync\\Pages')
-		    ->group(function($route) use($page_class, $class_parameter){
-			    Route::any($page_class::$pattern, 'PageController@run')->name('page_class');
-		    });
+		if(method_exists($page_class, 'form_request')){
+			$routes[] = Route::match(['post', 'put', 'patch', 'delete'], $pattern, $page_class . '@form_request');
+		}
+
+		$default_middleware = config('react_sync.middleware');
+		$required_middleware = ['web', HandleResponseMiddleware::class];
+		$page_middleware = (array) $page_class::$middleware;
+		$resolved_middleware = array_merge($default_middleware, $page_middleware, $required_middleware);
+		$resolved_middleware = array_unique($resolved_middleware);
+
+		foreach($routes as $route){
+			$route->middleware($resolved_middleware);
+		}
 	}
+
 });

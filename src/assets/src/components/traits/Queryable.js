@@ -4,9 +4,13 @@ import Trait from './Trait';
 import { get, camelCase, snakeCase } from 'lodash';
 import { app_get, snake_case, def } from '../../helpers';
 import Shell from '../Shell';
+import ReactSync from '../../ReactSync';
+import collect from '../../collect.js';
+import axios from '../../fetchClient';
+import { dispatch, on } from '../../Event.js';
+
 
 window.Find = (dotstring) => {
-	
 	return get(ReactSyncAppData.page_data.state, dotstring);
 };
 
@@ -21,14 +25,16 @@ class Queryable extends Trait{
 	constructor(targetClass){
 		super(targetClass);
 	}
-	
+
 	static repo = ReactSyncAppData.page_data.state;
-	
+
 	static hasBeenKeyed = false;
-	
+
 	static setKeyed(){
-		
+
 	}
+
+
 
 /**
  * (STATIC) - Query the data store and return the model with the supplied id
@@ -37,21 +43,17 @@ class Queryable extends Trait{
 	static find(id){
 		const { plural, repo } = this;
 		const dotstring = `${plural}.${id}`;
-		console.log('plural, repo', plural, repo, dotstring);
-		
 		return app_get(dotstring);
 	}
 
 
 /**
- * (STATIC) - TODO -- Work in Progress -- DO NOT USE
+ * (STATIC) -
  * @static
  */
-	static where(a,b,c){
-		// WIP!!!
-		let query = [].slice.call(arguments);
-
+	static where(...args){
 		this.refresher = React.createRef();
+		return collect(appGet(this.plural)).where(...args);
 	}
 
 
@@ -62,12 +64,14 @@ class Queryable extends Trait{
 
 
 	static list(additional_props = {}){
-		return <Shell url={`/api/${this.plural}`} Model={this} {...additional_props} />
+
+		return <Shell url={this.plural_url} Model={this} {...additional_props} />
 	}
 
 
 	/** */
 	static all(additional_props = {}){
+    	debugger;
 		this.refresher = React.createRef();
 		const plural = this.plural;
 		let items = app_get('state.'+plural) || app_get('state.'+ snakeCase(plural)) || app_get(plural) || app_get(snakeCase(plural));
@@ -108,7 +112,9 @@ class Queryable extends Trait{
 
 	/**
 	 */
-
+	get save_path(){
+		return this.api_url;
+	}
 
 	/**
 	 * Store the model's state back to the database
@@ -129,35 +135,42 @@ class Queryable extends Trait{
 
 
 	/** */
-	static create_path = `/${this.plural}`;
+	static get create_path(){
+		return this.plural_url;
+	}
+
 
 
 	/**
-	 * Store the model's state back to the database
+	 * Create a new model and insert into the database
 	 */
 	static create(initialProps = {}){
-		const react_sync_instance = window[window.ReactSyncGlobal];
-		axios.post(this.create_path, initialProps)
-			.then(response => {
-				if(window.location.href != response.request.responseURL){
-					react_sync_instance.components.forEach(function(component){
-						history.pushState(response.data, "", response.request.responseURL);
-						component.setState(response.data);
-					});
+    	return new Promise((resolve, reject) => {
+    		axios.post(this.create_path, initialProps)
+    			.then(response => {
+        			const redirect_url = this.response_is_redirect(response);
 
-					react_sync_instance.page_data = response.data;
+    				if(redirect_url){
+    					history.pushState(response.data, "", redirect_url);
+    					this.refresh_static();
+    				}
+    				else{
+    					this.refresh_static();
+    				}
 
-				}
-				else{
-					this.refresh_static();
-				}
+    				react_sync_notification('Saved');
 
-				react_sync_notification('Saved');
-			})
-			.catch(err => {
-				console.error(err);
-				react_sync_notification({text: 'An error occurred', level: 'danger'});
-			});
+    				resolve(response.data);
+
+    				dispatch('model_created', new this(response.data));
+    			})
+    			.catch(err => {
+    				console.error(err);
+    				react_sync_notification({text: 'An error occurred', level: 'danger'});
+    				reject(err);
+    			});
+
+    	});
 	}
 
 	/**
@@ -165,64 +178,78 @@ class Queryable extends Trait{
 	 * @todo complete this method
 	 */
 
-/*
-	static create_static(initialProps = {}){
-		return axios.post(`/${this.plural}`, initialProps)
-			.then(data => {
-				this.refresh_static();
-				react_sync_notification('Created');
-			})
-			.catch(err => {
-				react_sync_notification({text: 'An error occurred', level: 'danger'});
-			});
-	}
-*/
 
 	/** */
 	get delete_path(){
-		return `/api/${this.singular}/${this.id}`;
+
+		return this.api_url;
 	}
 
 	/**
 	 * Delete a model
 	 */
-	delete(){
-		const react_sync_instance = window[window.ReactSyncGlobal];
-		axios.delete(this.delete_path)
-			.then(response => {
-				if(window.location.href != response.request.responseURL){
-					react_sync_instance.components.forEach(function(component){
-						history.pushState(response.data, "", response.request.responseURL);
-						component.setState(response.data);
-					});
+	delete(callback = false){
+    	return new Promise((resolve, reject) => {
+    		axios.delete(this.delete_path)
+    			.then(response => {
+        			const redirect_url = this.constructor.response_is_redirect(response);
+    				if(redirect_url){
+    					history.pushState(response.data, "", redirect_url);
+    					this.refresh();
+    				}
+    				else{
+    					this.refresh();
+    				}
 
-					react_sync_instance.page_data = response.data;
-				}
-				else{
-					this.refresh();
-				}
+    				react_sync_notification('Deleted');
+    				dispatch('model_deleted', response);
+    				resolve(response);
+    				if(typeof callback === 'function'){
+	    				callback(response);
+    				}
 
-				react_sync_notification('Deleted');
-			})
-			.catch(err => {
-				console.log(err);
-				react_sync_notification({text: 'An error occurred', level: 'danger'});
+    			})
+    			.catch(err => {
+    				console.log(err);
+    				react_sync_notification({text: 'An error occurred', level: 'danger'});
+    				reject(err);
+    			});
 			});
 	}
 
 
 	/** */
 	static refresh_static(){
-		window.ReactSyncAppData.update();
+		Shell.cache = {};
+		ReactSync.getInstance().update();
 	}
 
 
 	/** */
-	refresh(redirectEndpoint){
+	refresh(){
 		Shell.cache = {};
-		window.ReactSyncAppData.update();
+
+		if(this.props.refresh) this.props.refresh()
+		else{
+			ReactSync.getInstance().update();
+		}
+
 	}
 
+    static response_is_redirect(response){
+    	const { href } = window.location;
+    	const { responseURL } = response.request;
+    	const { url } = response.config;
+    	console.log(url, responseURL);
+    	if(responseURL !== url && href !== responseURL){
+        	return responseURL;
+    	}
+    	return false;
+    }
+
+
+
 }
+
 
 export default Queryable;

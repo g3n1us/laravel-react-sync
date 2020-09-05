@@ -1,5 +1,7 @@
 import React from 'react';
 import Trait from './Trait';
+import Shell from '../Shell';
+import qs from 'qs';
 
 import { studly_case } from '../../helpers';
 
@@ -16,11 +18,14 @@ class Eloquent extends Trait{
 	static query_props = ['find', 'where', 'all', 'first'];
 
 	/** */
-	static pagination_props = ['per_page'];
+	static pagination_props = ['per_page', 'perPage'];
+
+	/** */
+	static ordering_props = ['order_by', 'sort_by', 'orderBy', 'sortBy'];
 
 	/** */
 	static get reserved_props(){
-		return [...this.query_props, ...this.pagination_props, 'order_by', 'sort_by'];
+		return [ ...this.query_props, ...this.pagination_props, ...this.ordering_props ];
 	}
 
 	/** */
@@ -40,7 +45,7 @@ class Eloquent extends Trait{
 
 	/** */
 	get non_reserved_props(){
-		return this.get_non_reserved_props();
+		return this.constructor.get_non_reserved_props(this.props);
 	}
 
 	/** */
@@ -69,15 +74,35 @@ class Eloquent extends Trait{
 			}
 			else where_prop = this.props.where;
 		}
+
+		const { singular_url, plural_url } = this.schema.rest_properties;
 		const map = {
-			find: `/api/${this.singular}/${this.props.find}`,
-			where: `/api/${this.plural}/where/${where_prop}`,
-			all: `/api/${this.plural}`,
-			first: `/api/${this.singular}`,
+			find: `${singular_url}/${this.props.find}`,
+			where: `${plural_url}/where/${where_prop}`,
+			all: plural_url,
+			first: singular_url,
 		}
 		const qs_object = {};
-		if(this.props.per_page) qs_object.per_page = this.props.per_page;
+		let { per_page, perPage } = this.props;
+		per_page = per_page || perPage;
+		if(per_page) {
+			qs_object.per_page = per_page;
+		}
+
+		let { order_by, orderBy, sort_by, sortBy, order_direction, orderDirection, sort_direction, sortDirection } = this.props;
+
+		order_by = order_by || orderBy || sort_by || sortBy;
+		if(order_by){
+			qs_object.order_by = order_by;
+		}
+
+		order_direction = order_direction || orderDirection || sort_direction || sortDirection;
+		if(order_direction){
+			qs_object.order_direction = order_direction;
+		}
+
 		const qs_string = qs.stringify(qs_object);
+
 		return map[q] + `?${qs_string}`;
 	}
 
@@ -89,6 +114,7 @@ class Eloquent extends Trait{
 
 	/** */
 	render(){
+
 		if(this.is_query){
 			return this.queryRender();
 		}
@@ -96,7 +122,7 @@ class Eloquent extends Trait{
 		let renderAs = this.props.renderAs || this.props.render || 'Default';
 		let renderName = `render${studly_case(renderAs)}`;
 		if(typeof renderAs === 'function'){
-			return renderAs(this.props);
+			return renderAs(this.props, this);
 		}
 
 		if(typeof this[renderName] === 'function'){
@@ -110,6 +136,12 @@ class Eloquent extends Trait{
 	/** */
 	renderDebug(){
 		return (<div><code>{this.constructor.name} | {this.props.id}</code></div>);
+	}
+
+	/** */
+	show(addl_props = {}){
+    	const C = this.constructor;
+    	return <C {...this.props} {...addl_props} />
 	}
 
 }

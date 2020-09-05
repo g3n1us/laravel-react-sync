@@ -47,11 +47,13 @@
 		}
 	}
 
+
 	if(!function_exists('to_string_boolean')){
 		function to_string_boolean($val){
 			return !!$val === true ? 'true' : 'false';
 		}
 	}
+
 
 	if(!function_exists('component_exists')){
 		function component_exists($name){
@@ -79,65 +81,19 @@
 	}
 
 
+	if(!function_exists('returnFunctionText')){
+		function returnFunctionText(ReflectionMethod $method){
+	        $lines = file($method->getFileName());
+	        $length = $method->getEndLine() - $method->getStartLine();
+	        $lines = array_slice($lines, $method->getStartLine() - 1, $length + 1);
+	        return implode(PHP_EOL, $lines);
+		}
+	}
+
+
 	if(!function_exists('get_schema')){
 		function get_schema($model = null){
-			$connection = Schema::getConnection();
 
-			if($model === null) die("\npass in a model instance!\n\n");
-// dump($model->getKeyName());
-			$table = $model->getTable();
-
-			$primary_key = $model->getKeyName();
-
-			$attrs = Schema::getColumnListing($model->getTable());
-			$attrs = collect($attrs)->map(function($column) use($table, $connection, $primary_key){
-				$column_definition = $connection->getDoctrineColumn($table, $column)->toArray();
-				$column_definition['type'] = $column_definition['type']->getName();
-				$column_definition['nullable'] = $column_definition['notnull'] === false; // maybe add something else to determine this
-				$column_definition['fillable'] = $column_definition['autoincrement'] === false &&
-				!in_array($column, ['created_at', 'updated_at']); // maybe add something else to determine this
-				$column_definition['required'] = $column_definition['fillable'] === true &&
-				empty($column_definition['default']) && $column_definition['nullable'] === false; // maybe add something else to determine this
-
-				$column_definition['primaryKey'] = $primary_key == $column;
-				return [$column => $column_definition];
-			})->values()->collapse();
-
-			$appended_attrs = coerceAsArray($model)->only(['with', 'appends'])->flatten();
-
-			$reflection = new ReflectionClass($model);
-
-			$model_name = get_class($model);
-
-            $ignored = $model->ignore_from_schema ?? [];
-            $relations = collect($reflection->getMethods())->filter(function($v) use($model_name, $ignored){
-                $modifiers = Reflection::getModifierNames($v->getModifiers());
-                return !preg_match('/[gs]et.*?Attribute/', $v->name)
-                    && $v->class == $model_name
-                    && in_array('public', $modifiers)
-                    && !in_array('static', $modifiers)
-                    && !in_array($v->name, $ignored);
-            });
-
-			$relations = $relations->pluck('name')->map(function($relation_name) use($model){
-				$r = $model->{$relation_name}();
-				if(!is_object( $r )) return null;
-				$relation_type = class_basename(get_class($r));
-				$arr = coerceAsArray($r);
-				$arr->transform(function($a){
-    				if(is_object($a)) return class_basename($a);
-    				else return $a;
-				});
-				$arr->put('relation_name', $relation_name);
-				return [$relation_name => [
-    				'name' => $relation_name,
-    				'type' => 'relation',
-    				'relation_type' => $relation_type,
-    				'definition' => $arr->except('query'),
-				]];
-			})->filter()->collapse();
-
-			return collect($attrs)->merge($relations);
 		}
 	}
 

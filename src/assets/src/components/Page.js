@@ -1,18 +1,24 @@
 import React, { Component } from 'react';
 import Event from '../Event';
-import axios from 'axios';
-const { on } = Event;
+import axios from '../fetchClient';
+const { on, once } = Event;
 import PageShell from './PageShell';
 
 import ReactSync from '../ReactSync';
 
 import Eloquent from './traits/Eloquent';
 
-import { studly_case } from '../helpers';
+import { studly_case, kebab_case } from '../helpers';
+
+import { navigate } from '../fetchClient';
 
 
 /** */
 class Page extends Component{
+
+    /** */
+    static associatedModel = null;
+
 	/** */
 	constructor(props){
 		super(props);
@@ -20,13 +26,28 @@ class Page extends Component{
 		components.push(this);
 
 		ReactSync.pages[this.constructor.name] = this.constructor;
+
+// 		this.ref = React.createRef();
 	}
 
 	/** */
 	componentDidMount(){
+
+    	once('navigating', e => {
+        	this.getDomNode().setAttribute('data-react-sync-navigation', "navigating");
+    	});
+
+    	once('navigated', e => {
+        	this.getDomNode().removeAttribute('data-react-sync-navigation');
+    	});
+
 		on('refresh-state', (e) => {
 			this.setState(REACT_SYNC_DATA.page_data);
 		});
+	}
+
+	getDomNode(){
+    	return this.props.domNode || document.querySelector(`[data-react-render="${this.constructor.name}"]`);
 	}
 
 	/** */
@@ -62,6 +83,17 @@ class Page extends Component{
 	}
 
 	/** */
+	renderNavLink(){
+		const human_name = this.constructor.name.slice(0, -4);
+		const path = kebab_case(this.constructor.name.slice(0, -4));
+		const prefix = (new ReactSync).config.pages_prefix;
+		const link = `${prefix}/${path}`;
+		return (
+			<a key={`NavLink${link}`} href={link} onClick={navigate} className="nav-link">{human_name}</a>
+		);
+	}
+
+	/** */
 	get is_query(){
 		return !(Object.keys(this.props).length);
 	}
@@ -74,6 +106,52 @@ class Page extends Component{
 		)
 	}
 
+
+}
+
+if(!Page.styleTagCreated){
+    Page.styleTagCreated = true;
+    const tag = document.createElement('style');
+    tag.type = 'text/css';
+    tag.innerHTML = `
+    [data-react-sync-navigation]{
+        position: relative;
+    }
+    [data-react-sync-navigation]::after{
+        content: "loading...";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        // background-color: rgba(0, 0, 0, 0.3);
+        background-color: rgba(255, 255, 255, 0.5);
+        color: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 25px;
+        cursor: wait;
+    }
+    .react_sync_table th{
+        cursor: pointer;
+    }
+    .react_sync_table th > span{
+        white-space: nowrap;
+        display: flex;
+    }
+    .react_sync_table th[data-currentsort] > span::after{
+        margin-left: auto;
+        padding-left: 1rem;
+    }
+    .react_sync_table th[data-currentsort="desc"] > span::after{
+        content: "↑"
+    }
+    .react_sync_table th[data-currentsort="asc"] > span::after{
+        content: "↓"
+    }
+    `;
+    document.head.appendChild(tag);
 
 }
 
