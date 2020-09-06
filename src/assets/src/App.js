@@ -3,27 +3,32 @@ import ReactDOM from 'react-dom';
 
 // import Notification, { NotificationRef } from 'laravel_react_sync';
 
-import * as _models from 'models';
+import * as react_sync_helpers from './helpers.js';
 
-import LaravelReactSync, { Model, PageNav, Reducer, helpers as react_sync_helpers } from 'laravel_react_sync';
+import Reducer from './Reducer.js';
+
+import { PageNav } from './components';
+
 
 const { app_current } = react_sync_helpers;
 
-for(const M in _models) Model.addModel(_models[M]);
-
-const { models } = Model;
 
 class App extends Component {
 
 	static instance;
 
+	static app = () => {};
+
 	constructor(props){
 		super(props);
-		this.state = this.props.page_props;
 
-		typeof window.app !== "function" && window.app = function(){
+		this.state = Reducer();
+
+		App.app = function(){
 			return this;
 		}.bind(this);
+
+		window.app = App.app;
 	}
 
 	getPortalTargets(){
@@ -34,12 +39,16 @@ class App extends Component {
 	}
 
 	components(){
-		const { App, ...rest } = require('./');
+		const rest = require('js/components');
 		return { PageNav, ...rest };
 	}
 
 	pages(){
 		return require('pages');
+	}
+
+	models(){
+		return require('models');
 	}
 
 	renderables(){
@@ -49,7 +58,7 @@ class App extends Component {
 	get CurrentPage(){
 		const { page_class } = this.state || this.props;
 
-        return this.pages()[page_class];
+        return this.pages()[page_class] || {};
 	}
 
     render() {
@@ -61,15 +70,18 @@ class App extends Component {
                 throw new Error(`\n\nYou are trying to render a component called: '${renderable.dataset.reactRender}' that doesn't exist, or isn't exported from './Components'\n\nAvailable components are: ${Object.keys(renderables).join(', ')}\n\n`);
             }
             const { defaultProps = {} } = Renderable;
-            const defaultPageProps = this.CurrentPage ? this.CurrentPage.defaultProps : {};
             return ReactDOM.createPortal(
-                <Renderable attributes={{...renderable.dataset}} {...defaultProps} {...defaultPageProps} {...this.state} />,
+                <Renderable attributes={{...renderable.dataset}} {...defaultProps} {...this.CurrentPage.defaultProps} {...this.state} />,
                 renderable
             );
         });
 
         return portals;
     }
+}
+
+export function app(){
+	return App.app();
 }
 
 export default App;

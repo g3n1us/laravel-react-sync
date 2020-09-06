@@ -18,7 +18,7 @@ import Eloquent from './traits/Eloquent';
 import MorphsDates from './traits/MorphsDates';
 import HasAttributes from './traits/HasAttributes';
 
-
+import { app } from '../App';
 
 import Shell from './Shell';
 
@@ -52,7 +52,7 @@ class Model extends Component{
 	}
 
 
-
+	app_address = null;
 
 /**
   @constructor
@@ -62,11 +62,7 @@ class Model extends Component{
 
     super(props);
 
-//     if(props === null) debugger
-
     this.getDates();
-
-    Model.addModel(this.constructor);
 
 	if(!app_get(this.plural)){
 		app_put(this.plural, {});
@@ -93,7 +89,6 @@ class Model extends Component{
 		let [ relationName, relationDefinition ] = v_array;
 		const { relation_type, definition } = relationDefinition;
 		if(relationName in this.props){
-// 			console.log('definition', definition);
 			joining_ids.push(definition.foreignKey);
 			const relationValue = this.props[relationName];
 			const class_name = pluralToClassName(relationName);
@@ -310,6 +305,30 @@ class Model extends Component{
         return <this.constructor {...this.props} />;
     }
 
+    setState(partialState, callback){
+		    if(('refresh' in this.props) && ('shell' in this.props)){
+			    console.log('props.refresh');
+			    this.props.refresh();
+		    }
+
+		    else if(('app_address' in this.props) || ('app_address' in this)){
+			    const app_address = this.props.app_address || this.app_address
+				console.log(app_address);
+				const A = app();
+				const current = A.state[app_address];
+				const updated = {...current, ...partialState}
+				console.log(app(), updated);
+		    }
+
+		    if(typeof callback === 'function'){
+			    callback(...args);
+		    }
+
+
+	    super.setState(partialState, (...args) => {
+		    console.log(args);
+	    });
+    }
 
 }
 

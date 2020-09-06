@@ -17,8 +17,6 @@ class ReactSyncPreset extends Preset
 
 	static $include_bootstrap = false;
 
-	static $include_example = false;
-
 	static $start_added = true;
 
 	static $command;
@@ -60,10 +58,6 @@ class ReactSyncPreset extends Preset
         $command->call('ui:auth', ['type' => 'react-sync']);
 //         dd('sdf');
 
-        if(static::$include_example){
-	        $command->call('make:react_model', ['name' => 'Example']);
-	        $command->call('make:react_page', ['name' => 'Example']);
-        }
 
         static::addStartCommand();
 
@@ -122,10 +116,6 @@ class ReactSyncPreset extends Preset
 
 		if ($command->confirm('Would you like to include the Bootstrap framework?', 'yes')) {
 		    static::$include_bootstrap = true;
-		}
-
-		if ($command->confirm('Would you like to include an example Page and Model component to get started?', 'yes')) {
-		    static::$include_example = true;
 		}
 
 

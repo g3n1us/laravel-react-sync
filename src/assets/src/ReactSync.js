@@ -1,4 +1,6 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
+
 import { dispatch } from './Event';
 import schemas from 'js/schema';
 import model_properties from 'js/model_properties';
@@ -6,15 +8,24 @@ import qs from 'qs';
 import Reducer from './Reducer';
 import { getAjaxUrl } from './helpers';
 import axios from './fetchClient';
+import App from './App.js';
+import { Model, Page } from './components';
 
 /** */
 class ReactSync{
+
+	page_data = null;
+
 	/** */
 	constructor(){
 		if(ReactSync.instance) return ReactSync.instance;
 		ReactSync.instance = this;
 
 		const script_tags = document.querySelectorAll('[data-react_sync_data="true"]');
+		if(!script_tags.length){
+			throw new Error("The ReactSync Blade directive is missing. Add '@include('react_sync::page_js')' to the <head /> of your template.");
+		}
+
 		script_tags.forEach(t => {
 			const identifier = t.id.replace('react_sync_', '');
 			if(identifier.match(/^page_context.*?$/)){
@@ -41,18 +52,36 @@ class ReactSync{
 
 	}
 
+	static getInstance(){
+		return new this;
+	}
+
 	static booted = false;
 
 	initialData = null;
 
 	/** */
-	boot(data){
+	boot(){
+		if(this.constructor.booted) return;
+
 		if(!this.initialData){
 			this.initialData = this.route.controller;
 			history.replaceState(this.initialData, null, null);
 		}
-		ReactSync.pages = {...ReactSync.pages, ...data.pages};
+		ReactSync.pages = this.pages;
+		ReactSync.models = this.models;
+		Page.pages = this.pages;
+		Model.models = this.models;
+
 		this.constructor.booted = true;
+
+		return this;
+	}
+
+	/** */
+	render(){
+		this.boot();
+		ReactDOM.render(<App ref={ReactSync.setAppRef} {...this.page_data} />, document.createElement('div'));
 	}
 
 	/** */
@@ -85,7 +114,14 @@ class ReactSync{
 	static pages = {};
 
 	get pages(){
-		return ReactSync.pages;
+		return require('pages');
+	}
+
+	/** */
+	static models = {};
+
+	get models(){
+		return require('models');
 	}
 
 	/** */
@@ -103,9 +139,10 @@ class ReactSync{
 		return axios.get(getAjaxUrl()).then((new_page_data) => {
 			this.page_data = new_page_data.data;
 			this.route.controller = new_page_data.data
-			app().setState(Reducer());
+			const fromReducer = Reducer();
+			App.app().setState(fromReducer);
 			if(typeof callback === 'function'){
-				callback(this.page_data);
+				callback(fromReducer);
 			}
 		});
 	}
@@ -115,6 +152,8 @@ class ReactSync{
 
 ReactSync.instance = false;
 
-window[window.ReactSyncGlobal] = new ReactSync;
+if(window.ReactSyncGlobal){
+	window[window.ReactSyncGlobal] = new ReactSync;
+}
 
 export default ReactSync;

@@ -20,7 +20,7 @@ export { navigate } from './fetchClient';
 
 import fetchClient from './fetchClient';
 
-
+import { app } from './App';
 /** */
 const LaravelReactSync = {
 	...extras,
@@ -40,6 +40,7 @@ const LaravelReactSync = {
 	Table,
 	ReactSync,
 	Reducer,
+	app,
 };
 
 //export const {...rest} = layouts;
@@ -62,6 +63,7 @@ export {
 	ReactSync,
 	Reducer,
 	Table,
+	app,
 };
 
 export default LaravelReactSync;

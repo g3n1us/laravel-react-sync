@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Model } from 'laravel_react_sync';
+
 /**
 @extends Model
 */
@@ -21,7 +22,7 @@ class {{$name}} extends Model{
 	}
 
     renderDefault(){
-		return (<h2>{this.constructor.name}</h2>);
+		return (<h2>{{$name}}</h2>);
     }
 
 }

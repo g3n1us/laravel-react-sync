@@ -14,7 +14,7 @@ export default function Reducer(){
 
 	const ReactSyncInstance = new ReactSync;
 
-	ReactSyncInstance.boot({pages: pages});
+	ReactSyncInstance.boot();
 
 	const state = ReactSyncInstance.route.controller || {};
 
@@ -34,22 +34,31 @@ export default function Reducer(){
 		accumulator[studly_case(v.singular)] = v;
 		return accumulator;
 	}, {});
-
+// console.log(plural_model_map);
+// console.log(singular_model_map);
 	const model_map = {...plural_model_map, ...singular_model_map};
 
 // 	const models_with_keys = Object.values(models).map(C => [C.plural, C]);
 
 	const page_props = collect(state).map((valueOrValues, propName) => {
+// 		console.log(valueOrValues, propName);
 		if(model_map[propName]){
     		// This is! a representation of a model or models, so turn it into one
     		if(typeof valueOrValues === "object" && valueOrValues === null) return null;
 
 			if(isPaginated(valueOrValues) || Array.isArray(valueOrValues)){
-        		return collect(valueOrValues).map(c => new model_map[propName]({...c}));
+        		return collect(valueOrValues).map((c, i) => {
+	        		const app_address = `${propName}.${i}`;
+	        		const m = new model_map[propName]({...c, app_address});
+	        		m.app_address = app_address;
+	        		return m;
+        		});
     		}
 
             else if(typeof valueOrValues === "object"){
-                return new model_map[propName]({...valueOrValues});
+                const m = new model_map[propName]({...valueOrValues, app_address: propName});
+                m.app_address = propName;
+                return m;
             }
 
 		}
@@ -63,18 +72,21 @@ export default function Reducer(){
 	Object.keys(plural_model_map).forEach(pluralname => {
 		const M = plural_model_map[pluralname];
 
-		(pluralname in page_props) && page_props[pluralname] && page_props[pluralname].each((v, i) => {
-			Object.defineProperty(page_props[pluralname], v.id, {
-				get: function(){
-					return this.get(i);
-				},
-				set: function(newprops){
-					const newitem = new M({...newprops});
-					this.put(i, newitem);
-					return newitem;
-				},
-			})
-		});
+		if((pluralname in page_props) && page_props[pluralname]){
+			page_props[pluralname].each((v, i) => {
+				Object.defineProperty(page_props[pluralname], v.id, {
+					get: function(){
+						return this.get(i);
+					},
+					set: function(newprops){
+						const newitem = new M({...newprops});
+						this.put(i, newitem);
+						return newitem;
+					},
+				})
+			});
+
+		}
 
 	});
 

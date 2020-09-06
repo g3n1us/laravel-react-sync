@@ -1,10 +1,4 @@
-import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
-import App from './components/App';
-import { ReactSync, helpers, collect, Reducer } from 'laravel_react_sync';
-import * as pages from 'pages';
-import * as models from 'models';
-// import { collect } from 'collect.js';
+import { ReactSync } from 'laravel_react_sync';
 
 /**
  * First we will load all of this project's JavaScript dependencies which
@@ -20,7 +14,4 @@ require('./bootstrap');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-const ReactSyncInstance = new ReactSync;
-ReactSyncInstance.boot({pages: pages});
-
-ReactDOM.render(<App ref={ReactSync.setAppRef} {...ReactSyncInstance.page_data} page_props={Reducer()} />, document.createElement('div'));
+(new ReactSync).render();

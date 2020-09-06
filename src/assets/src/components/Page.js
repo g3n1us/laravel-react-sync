@@ -23,9 +23,9 @@ class Page extends Component{
 	constructor(props){
 		super(props);
 		const { components, page_data, pages } = new ReactSync;
-		components.push(this);
+// 		components.push(this);
 
-		ReactSync.pages[this.constructor.name] = this.constructor;
+// 		ReactSync.pages[this.constructor.name] = this.constructor;
 
 // 		this.ref = React.createRef();
 	}

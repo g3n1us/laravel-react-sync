@@ -9,6 +9,7 @@ import collect from '../../collect.js';
 import axios from '../../fetchClient';
 import { dispatch, on } from '../../Event.js';
 
+const ReactSyncAppData = ReactSync.getInstance();
 
 window.Find = (dotstring) => {
 	return get(ReactSyncAppData.page_data.state, dotstring);
@@ -22,7 +23,9 @@ window.Find = (dotstring) => {
 */
 class Queryable extends Trait{
 
-	static repo = ReactSyncAppData.page_data.state;
+	static get repo(){
+		return ReactSyncAppData.page_data.state;
+	}
 
 	static hasBeenKeyed = false;
 
