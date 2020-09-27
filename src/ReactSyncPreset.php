@@ -144,16 +144,16 @@ class ReactSyncPreset extends Preset
 
 
     public static function ensurePagesModelsDirectoriesExist(){
-		if(!is_dir(Paths::app_path("Pages"))){
-			mkdir(Paths::app_path("Pages"));
+		if(!is_dir(Paths::app_path() . "/Pages")){
+			mkdir(Paths::app_path() . "/Pages");
 		}
 
 		if(!is_file(Paths::app_path("Pages/.index"))){
 			file_put_contents(Paths::app_path("Pages/.index"), '');
 		}
 
-		if(!is_dir(Paths::app_path("Models"))){
-			mkdir(Paths::app_path("Models"));
+		if(!is_dir(Paths::app_path() . "/Models")){
+			mkdir(Paths::app_path() . "/Models");
 		}
 
 		if(!is_file(Paths::app_path("Models/.index"))){
@@ -162,6 +162,10 @@ class ReactSyncPreset extends Preset
 
 		if(!is_dir(Paths::resource_path("js/components"))){
 			mkdir(Paths::resource_path("js/components"));
+		}
+
+		if(!is_dir(Paths::resource_path("sass"))){
+			mkdir(Paths::resource_path("sass"));
 		}
 
 		if(!is_file(Paths::resource_path("js/components/.index"))){
@@ -235,11 +239,6 @@ class ReactSyncPreset extends Preset
             Paths::resource_path("$js_path/components/ExampleComponent.vue")
         );
 
-        copy(
-            __DIR__.'/react-sync-stubs/components/App.js',
-            Paths::resource_path("$js_path/components/App.js")
-        );
-
     }
 
     /**
@@ -252,8 +251,8 @@ class ReactSyncPreset extends Preset
         $js_path = is_dir(Paths::resource_path('js')) ? 'js' : 'assets/js';
         copy(__DIR__.'/react-sync-stubs/app.js', Paths::resource_path("$js_path/app.js"));
 		if(static::$include_bootstrap){
-			copy(__DIR__.'/react-sync-stubs/app.scss', Paths::resource_path("sass/app.scss"));
-			copy(__DIR__.'/react-sync-stubs/_variables.scss', Paths::resource_path("sass/_variables.scss"));
+			copy(__DIR__.'/react-sync-stubs/app.scss', Paths::resource_path() . "/sass/app.scss");
+			copy(__DIR__.'/react-sync-stubs/_variables.scss', Paths::resource_path() . "/sass/_variables.scss");
 		}
     }
 }
