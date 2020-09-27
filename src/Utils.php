@@ -53,6 +53,8 @@ class Utils	{
 	public static function listModels(){
 		$fs = new Filesystem;
 		$namespace = config('react_sync.namespace');
+		if(!is_dir(Paths::app_path('Models'))) return collect([]);
+
 	    $possible_models = collect($fs->allFiles(Paths::app_path('Models')))
 	        ->map(function($f) use($fs, $namespace){
 		        if($f->getType() != 'file') return null;
@@ -75,6 +77,7 @@ class Utils	{
 	public static function listPages(){
 		$fs = new Filesystem;
 		$namespace = config('react_sync.namespace');
+		if(!is_dir(Paths::app_path('Pages'))) return collect([]);
 	    $possible_pages = collect($fs->allFiles(Paths::app_path('Pages')))
 	        ->map(function($f) use($fs, $namespace){
 		        if($f->getType() != 'file') return null;
