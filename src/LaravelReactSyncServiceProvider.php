@@ -3,10 +3,15 @@ namespace G3n1us\LaravelReactSync;
 
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\Route;
-use G3n1us\LaravelReactSync\Pages\Core\Page;
+use G3n1us\LaravelReactSync\Page;
 
 class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 	use ReactSyncable;
+
+
+	private function installed(){
+		return is_dir(app_path() . '/Pages') && is_dir(app_path() . '/Models');
+	}
 
     /**
      * Register bindings in the container.
@@ -15,6 +20,10 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
      */
     public function register()
     {
+	    if(!$this->installed()){
+		    return;
+	    }
+
 	    $this->syncable_register();
 
 		$this->app->bind(Page::class, function ($app) {
@@ -32,6 +41,10 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
      */
     public function boot()
     {
+	    if(!$this->installed()){
+		    return;
+	    }
+
 	    $this->syncable_boot();
 
     }
