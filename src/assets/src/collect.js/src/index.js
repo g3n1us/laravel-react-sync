@@ -1,5 +1,8 @@
 'use strict';
 
+import { isObject, isArray } from './helpers/is';
+
+/*
 function Collection(collection, pagination) {
 	if (collection !== undefined && !Array.isArray(collection) && typeof collection !== 'object') {
 		this.items = [collection];
@@ -30,6 +33,87 @@ function Collection(collection, pagination) {
 	else {
 		this.items = collection || [];
 	}
+}
+*/
+
+
+
+export class Collection{
+
+	items = [];
+
+	constructor(collection = []){
+		if(!(this instanceof PaginatedCollection)){
+			if(isPaginated(collection)){
+				return new PaginatedCollection(collection);
+			}
+			else if(collection instanceof Collection){
+				this.items = collection.items;
+			}
+
+			else if( !isArray(collection) && !isObject(collection)){
+				this.items = [collection];
+			}
+
+			else{
+				this.items = collection;
+			}
+		}
+	}
+
+}
+
+
+export class PaginatedCollection extends Collection{
+	// "["current_page","data","first_page_url","from","last_page","last_page_url","next_page_url","path","per_page","prev_page_url","to","total"]"
+
+	current_page;
+
+	first_page_url;
+
+	from;
+
+	last_page;
+
+	last_page_url;
+
+	next_page_url;
+
+	path;
+
+	per_page;
+
+	prev_page_url;
+
+	to;
+
+	total;
+
+	constructor(collection = []){
+		super(collection);
+
+		this.items = collection.items || collection.data;
+
+		const { data, items, ...rest } = collection;
+
+		const pagination_props = this.items.pagination || rest;
+
+		for(const property in pagination_props){
+			this[property] = pagination_props[property];
+		}
+
+		Object.defineProperty(this.items, 'pagination', {
+			value: pagination_props,
+			// enumerable: true,
+		});
+
+	}
+
+	map(fn){
+		this.items = this.items.map(fn);
+		return this;
+	}
+
 }
 
 
@@ -176,9 +260,13 @@ Collection.prototype.whereNotNull = require('./methods/whereNotNull');
 Collection.prototype.wrap = require('./methods/wrap');
 Collection.prototype.zip = require('./methods/zip');
 
-const collect = collection => new Collection(collection);
+export function collect(collection){
+	return new Collection(collection);;
+}
 
-module.exports = collect;
-module.exports.collect = collect;
-module.exports.default = collect;
-module.exports.Collection = Collection;
+export default collect;
+
+//module.exports = collect;
+// module.exports.collect = collect;
+// module.exports.default = collect;
+// module.exports.Collection = Collection;

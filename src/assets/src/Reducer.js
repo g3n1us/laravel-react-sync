@@ -34,14 +34,10 @@ export default function Reducer(){
 		accumulator[studly_case(v.singular)] = v;
 		return accumulator;
 	}, {});
-// console.log(plural_model_map);
-// console.log(singular_model_map);
+
 	const model_map = {...plural_model_map, ...singular_model_map};
 
-// 	const models_with_keys = Object.values(models).map(C => [C.plural, C]);
-
 	const page_props = collect(state).map((valueOrValues, propName) => {
-// 		console.log(valueOrValues, propName);
 		if(model_map[propName]){
     		// This is! a representation of a model or models, so turn it into one
     		if(typeof valueOrValues === "object" && valueOrValues === null) return null;
