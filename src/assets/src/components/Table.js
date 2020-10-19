@@ -164,9 +164,10 @@ export default class Table extends Component{
 		};
 */
 
-		const rows = this.props.data || associatedModel && app().state[associatedModel.plural_handle];
+		let rows = this.props.data || associatedModel && app().state[associatedModel.plural_handle];
+		rows = collect(rows);
 
-		if(collect(rows).isEmpty()){
+		if(rows.isEmpty()){
 			return null;
 		}
 

@@ -4,7 +4,7 @@ const pluralize = require('pluralize');
 import { on } from './Event';
 import qs from 'qs';
 // import collect from 'collect.js';
-import { collect } from './collect.js';
+import { collect, PaginatedCollection } from './collect.js';
 
 
 /*
@@ -48,6 +48,7 @@ export function collect_paged(paginated){
 
 
 export function isPaginated(paginated){
+	if(paginated instanceof PaginatedCollection) return true;
     if(paginated === null || typeof paginated !== "object" || Array.isArray(paginated)) return false;
 
     const { current_page, last_page, per_page } = paginated || {};

@@ -2,7 +2,7 @@
 
 module.exports = function map(fn) {
   if (Array.isArray(this.items)) {
-    return new this.constructor(this.items.map(fn), this.items.pagination);
+    return new this.constructor(this.items.map(fn));
   }
 
   const collection = {};
@@ -11,5 +11,5 @@ module.exports = function map(fn) {
     collection[key] = fn(this.items[key], key);
   });
 
-  return new this.constructor(collection, this.items.pagination);
+  return new this.constructor(collection);
 };

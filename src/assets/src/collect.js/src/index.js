@@ -67,27 +67,49 @@ export class Collection{
 export class PaginatedCollection extends Collection{
 	// "["current_page","data","first_page_url","from","last_page","last_page_url","next_page_url","path","per_page","prev_page_url","to","total"]"
 
-	current_page;
+	get current_page(){
+		return this.items.pagination.current_page;
+	}
 
-	first_page_url;
+	get first_page_url(){
+		return this.items.pagination.first_page_url;
+	}
 
-	from;
+	get from(){
+		return this.items.pagination.from;
+	}
 
-	last_page;
+	get last_page(){
+		return this.items.pagination.last_page;
+	}
 
-	last_page_url;
+	get last_page_url(){
+		return this.items.pagination.last_page_url;
+	}
 
-	next_page_url;
+	get next_page_url(){
+		return this.items.pagination.next_page_url;
+	}
 
-	path;
+	get path(){
+		return this.items.pagination.path;
+	}
 
-	per_page;
+	get per_page(){
+		return this.items.pagination.per_page;
+	}
 
-	prev_page_url;
+	get prev_page_url(){
+		return this.items.pagination.per_page;
+	}
 
-	to;
+	get to(){
+		return this.items.pagination.to;
+	}
 
-	total;
+	get total(){
+		return this.items.pagination.total;
+	}
 
 	constructor(collection = []){
 		super(collection);
@@ -98,19 +120,18 @@ export class PaginatedCollection extends Collection{
 
 		const pagination_props = this.items.pagination || rest;
 
-		for(const property in pagination_props){
-			this[property] = pagination_props[property];
-		}
-
 		Object.defineProperty(this.items, 'pagination', {
 			value: pagination_props,
-			// enumerable: true,
 		});
 
 	}
 
 	map(fn){
+		const { pagination } = this.items;
 		this.items = this.items.map(fn);
+		Object.defineProperty(this.items, 'pagination', {
+			value: pagination,
+		});
 		return this;
 	}
 
@@ -118,6 +139,7 @@ export class PaginatedCollection extends Collection{
 
 
 function isPaginated(collection){
+	if(collection instanceof PaginatedCollection) return true;
 	if(collection === null || typeof collection !== "object" || Array.isArray(collection)) return false;
 
 	const { current_page, last_page, per_page } = collection || {};
