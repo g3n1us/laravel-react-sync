@@ -30,7 +30,7 @@ mix.babelConfig({
     plugins: ['@babel/plugin-proposal-class-properties'],
 });
 
-mix.react('src/main.js', `dist/${filename}`)
+mix.react('resources/src/main.js', `resources/dist/${filename}`)
 	.setPublicPath('dist')
 	.sourceMaps();
 /*
