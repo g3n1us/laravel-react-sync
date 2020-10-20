@@ -10,7 +10,7 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
 
 
 	private function installed(){
-		return is_dir(app_path() . '/Pages') && is_dir(app_path() . '/Models');
+		return is_dir(app_path() . '/Pages');
 	}
 
     /**
@@ -20,9 +20,13 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
      */
     public function register()
     {
+
+/*
+	    dd('sdf', $this->installed());
 	    if(!$this->installed()){
 		    return;
 	    }
+*/
 
 	    $this->syncable_register();
 
@@ -41,9 +45,11 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
      */
     public function boot()
     {
+/*
 	    if(!$this->installed()){
 		    return;
 	    }
+*/
 
 	    $this->syncable_boot();
 
