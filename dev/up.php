@@ -16,10 +16,10 @@ exec('composer config repositories.laravel_react_sync "{\"type\":\"path\",\"url\
 exec("composer require g3n1us/laravel-react-sync dev-$branch");
 exec('php artisan ui react-sync --option=continue');
 file_put_contents(".env", "DB_CONNECTION=sqlite\n", FILE_APPEND | LOCK_EX);
-file_put_contents(".env", "DB_DATABASE=database.sqlite\n", FILE_APPEND | LOCK_EX);
+file_put_contents(".env", "DB_DATABASE=\"$tmplaravelroot/database/database.sqlite\"\n", FILE_APPEND | LOCK_EX);
 file_put_contents(".env", "APP_URL=\n", FILE_APPEND | LOCK_EX);
 
-touch("database.sqlite");
+touch("database/database.sqlite");
 exec('php artisan migrate');
 exec('npm install && npm start');
 echo "\n" . $tmplaravelroot . "\n";
