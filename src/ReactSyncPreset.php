@@ -20,22 +20,24 @@ class ReactSyncPreset extends Preset
 	static $start_added = true;
 
 	static $command;
+	
+	static $continue = false;
 
     private function getJsPath(){
 		return is_dir(Paths::resource_path('js')) ? Paths::resource_path('js') : Paths::resource_path('assets/js');
     }
 
 
-	public static function install_auth(AuthCommand $command){
-		static::$command = $command;
-		$command->call('ui:auth');
-		if ($command->confirm('Would you like to use the React Sync layout in place of the default layout view template?', 'yes')) {
-			copy(__DIR__.'/views/layout.blade.php', Paths::resource_path("views/layouts/app.blade.php"));
-		}
-
-
-
-	}
+// 	public static function install_auth(AuthCommand $command){
+// 		static::$command = $command;
+// 		$command->call('ui:auth');
+// 		if ($command->confirm('Would you like to use the React Sync layout in place of the default layout view template?', 'yes')) {
+// 			copy(__DIR__.'/views/layout.blade.php', Paths::resource_path("views/layouts/app.blade.php"));
+// 		}
+// 
+// 
+// 
+// 	}
 
     /**
      * Install the preset.
@@ -44,7 +46,9 @@ class ReactSyncPreset extends Preset
      */
     public static function install(UiCommand $command)
     {
-        static::$command = $command;
+		static::$continue = in_array('continue', $command->option('option'));
+		
+		static::$command = $command;
         static::preflight($command);
 
         static::ensurePagesModelsDirectoriesExist();
@@ -55,7 +59,7 @@ class ReactSyncPreset extends Preset
         static::updateComponent();
         static::removeNodeModules();
 
-        $command->call('ui:auth', ['type' => 'react-sync']);
+        $command->call('ui:auth');
 //         dd('sdf');
 
 
@@ -106,7 +110,7 @@ class ReactSyncPreset extends Preset
 
 
 	    $command->info("You are about to install the Laravel ReactSync preset");
-		if (!$command->confirm('Would you like to continue?', 'yes')) {
+		if (!static::$continue && !$command->confirm('Would you like to continue?', 'yes')) {
 		    exit('Cancelled' . PHP_EOL);
 		}
 
@@ -114,9 +118,12 @@ class ReactSyncPreset extends Preset
 
 	    $command->info("The following questions will help get the preset configured for your specific requirements.");
 
-		if ($command->confirm('Would you like to include the Bootstrap framework?', 'yes')) {
-		    static::$include_bootstrap = true;
+		if(!static::$continue){
+			if ($command->confirm('Would you like to include the Bootstrap framework?', 'yes')) {
+				static::$include_bootstrap = true;
+			}			
 		}
+
 
 
     }
@@ -124,7 +131,7 @@ class ReactSyncPreset extends Preset
 
 	public static function addStartCommand(){
         if (! file_exists(Paths::base_path('package.json'))) {
-            return;
+            // return;
         }
 
         $package_json = json_decode(file_get_contents(Paths::base_path('package.json')), true);
