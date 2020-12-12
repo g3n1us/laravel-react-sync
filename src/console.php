@@ -196,13 +196,14 @@ if(!function_exists('write_index_files')){
 
 	    $dir_start = Paths::base_path();
 	    $fs = new Filesystem;
-	    $dirs = collect($fs->allFiles($dir_start))
-	        ->map(function($f){ return $f->getPath(); })
-	        ->unique()
-	        ->filter(function($dir) use($fs){
-	            return $fs->exists("$dir/.index");
-	        });
-	    $dirs->each(function($dir) use($fs, $_this){
+	    
+		$files = collect($fs->allFiles(Paths::resource_path(), true))->merge($fs->allFiles(Paths::app_path(), true));
+		$indexed_dirs = $files->map(function($f){
+			return $f->getBasename() === '.index' ? $f->getPath() : null;
+		})->filter();		
+			
+			
+	    $indexed_dirs->each(function($dir) use($fs, $_this){
 	        $filenames = collect($fs->files($dir));
 	        $names = $filenames->map(function($file)use ($fs){
 	            $path = $file->getPathName();
