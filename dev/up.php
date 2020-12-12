@@ -1,12 +1,18 @@
 #!/usr/bin/env php
 <?php
 $tmplaravelrootname = '.laravel' . time();
-$tmplaravelroot = dirname(getcwd()) . "/$tmplaravelrootname";
+$parent_dir = dirname(getcwd());
+$tmplaravelroot = "$parent_dir/$tmplaravelrootname";
+
+if(!file_exists(getcwd() . "/webpack.mix.js")){
+	throw new \Exception('Must be run from the repo root');
+	exit();
+}
 
 exec('git branch --show-current', $branch);
 $branch = $branch[0];
 
-chdir(dirname(getcwd()));
+chdir($parent_dir);
 
 exec("laravel new $tmplaravelrootname");
 
@@ -20,6 +26,7 @@ file_put_contents(".env", "DB_DATABASE=\"$tmplaravelroot/database/database.sqlit
 file_put_contents(".env", "APP_URL=\n", FILE_APPEND | LOCK_EX);
 
 touch("database/database.sqlite");
+touch("resources/sass/app.scss");
 exec('php artisan migrate');
-exec('npm install && npm start');
+// exec('npm install && npm start');
 echo "\n" . $tmplaravelroot . "\n";

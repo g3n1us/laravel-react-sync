@@ -26,8 +26,7 @@ Artisan::command('make:react_model {name?}', function($name = null){
 	$migration_filename = implode('_', [\Carbon\Carbon::now()->format('Y_m_d_hms'), 'create', $tablename, 'table']) . '.php';
 	file_put_contents(Paths::database_path("migrations/$migration_filename"), $rendered_migration);
 
-// 	Artisan::call("make:model -m -f $path");
-	$tpl = file_get_contents(__DIR__ . '/js_file_templates/model.blade.js');
+	$tpl = file_get_contents(__DIR__ . '/react-sync-stubs/model_js.stub');
 	$rendered = str_replace('{{$name}}', $name, $tpl);
 	file_put_contents(Paths::app_path("Models/$name.js"), $rendered);
 	$this->call('react_sync:all');
@@ -123,8 +122,8 @@ Artisan::command('make:react_page {name?}', function($name = null){
 
 	}
 
-	$rendered = file_get_contents(__DIR__ . '/js_file_templates/page_php.blade.js');
-	$js_rendered = file_get_contents(__DIR__ . '/js_file_templates/page.blade.js');
+	$rendered = file_get_contents(__DIR__ . '/react-sync-stubs/page_php.stub');
+	$js_rendered = file_get_contents(__DIR__ . '/react-sync-stubs/page.stub');
 
 	foreach($replacements as $find => $replacement){
 		$rendered = str_replace($find, $replacement, $rendered);

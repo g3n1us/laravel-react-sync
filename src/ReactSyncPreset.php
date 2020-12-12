@@ -23,22 +23,6 @@ class ReactSyncPreset extends Preset
 	
 	static $continue = false;
 
-    private function getJsPath(){
-		return is_dir(Paths::resource_path('js')) ? Paths::resource_path('js') : Paths::resource_path('assets/js');
-    }
-
-
-// 	public static function install_auth(AuthCommand $command){
-// 		static::$command = $command;
-// 		$command->call('ui:auth');
-// 		if ($command->confirm('Would you like to use the React Sync layout in place of the default layout view template?', 'yes')) {
-// 			copy(__DIR__.'/views/layout.blade.php', Paths::resource_path("views/layouts/app.blade.php"));
-// 		}
-// 
-// 
-// 
-// 	}
-
     /**
      * Install the preset.
      *
@@ -60,8 +44,6 @@ class ReactSyncPreset extends Preset
         static::removeNodeModules();
 
         $command->call('ui:auth');
-//         dd('sdf');
-
 
         static::addStartCommand();
 
@@ -229,7 +211,6 @@ class ReactSyncPreset extends Preset
      */
     protected static function updateWebpackConfiguration()
     {
-        $js_path = is_dir(Paths::resource_path('js')) ? 'js' : 'assets/js';
         copy(__DIR__.'/react-sync-stubs/webpack.mix.js', Paths::base_path('webpack.mix.js'));
     }
 
@@ -240,10 +221,9 @@ class ReactSyncPreset extends Preset
      */
     protected static function updateComponent()
     {
-        $js_path = is_dir(Paths::resource_path('js')) ? 'js' : 'assets/js';
 
         (new Filesystem)->delete(
-            Paths::resource_path("$js_path/components/ExampleComponent.vue")
+            Paths::resource_path("js/components/ExampleComponent.vue")
         );
 
     }
@@ -255,11 +235,13 @@ class ReactSyncPreset extends Preset
      */
     protected static function updateBootstrapping()
     {
-        $js_path = is_dir(Paths::resource_path('js')) ? 'js' : 'assets/js';
-        copy(__DIR__.'/react-sync-stubs/app.js', Paths::resource_path("$js_path/app.js"));
+        copy(__DIR__.'/react-sync-stubs/app.js', Paths::resource_path("js/app.js"));
 		if(static::$include_bootstrap){
 			copy(__DIR__.'/react-sync-stubs/app.scss', Paths::resource_path() . "/sass/app.scss");
 			copy(__DIR__.'/react-sync-stubs/_variables.scss', Paths::resource_path() . "/sass/_variables.scss");
+		}
+		else{
+			touch(Paths::resource_path() . "/sass/app.scss");
 		}
     }
 }
