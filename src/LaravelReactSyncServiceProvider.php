@@ -21,13 +21,6 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
     public function register()
     {
 
-/*
-	    dd('sdf', $this->installed());
-	    if(!$this->installed()){
-		    return;
-	    }
-*/
-
 	    $this->syncable_register();
 
 		$this->app->bind(Page::class, function ($app) {
@@ -45,11 +38,6 @@ class LaravelReactSyncServiceProvider extends LaravelServiceProvider{
      */
     public function boot()
     {
-/*
-	    if(!$this->installed()){
-		    return;
-	    }
-*/
 
 	    $this->syncable_boot();
 
