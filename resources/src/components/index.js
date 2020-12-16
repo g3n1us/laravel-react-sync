@@ -10,6 +10,5 @@ import PageShell from './PageShell';
 import Pagination from './Pagination';
 // import PrimordialModel from './PrimordialModel';
 import Shell from './Shell';
-import Table from './Table';
 
-export { Alert, Field, Form, LegacyModel, Model, Notification, Page, PageNav, PageShell, Pagination, /* PrimordialModel, */ Shell, Table };
+export { Alert, Field, Form, LegacyModel, Model, Notification, Page, PageNav, PageShell, Pagination, /* PrimordialModel, */ Shell };
